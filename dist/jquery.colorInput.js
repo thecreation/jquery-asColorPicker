@@ -120,12 +120,12 @@
 
   var Color = $.colorValue = function (string, format) {
     this.value = {
-      r: null,
-      g: null,
-      b: null,
-      h: null,
-      s: null,
-      v: null,
+      r: 0,
+      g: 0,
+      b: 0,
+      h: 0,
+      s: 0,
+      v: 0,
       a: 1
     };
     this._format = 'HEX';
@@ -412,13 +412,25 @@
     // compoents
     this.components = $.extend(true, {}, this.components);
 
-    // color value and format
-    this.color = new Color(this.input.value);
+    for (var i in this.components) {
+      if (typeof this.options.components[i] !== 'undefined' && this.options.components[i] === false) {
+        delete this.components[i];
+      }
+    }
 
     if (!this.options.format) {
       this.options.format = this.color.format || 'hex';
     }
-    this.color.format(this.options.format);
+
+    // color value and format
+    if (this.input.value === '') {
+      this.color = new Color({
+        a: 0
+      }, this.options.format);
+    } else {
+      this.color = new Color(this.input.value, this.options.format);
+    }
+
 
     // create
     this.created = false;
@@ -618,8 +630,9 @@
 
   ColorInput.registerComponent('trigger', {
     selector: '.colorinput-trigger',
+    template: '<span class="colorinput-trigger"><span></span></span>',
     init: function (api) {
-      api.$trigger = $(api.options.template.trigger);
+      api.$trigger = $(this.template);
       this.$trigger_inner = api.$trigger.children('span');
 
       api.$trigger.insertAfter(api.$input);
@@ -640,12 +653,13 @@
 
   ColorInput.registerComponent('saturation', {
     selector: '.colorinput-picker-saturation',
+    template: '<div class="colorinput-picker-saturation"><i><b></b></i></div>',
     width: 150,
     height: 150,
     size: 6,
     data: {},
     init: function (api) {
-      this.$saturation = api.$picker.find(this.selector);
+      this.$saturation = $(this.template).appendTo(api.$picker);
 
       this.$handle = this.$saturation.children('i');
 
@@ -727,10 +741,11 @@
 
   ColorInput.registerComponent('hue', {
     selector: '.colorinput-picker-hue',
+    template: '<div class="colorinput-picker-hue"><i></i></div>',
     height: 150,
     data: {},
     init: function (api) {
-      this.$hue = api.$picker.find(this.selector);
+      this.$hue = $(this.template).appendTo(api.$picker);
       this.$handle = this.$hue.children('i');
 
       this.update(api);
@@ -804,10 +819,11 @@
 
   ColorInput.registerComponent('alpha', {
     selector: '.colorinput-picker-alpha',
+    template: '<div class="colorinput-picker-alpha"><i></i></div>',
     height: 150,
     data: {},
     init: function (api) {
-      this.$alpha = api.$picker.find(this.selector);
+      this.$alpha = $(this.template).appendTo(api.$picker);
       this.$handle = this.$alpha.children('i');
 
       this.update(api);
@@ -881,18 +897,13 @@
     disabled: false,
     readonly: false,
     format: null,
-    input: {
-      editable: false
-    },
     components: {
       saturation: true,
       hue: true,
       alpha: true
     },
-    /* hex|rgb|rgba|hsl|hsla */
     template: {
-      trigger: '<span class="colorinput-trigger"><span></span></span>',
-      picker: '<div class="colorinput-picker">' + '<div class="colorinput-picker-saturation"><i><b></b></i></div>' + '<div class="colorinput-picker-hue"><i></i></div>' + '<div class="colorinput-picker-alpha"><i></i></div>' + '</div>'
+      picker: '<div class="colorinput-picker"></div>'
     }
   };
 
