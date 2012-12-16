@@ -950,10 +950,9 @@
         api.hide();
       });
 
-      this.$extra.find('.colorinput-picker-info').delegate('input','change',function(e){
+      this.$extra.find('.colorinput-picker-info').delegate('input','keyup update change',function(e){
         var val;
         var type = $(e.target).data('type');
-
         switch(type){
           case 'r':
           case 'g':
@@ -973,6 +972,9 @@
               val = 0;
             }
             break;
+        }
+        if(isNaN(val)){
+          val = 0;
         }
         var color = {};
         color[type] = val;
