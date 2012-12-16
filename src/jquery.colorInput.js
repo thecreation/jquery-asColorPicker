@@ -520,18 +520,17 @@
       if (this.$picker.parent().length === 0) {
         this.$picker.appendTo('body').on('mousedown.colorinput', function (e) {
           e.stopPropagation();
-          e.preventDefault();
+          
 
           var target = $(e.target);
           var $component = target.closest('.colorinput-picker > div');
 
           $.each(self.components, function (name, component) {
             if ($component.is(component.selector) && typeof component.mousedown === 'function') {
+              e.preventDefault();
               return component.mousedown(self, e);
             }
           });
-
-          return false;
         });
       }
 
@@ -893,15 +892,15 @@
     selector: '.colorinput-picker-extra',
     template: '<div class="colorinput-picker-extra">' +
                 '<ul class="colorinput-picker-sets">' +
-                  '<li class="colorinput-picker-set-white">white</li>' +
-                  '<li class="colorinput-picker-set-black">black</li>' +
-                  '<li class="colorinput-picker-set-transparent">transparent</li>' +
+                  '<li data-color="white">white</li>' +
+                  '<li data-color="black">black</li>' +
+                  '<li data-color="transparent">transparent</li>' +
                 '</ul>' +
                 '<ul class="colorinput-picker-info">' +
-                  '<li><label>R:<input type="text" class="colorinput-picker-info-r"/></label></li>' +
-                  '<li><label>G:<input type="text" class="colorinput-picker-info-g"/></label></li>' +
-                  '<li><label>B:<input type="text" class="colorinput-picker-info-b"/></label></li>' +
-                  '<li><label>A:<input type="text" class="colorinput-picker-info-a"/></label></li>' +
+                  '<li><label>R:<input type="text" data-type="r"/></label></li>' +
+                  '<li><label>G:<input type="text" data-type="g"/></label></li>' +
+                  '<li><label>B:<input type="text" data-type="b"/></label></li>' +
+                  '<li><label>A:<input type="text" data-type="a"/></label></li>' +
                 '</ul>' +
                 '<input type="text" class="colorinput-picker-hex" />' +
                 '<div class="colorinput-picker-preview"><div></div></div>' +
@@ -911,12 +910,78 @@
     init: function (api) {
       this.$extra = $(this.template);
 
-      this.$extra.$r = this.$extra.find('.colorinput-picker-info-r');
-      this.$extra.$g = this.$extra.find('.colorinput-picker-info-g');
-      this.$extra.$b = this.$extra.find('.colorinput-picker-info-b');
-      this.$extra.$a = this.$extra.find('.colorinput-picker-info-a');
+      this.$extra.$r = this.$extra.find('[data-type="r"]');
+      this.$extra.$g = this.$extra.find('[data-type="g"]');
+      this.$extra.$b = this.$extra.find('[data-type="b"]');
+      this.$extra.$a = this.$extra.find('[data-type="a"]');
       this.$extra.$hex = this.$extra.find('.colorinput-picker-hex');
       this.$extra.$preview = this.$extra.find('.colorinput-picker-preview div');
+
+      this.$extra.find('.colorinput-picker-sets').delegate('li','click',function(e){
+        var color = {};
+        var type = $(e.target).data('color');
+        switch(type){
+          case 'white':
+            color = {
+              r: 255,
+              g: 255,
+              b: 255,
+              a: 1
+            };
+            break;
+          case 'black':
+            color = {
+              r: 0,
+              g: 0,
+              b: 0,
+              a: 1
+            };
+            break;
+          case 'transparent':
+            color = {
+              r: 255,
+              g: 255,
+              b: 255,
+              a: 0
+            };
+        }
+
+        api.value(color);
+        api.hide();
+      });
+
+      this.$extra.find('.colorinput-picker-info').delegate('input','change',function(e){
+        var val;
+        var type = $(e.target).data('type');
+
+        switch(type){
+          case 'r':
+          case 'g':
+          case 'b':
+            val = parseInt(this.value,10);
+            if(val>255){
+              val = 255;
+            } else if(val<0){
+              val = 0;
+            }
+            break;
+          case 'a':
+            val = parseFloat(this.value, 10);
+            if(val>1){
+              val = 1;
+            } else if(val < 0){
+              val = 0;
+            }
+            break;
+        }
+        var color = {};
+        color[type] = val;
+        api.value(color);
+      });
+
+      this.$extra.$hex.on('change',function(){
+        api.value(this.value);
+      });
 
       this.update(api);
 

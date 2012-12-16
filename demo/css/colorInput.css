@@ -135,15 +135,15 @@
   cursor: pointer;
 }
 
-.colorinput-picker-sets .colorinput-picker-set-white {
+.colorinput-picker-sets [data-color="white"] {
   background: #fff;
 }
 
-.colorinput-picker-sets .colorinput-picker-set-black {
+.colorinput-picker-sets [data-color="black"] {
   background: #000;
 }
 
-.colorinput-picker-sets .colorinput-picker-set-transparent {
+.colorinput-picker-sets [data-color="transparent"] {
   background: url(../img/colors.png) -1px -151px no-repeat;
 }
 
