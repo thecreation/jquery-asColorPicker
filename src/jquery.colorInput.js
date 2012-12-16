@@ -415,18 +415,20 @@
     }
 
     if (!this.options.format) {
-      this.options.format = this.color.format || 'hex';
+      this.options.format = this.options.format||'hex';
     }
 
     // color value and format
     if (this.input.value === '') {
       this.color = new Color({
-        a: 0
+        r: 255,
+        g: 255,
+        b: 255,
+        a: 1
       }, this.options.format);
     } else {
       this.color = new Color(this.input.value, this.options.format);
     }
-
 
     // create
     this.created = false;
@@ -516,7 +518,6 @@
 
       // if not attached to body
       if (this.$picker.parent().length === 0) {
-
         this.$picker.appendTo('body').on('mousedown.colorinput', function (e) {
           e.stopPropagation();
           e.preventDefault();
@@ -888,6 +889,49 @@
     }
   });
 
+  ColorInput.registerComponent('extra', {
+    selector: '.colorinput-picker-extra',
+    template: '<div class="colorinput-picker-extra">' +
+                '<ul class="colorinput-picker-sets">' +
+                  '<li class="colorinput-picker-set-white">white</li>' +
+                  '<li class="colorinput-picker-set-black">black</li>' +
+                  '<li class="colorinput-picker-set-transparent">transparent</li>' +
+                '</ul>' +
+                '<ul class="colorinput-picker-info">' +
+                  '<li><label>R:<input type="text" class="colorinput-picker-info-r"/></label></li>' +
+                  '<li><label>G:<input type="text" class="colorinput-picker-info-g"/></label></li>' +
+                  '<li><label>B:<input type="text" class="colorinput-picker-info-b"/></label></li>' +
+                  '<li><label>A:<input type="text" class="colorinput-picker-info-a"/></label></li>' +
+                '</ul>' +
+                '<input type="text" class="colorinput-picker-hex" />' +
+                '<div class="colorinput-picker-preview"><div></div></div>' +
+              '</div>',
+    height: 150,
+    data: {},
+    init: function (api) {
+      this.$extra = $(this.template);
+
+      this.$extra.$r = this.$extra.find('.colorinput-picker-info-r');
+      this.$extra.$g = this.$extra.find('.colorinput-picker-info-g');
+      this.$extra.$b = this.$extra.find('.colorinput-picker-info-b');
+      this.$extra.$a = this.$extra.find('.colorinput-picker-info-a');
+      this.$extra.$hex = this.$extra.find('.colorinput-picker-hex');
+      this.$extra.$preview = this.$extra.find('.colorinput-picker-preview div');
+
+      this.update(api);
+
+      this.$extra.appendTo(api.$picker);
+    },
+    update: function(api) {
+      this.$extra.$r.val(api.color.value.r);
+      this.$extra.$g.val(api.color.value.g);
+      this.$extra.$b.val(api.color.value.b);
+      this.$extra.$a.val(api.color.value.a);
+      this.$extra.$hex.val(api.color.toHEX());
+      this.$extra.$preview.css('backgroundColor', api.color.toRGBA());
+    }
+  });
+
   // Default options for the plugin as a simple object
   ColorInput.defaults = {
     disabled: false,
@@ -896,7 +940,8 @@
     components: {
       saturation: true,
       hue: true,
-      alpha: true
+      alpha: true,
+      extra: true
     },
     template: {
       picker: '<div class="colorinput-picker"></div>'
