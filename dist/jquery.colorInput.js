@@ -1,4 +1,4 @@
-/*! jQuery ColorInput - v0.1.0 - 2012-12-16
+/*! jQuery ColorInput - v0.2.0 - 2012-12-16
 * https://github.com/KaptinLin/colorInput
 * Copyright (c) 2012 KaptinLin; Licensed GPL */
 
@@ -954,10 +954,9 @@
         api.hide();
       });
 
-      this.$extra.find('.colorinput-picker-info').delegate('input','change',function(e){
+      this.$extra.find('.colorinput-picker-info').delegate('input','keyup update change',function(e){
         var val;
         var type = $(e.target).data('type');
-
         switch(type){
           case 'r':
           case 'g':
@@ -977,6 +976,9 @@
               val = 0;
             }
             break;
+        }
+        if(isNaN(val)){
+          val = 0;
         }
         var color = {};
         color[type] = val;

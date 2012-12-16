@@ -98,7 +98,7 @@
 
 .colorinput-picker-extra {
   float: left;
-  width: 70px;
+  width: 68px;
   margin-left: 5px;
   font-size: 11px;
 }
@@ -149,6 +149,7 @@
 
 .colorinput-picker-info {
   margin-bottom: 5px !important;
+  line-height: 16px;
 }
 
 .colorinput-picker-info label {
@@ -157,12 +158,15 @@
 
 .colorinput-picker-info input {
   width: 35px;
-  margin-left: 5px;
+  padding: 0;
+  margin: 0 0 0 5px;
   border: none;
 }
 
 .colorinput-picker-hex {
-  width: 70px;
+  width: 68px;
+  padding: 2px;
+  margin: 0;
   margin-bottom: 5px !important;
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
@@ -176,6 +180,6 @@
 }
 
 .colorinput-picker-preview div {
-  width: 68px;
+  width: 66px;
   height: 28px;
 }
