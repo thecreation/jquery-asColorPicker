@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>jquery.colorInput.js</title>
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width">
+
+<link rel="stylesheet" href="css/normalize.css">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/prism.css">
+<link rel="stylesheet" href="css/colorInput.css">
+
+<script src="js/vendor/jquery-1.8.0.min.js"></script>
+<script src="js/vendor/jquery.toc.js"></script>
+<script src="../src/jquery.colorInput.js"></script>
+<script src="js/main.js"></script>
+<script src="js/rainbow.min.js"></script>
+
+</head>
+<body>
+<!--[if lt IE 7]>
+    <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+<![endif]-->
+<div id="toc"></div>
+<div id="wrapper">
+    <section>
+        <h2>Modes</h2>
+        <section>
+            <h3>input[type=color]</h3>
+        </section>
+        <section>
+            <h3>Custom</h3>
+        </section>
+        <section>
+            <h3>Flat</h3>
+        </section>
+
+    </section>
+    <section>
+        <h2>Skin</h2>
+        <section>
+            <h3>simple</h3>
+        </section>
+    </section>  
+
+    <section>
+        <h2>Components</h2>
+        <section>
+            <h3>Palette</h3>
+        </section>
+        <section>
+            <h3>saturation</h3>
+        </section>
+        <section>
+            <h3>hue</h3>
+        </section>
+        <section>
+            <h3>alpha</h3>
+        </section>
+        <section>
+            <h3>extra</h3>
+        </section>
+    </section>
+
+    <section>
+        <h2>Event</h2>
+        <section>
+            <h3>change</h3>
+        </section>
+        <section>
+            <h3>move</h3>
+        </section>
+        <section>
+            <h3>hide</h3>
+        </section>
+        <section>
+            <h3>show</h3>
+        </section>
+        <section>
+            <h3>beforeShow</h3>
+        </section>
+        <section>
+            <h3>beforeShow</h3>
+        </section>
+
+
+
+    </section>
+
+
+</div>
+
+<h1>jQuery colorInput</h1>
+<p>
+    A compact color selector for input elements.
+</p>
+
+<div id="console" style="width: 500px; float: right; color: #FFF; background: #000; font: 12px monospace; padding: 1em; margin: 1em 0; height: 350px; overflow: auto;"></div>
+
+<p>
+    Default<br /><input type="text" name="color1" class="color-picker" size="7" autocomplete="on" data-color-format="hex" value="hsl(207, 10%, 50%)" />
+</p>
+
+<p>
+    Black theme (set class=&quot;black&quot; on the input)<br />
+    <input type="text" name="color2" class="color-picker black" value="" size="7" />
+</p>
+
+<p>
+    Preset HEX value (set value attribute for preset)<br />
+    <input type="text" name="color3" class="color-picker" size="7" value="hsl(207, 90%, 0%)" />
+</p>
+
+<p>
+    With Opacity (set data-opacity attribute for preset)<br />
+    <input type="text" name="color3" class="color-picker-opacity" size="7" value="hsl(207, 100%, 50%)" data-opacity=".5" />
+</p>
+
+<p>
+    Attached to a hidden input<br />
+    <input type="hidden" name="color4" class="color-picker" value="#ef36a6" size="7" />
+</p>
+
+<p style="position: absolute; right: 0; top: 0; margin-right: 10px;">
+    Absolutely positioned in upper-right corner
+    <input type="hidden" name="color5" class="color-picker" value="#fff666" size="7" />
+</p>
+
+<p style="position: absolute; left: 0; bottom: 0; margin-left: 10px;">
+    <input type="hidden" name="color6" class="color-picker" value="#bf06ff" size="7" />
+    Absolutely positioned in bottom-left corner         
+</p>
+
+<p style="position: absolute; right: 0; bottom: 0; margin-right: 10px;">
+    Absolutely positioned in bottom-right corner            
+    <input type="hidden" name="color7" class="color-picker" value="#339966" size="7" />         
+</p>        
+
+<p style="margin-top: 50px;">
+    Select an action to apply to all of the controls on this page:
+    <br />
+    <input type="button" id="makeReadonly" value="Read-only" />
+    <input type="button" id="unmakeReadonly" value="Not Read-only" disabled="disabled" /><br />
+    <input type="button" id="disable" value="Disable" />
+    <input type="button" id="enable" value="Enable" disabled="disabled" /><br />
+    <input type="button" id="destroy" value="Destroy" />
+    <input type="button" id="create" value="Create" disabled="disabled" /><br />
+    <input type="button" id="randomize" value="Random Color" />
+</p>
+
+<script type="text/javascript">
+$(document).ready( function() {
+                
+    function init() {
+        
+        // Enabling miniColors
+        $('.color-picker').colorInput({
+            change: function(hex, rgb) {
+                $('#console').prepend('change: ' + hex + ', rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')<br>');
+            },
+            open: function(hex, rgb) {
+                $('#console').prepend('open: ' + hex + ', rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')<br>');
+            },
+            close: function(hex, rgb) {
+                $('#console').prepend('close: ' + hex + ', rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')<br>');
+            }
+        });
+        
+        // With opacity
+        $('.color-picker-opacity').colorInput({
+            opacity: true,
+            change: function(hex, rgba) {
+                $('#console').prepend('change: ' + hex + ', rgba(' + rgba.r + ', ' + rgba.g + ', ' + rgba.b + ', ' + rgba.a + ')<br>');
+            },
+            open: function(hex, rgba) {
+                $('#console').prepend('open: ' + hex + ', rgba(' + rgba.r + ', ' + rgba.g + ', ' + rgba.b + ', ' + rgba.a + ')<br>');
+            },
+            close: function(hex, rgba) {
+                $('#console').prepend('close: ' + hex + ', rgba(' + rgba.r + ', ' + rgba.g + ', ' + rgba.b + ', ' + rgba.a + ')<br>');
+            }
+        });
+        
+    }               
+
+    init();
+
+    $('#disable').click( function() {
+        $('#console').prepend('disable<br />');
+        $('.color-picker, .color-picker-opacity').colorInput('disabled', true);
+        $("#disable").prop('disabled', true);
+        $("#enable").prop('disabled', false);
+    });
+
+    $('#enable').click( function() {
+        $('#console').prepend('enable<br />');
+        $('.color-picker, .color-picker-opacity').colorInput('disabled', false);
+        $("#disable").prop('disabled', false);
+        $("#enable").prop('disabled', true);
+    });
+
+    $('#makeReadonly').click( function() {
+        $('#console').prepend('readonly = true<br />');
+        $('.color-picker, .color-picker-opacity').colorInput('readonly', true);
+        $("#unmakeReadonly").prop('disabled', false);
+        $("#makeReadonly").prop('disabled', true);
+    });
+
+    $('#unmakeReadonly').click( function() {
+        $('#console').prepend('readonly = false<br />');
+        $('.color-picker, .color-picker-opacity').colorInput('readonly', false);
+        $("#unmakeReadonly").prop('disabled', true);
+        $("#makeReadonly").prop('disabled', false);
+    });
+
+    $('#destroy').click( function() {
+        $('#console').prepend('destroy<br />');
+        $('.color-picker, .color-picker-opacity').colorInput('destroy');
+        $("INPUT[type=button]:not(#create)").prop('disabled', true);
+        $("#destroy").prop('disabled', true);
+        $("#create").prop('disabled', false);
+    });
+
+    $('#create').click( function() {
+        $('#console').prepend('create<br />');
+        init();
+        $("#makeReadonly, #disable, #destroy, #randomize").prop('disabled', false);
+        $("#destroy").prop('disabled', false);
+        $("#create").prop('disabled', true);
+    });
+
+    $('#randomize').click( function() {
+        $('.color-picker, .color-picker-opacity').colorInput('value', '#' + Math.floor(Math.random() * 16777215).toString(16));
+    });
+
+});
+</script>
+</body>
+</html>

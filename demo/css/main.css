@@ -92,18 +92,91 @@ textarea {
 /* ==========================================================================
    Author's custom styles
    ========================================================================== */
-
-@import url(http://fonts.googleapis.com/css?family=Abel);
-
-body {
-    font-family: 'Abel', sans-serif;
-    margin: 20px;
+#toc {
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    position: fixed;
+    background: #333;
+    box-shadow: inset -5px 0 5px 0px #000;
+    width: 150px;
+    padding-top: 20px;
+    color: #fff;
 }
 
-.wrap {
-    max-width: 600px;
-    margin: 0 auto;
+#toc ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
+
+#toc li {
+    padding: 5px 10px;
+}
+
+#toc a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+}
+
+#toc .toc-h2 {
+    padding-left: 10px;
+}
+
+#toc .toc-h3 {
+    padding-left: 20px;
+}
+
+#toc .toc-active {
+    background: #336699;
+    box-shadow: inset -5px 0px 10px -5px #000;
+}
+
+#wrapper {
+    margin: 0 20px 0 170px;
+}
+code, pre {
+    font-size: 12px;
+}
+
+
+.example {
+    background-color: #f0f0f0;
+    margin-top: 0;
+    padding: 1em;
+}
+
+
+
+/* positons */
+.position_tooltip,.show {
+    margin: 0.5em;
+    background: #ddddff;
+    padding: 10px;
+    cursor: default;
+    float:left;
+    width: 100px;
+    text-align: center;
+}
+.show {
+    width: auto;
+}
+.trace {
+    width: 200px;
+    height: 100px;
+}
+.positon_wrap {
+    overflow: hidden;
+}
+.position_tooltip:nth-child(3n+1){
+    clear:left;
+}
+
+
+
+
+
 
 
 

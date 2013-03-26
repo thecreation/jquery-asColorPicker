@@ -38,6 +38,21 @@
           box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 }
 
+.colorinput-picker.colorinput-flat {
+  position: relative;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 200px;
+  height: 150px;
+  -webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+  -webkit-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+     -moz-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
 .colorinput-picker-hue,
 .colorinput-picker-alpha {
   position: relative;
