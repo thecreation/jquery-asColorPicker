@@ -559,10 +559,14 @@
         update: function(color,trigger) {
             var self = this;
 
+            console.log(color)
+
             //set chosen color to color object
             if (color !== {}) {
                 self.color.set(color);
             }
+
+            console.log(self.color.toHEX())
 
             // update all components
             $.each(this._comps,function(i,v) {
@@ -772,6 +776,10 @@ $.colorInput.registerComponent('saturation', {
         this.height = this.$saturation.height();
         this.size = this.$handle.width() / 2;
 
+        console.log(this.width)
+        console.log(this.height)
+        console.log(this.size)
+
         //bind action
         this.$saturation.on('mousedown.colorInput',function(e) {             
             $.proxy(self.mousedown,self)(api,e);
@@ -840,17 +848,21 @@ $.colorInput.registerComponent('saturation', {
         }
     },
     update: function(api) {
-        console.log('update')
-        console.log($.colorValue.HSLToHEX({
-            h: api.color.value.h,
-            s: 1,
-            l: 0.5
-        }))
+        console.log(api.color.value.h)
+        if (api.color.value.h === undefined) {
+            api.color.value.h = 0;
+        }
         this.$saturation.css('backgroundColor', $.colorValue.HSLToHEX({
             h: api.color.value.h,
             s: 1,
             l: 0.5
         }));
+
+        console.log($.colorValue.HSLToHEX({
+            h: api.color.value.h,
+            s: 1,
+            l: 0.5
+        }))
 
         var x = api.color.value.s * this.width;
         var y = (1 - api.color.value.v) * this.height;
