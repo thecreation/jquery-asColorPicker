@@ -1,0 +1,66 @@
+.colorinput {
+    vertical-align: middle;
+    margin-right: 4px;
+    width: 300px;
+}
+
+// skin css 
+.colorinput-trigger {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border:1px solid #999;
+    background: url(../img/trigger.png) -20px 0 no-repeat;
+    vertical-align: middle;
+    span {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: url(../img/trigger.png) 0 0 no-repeat;
+    }
+}
+
+.colorinput-picker {
+    position: absolute;
+    top: 100%;
+    left: 0;
+
+    z-index: 1000;
+    display: none;
+
+
+  padding: 5px;
+  background-color: #ffffff;
+  border: 1px solid #bbb;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  -webkit-border-radius: 3px;
+     -moz-border-radius: 3px;
+          border-radius: 3px;
+  -webkit-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+     -moz-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+
+    .colorinput-picker-hue, .colorinput-picker-alpha{
+	  position: relative;
+	  float: left;
+	  width: 20px;
+	  height: 150px;
+	  margin-left: 5px;
+	  cursor: row-resize;
+	  background: url(../img/colors.png) 0 0 no-repeat;
+	  
+
+	  i {
+	    position: absolute;
+	    left: -2px;
+	    width: 22px;
+	    height: 2px;
+	    border: 1px solid black;
+	    background: white;
+	    margin-top: -1px;
+	    border-radius: 2px;
+	  }
+	}
+
+
+}
