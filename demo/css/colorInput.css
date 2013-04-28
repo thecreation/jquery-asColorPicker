@@ -1,7 +1,7 @@
 .colorInput-trigger.skin-1 {
   width: 25px;
   height: 25px;
-  margin-bottom: 3px;
+  padding: 0;
   cursor: pointer;
   background-color: #434343;
   border: 1px solid #000;
@@ -12,6 +12,7 @@
   display: inline-block;
   width: 17px;
   height: 17px;
+  padding: 0;
   margin: 3px;
   background-color: #4accda;
   border: 1px solid #000;
@@ -38,10 +39,16 @@
   content: '';
 }
 
-.colorInput.skin-1 {
+.colorInput.colorInput-flat {
   position: relative;
+}
+
+.colorInput.skin-1 {
+  position: absolute;
   width: 278px;
   height: 327px;
+  padding: 0;
+  margin: 0;
   overflow: hidden;
   background-color: #434343;
   border: 1px solid #000;
@@ -49,6 +56,7 @@
 
 .colorInput.skin-1 .colorInput-palettes {
   padding: 11px 12px;
+  overflow: hidden;
   border-bottom: 1px solid #000;
 }
 
@@ -58,10 +66,10 @@
 }
 
 .colorInput.skin-1 .colorInput-palettes li {
-  display: inline-block;
+  float: left;
   width: 23px;
   height: 23px;
-  margin: 0 -2px -4px;
+  margin: 0 3px 0 0;
   text-indent: -999px;
   list-style: none;
   cursor: pointer;
@@ -69,11 +77,17 @@
   border: 1px solid #363636;
 }
 
+.colorInput.skin-1 .colorInput-palettes li:last-child {
+  margin: 0;
+}
+
 .colorInput.skin-1 .colorInput-alpha,
 .colorInput.skin-1 .colorInput-hue {
   position: absolute;
   width: 256px;
   height: 27px;
+  padding: 0;
+  margin: 0;
   cursor: col-resize;
 }
 
@@ -115,6 +129,8 @@
   left: 10px;
   width: 173px;
   height: 172px;
+  padding: 0;
+  margin: 0;
   cursor: crosshair;
   background: url("../image/saturation.png") no-repeat #4accda;
   border: 1px solid #363636;
@@ -148,15 +164,23 @@
   right: 10px;
   width: 73px;
   height: 45px;
+  padding: 0;
+  margin: 0;
   background-color: #fff;
 }
 
-.colorInput.skin-1 .colorInput-preview .colorInput-preview-current {
+.colorInput.skin-1 .colorInput-preview-previous {
+  display: none;
+}
+
+.colorInput.skin-1 .colorInput-preview-current {
   position: absolute;
   top: 0;
   left: 0;
+  display: block;
   width: 100%;
   height: 100%;
+  background-color: #4accda;
 }
 
 .colorInput.skin-1 .colorInput-hex {
@@ -166,22 +190,24 @@
   width: 73px;
   height: 25px;
   padding: 0;
+  margin: 0;
   font-weight: bold;
   color: #444;
   text-align: center;
   background-color: #fff;
   border: none;
-  border-radius: none;
 }
 
 .colorInput.skin-1 .colorInput-check {
   position: absolute;
-  top: 262px;
   right: 10px;
+  bottom: 10px;
+  padding: 0;
+  margin: 0;
 }
 
 .colorInput.skin-1 .colorInput-check a {
-  position: relative;
+  position: absolute;
   display: block;
   width: 73px;
   padding: 3px 0;
@@ -193,7 +219,8 @@
 }
 
 .colorInput.skin-1 .colorInput-check .colorInput-check-apply {
-  top: -15px;
+  right: 0;
+  bottom: 36px;
   color: #fff;
   background-color: #9b9b9b;
   border: 1px solid rgba(0, 0, 0, 0.2);
@@ -208,7 +235,8 @@
 }
 
 .colorInput.skin-1 .colorInput-check .colorInput-check-cancel {
-  top: -6px;
+  right: 0;
+  bottom: 0;
   color: #c3c3c3;
   background-color: #272727;
   border: 1px solid rgba(0, 0, 0, 0.15);
@@ -225,7 +253,7 @@
 .colorInput-trigger.skin-2 {
   width: 64px;
   height: 25px;
-  margin-bottom: 3px;
+  padding: 0;
   cursor: pointer;
   background-color: #434343;
   border: 1px solid #000;
@@ -253,10 +281,16 @@
   content: '';
 }
 
-.colorInput.skin-2 {
+.colorInput.colorInput-flat {
   position: relative;
+}
+
+.colorInput.skin-2 {
+  position: absolute;
   width: 297px;
   height: 230px;
+  padding: 0;
+  margin: 0;
   overflow: hidden;
   background-color: #434343;
   border: 1px solid #000;
@@ -274,6 +308,8 @@
   left: 11px;
   width: 173px;
   height: 172px;
+  padding: 0;
+  margin: 0;
   cursor: crosshair;
   background: url("../image/saturation.png") no-repeat #4accda;
   border: 3px solid #000;
@@ -319,6 +355,8 @@
   position: absolute;
   width: 19px;
   height: 168px;
+  padding: 0;
+  margin: 0;
   cursor: row-resize;
   border: 2px solid #000;
 }
@@ -380,12 +418,12 @@
 
 .colorInput.skin-2 .colorInput-check {
   position: absolute;
-  right: 12px;
-  bottom: 7px;
+  right: 15px;
+  bottom: 6px;
 }
 
 .colorInput.skin-2 .colorInput-check a {
-  position: relative;
+  position: absolute;
   display: inline-block;
   width: 73px;
   padding: 3px 0;
@@ -397,6 +435,8 @@
 }
 
 .colorInput.skin-2 .colorInput-check .colorInput-check-apply {
+  right: 0;
+  bottom: 0;
   color: #444;
   -webkit-text-shadow: 1px 1px 0 #ffffff;
      -moz-text-shadow: 1px 1px 0 #ffffff;
@@ -429,9 +469,18 @@
 }
 
 .colorInput.skin-2 .colorInput-check .colorInput-check-cancel {
+  right: 78px;
+  bottom: 0;
   color: #fff;
 }
 
 .colorInput.skin-2 .colorInput-check .colorInput-check-cancel:hover {
   text-decoration: underline;
+}
+
+.colorInput .drag-disable {
+  -webkit-user-select: none;
+     -moz-user-select: -moz-none;
+       -o-user-select: none;
+          user-select: none;
 }

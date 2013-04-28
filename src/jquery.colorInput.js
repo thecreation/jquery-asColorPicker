@@ -463,7 +463,7 @@
         create: function() {
             var self = this;
             // Create picker
-            this.$picker = $('<div draggable=false class="colorInput '+ this.options.skin +'"></div>');
+            this.$picker = $('<div draggable=false class="colorInput '+ this.options.skin +' drag-disable"></div>');
 
             // Init components
             $.each(this._comps,function(i,v) {
@@ -751,7 +751,7 @@
 }())));
 
 $.colorInput.registerComponent('saturation', {
-    template: '<div class="colorInput-saturation"><i><b></b></i></div>',
+    template: '<div class="colorInput-saturation drag-disable"><i class="drag-disable"><b class="drag-disable"></b></i></div>',
     defaults: {},
     options: {},
     width: 0,
@@ -863,7 +863,7 @@ $.colorInput.registerComponent('saturation', {
 
 $.colorInput.registerComponent('hue', {
     selector: '.colorInput-picker-hue',
-    template: '<div class="colorInput-hue"><i></i></div>',
+    template: '<div class="colorInput-hue drag-disable"><i clsss="drag-disable"></i></div>',
     height: 150,
     data: {},
     init: function(api) {
@@ -949,7 +949,7 @@ $.colorInput.registerComponent('hue', {
 
 $.colorInput.registerComponent('h-hue', {
     selector: '.colorInput-picker-hue',
-    template: '<div class="colorInput-hue"><i></i></div>',
+    template: '<div class="colorInput-hue drag-disable"><i class="drag-disable"></i></div>',
     width: 150,
     data: {},
     init: function(api) {
@@ -1032,7 +1032,7 @@ $.colorInput.registerComponent('h-hue', {
 
 $.colorInput.registerComponent('alpha', {
     selector: '.colorInput-alpha',
-    template: '<div class="colorInput-alpha"><i></i></div>',
+    template: '<div class="colorInput-alpha drag-disable"><i class="drag-disable"></i></div>',
     height: 150,
     data: {},
     init: function(api) {
@@ -1112,7 +1112,7 @@ $.colorInput.registerComponent('alpha', {
 
 $.colorInput.registerComponent('h-alpha', {
     selector: '.colorInput-alpha',
-    template: '<div class="colorInput-alpha"><i></i></div>',
+    template: '<div class="colorInput-alpha drag-disable"><i class="drag-disable"></i></div>',
     width: 150,
     data: {},
     init: function(api) {
@@ -1302,7 +1302,7 @@ $.colorInput.registerComponent('hex', {
 
 $.colorInput.registerComponent('preview', {
     selector: '.colorInput-preview',
-    template: '<div class="colorInput-preview"><span class="colorInput-preview-previous"></span><span class="colorInput-preview-current"></span></div>',
+    template: '<div class="colorInput-preview"><span class="colorInput-preview-previous drag-disable"></span><span class="colorInput-preview-current"></span></div>',
     height: 150,
     init: function(api) {
         this.$preview = $(this.template).appendTo(api.$picker);
@@ -1317,7 +1317,7 @@ $.colorInput.registerComponent('preview', {
 
 $.colorInput.registerComponent('check', {
     selector: '.colorInput-check',
-    template: '<div class="colorInput-check"><a class="colorInput-check-apply"></a><a class="colorInput-check-cancel"></a></div>',
+    template: '<div class="colorInput-check drag-disable"><a class="colorInput-check-apply drag-disable"></a><a class="colorInput-check-cancel drag-disable"></a></div>',
     init: function(api) {
         var opts = $.extend(this.defaults,api.options.components.check),
             self = this;
