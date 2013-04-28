@@ -463,15 +463,11 @@
         create: function() {
             var self = this;
             // Create picker
-            this.$picker = $('<div draggable=”false" class="colorInput '+ this.options.skin +'"></div>');
+            this.$picker = $('<div draggable=false class="colorInput '+ this.options.skin +'"></div>');
 
             // Init components
             $.each(this._comps,function(i,v) {
                 self.components[v] && self.components[v].init(self);
-            });
-
-            this.$picker.on('drag','img',function() {
-                return false;
             });
 
             this.$input.addClass('colorInput-input');
@@ -662,6 +658,7 @@
             }
 
             this.$picker.css({
+                position: 'absolute',
                 top: top,
                 left: left
             });
@@ -1330,7 +1327,7 @@ $.colorInput.registerComponent('check', {
         this.$apply = this.$check.find('.colorInput-check-apply').text(opts.applyText);
         this.$cancel = this.$check.find('.colorInput-check-cancel').text(opts.cancelText);
 
-        this.$apply.on('click',$.proxy(this.apply,this));
-        this.$cancel.on('click',$.proxy(this.cancel,this));
+        this.$apply.on('click',$.proxy(api.apply,api));
+        this.$cancel.on('click',$.proxy(api.cancel,api));
     }
 });
