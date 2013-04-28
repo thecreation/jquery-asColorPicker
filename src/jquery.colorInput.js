@@ -405,7 +405,7 @@
     // Constructor
     var ColorInput = $.colorInput = function(input, options) {
         this.input = input;
-        this.$input = $(input);
+        this.$input = $(input).css({display: 'none'});
         this.$parent = $(input).parent();
 
         //flag
@@ -689,7 +689,6 @@
                 applyText: 'apply',
                 cancelText: 'cancel'
             },
-
         }
     };
 
@@ -702,7 +701,7 @@
 
 
     ColorInput.registerComponent('trigger', {
-        template: '<div class="colorinput-trigger"><span></span></div>',
+        template: '<div class="colorInput-trigger"><span></span></div>',
         init: function(api) {
 
             api.$trigger = $(this.template).addClass(api.options.skin);
