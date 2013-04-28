@@ -1,263 +1,437 @@
-.colorInput {
-  width: 300px;
-  margin-right: 4px;
-  vertical-align: middle;
+.colorInput-trigger.skin-1 {
+  width: 25px;
+  height: 25px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  background-color: #434343;
+  border: 1px solid #000;
 }
 
-.colorInput-trigger {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
-  background: url(../img/trigger.png) -20px 0 no-repeat;
-  border: 1px solid #999;
-}
-
-.colorInput-trigger span {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  background: url(../img/trigger.png) 0 0 no-repeat;
-}
-
-.colorInput {
+.colorInput-trigger.skin-1 span {
   position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1000;
-  display: none;
-  width: 200px;
-  height: 200px;
-  padding: 5px;
-  background-color: #ffffff;
-  border: 1px solid #bbb;
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  -webkit-border-radius: 3px;
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-  -webkit-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
-     -moz-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
-          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  margin: 3px;
+  background-color: #4accda;
+  border: 1px solid #000;
 }
 
-.colorInput .colorInput-saturation {
+.colorInput-trigger.skin-1 span:before {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 6px;
+  height: 6px;
+  background-color: #434343;
+  border-top: 1px solid #000;
+  border-left: 1px solid #000;
+  content: '';
+}
+
+.colorInput-trigger.skin-1 span:after {
+  position: absolute;
+  right: -4px;
+  bottom: -5px;
+  border: 4px solid transparent;
+  border-top-color: #787878;
+  content: '';
+}
+
+.colorInput.skin-1 {
   position: relative;
-  float: left;
-  width: 150px;
-  height: 150px;
-  cursor: crosshair;
-  background: url(../img/colors.png) -40px 0 no-repeat;
+  width: 278px;
+  height: 327px;
+  overflow: hidden;
+  background-color: #434343;
+  border: 1px solid #000;
 }
 
-.colorInput .colorInput-saturation i {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border: 1px solid black;
-  -webkit-border-radius: 11px;
-     -moz-border-radius: 11px;
-          border-radius: 11px;
+.colorInput.skin-1 .colorInput-palettes {
+  padding: 11px 12px;
+  border-bottom: 1px solid #000;
 }
 
-.colorInput .colorInput-saturation i b {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 8px;
-  height: 8px;
-  border: 1px solid white;
-  -webkit-border-radius: 9px;
-     -moz-border-radius: 9px;
-          border-radius: 9px;
-}
-
-.colorInput .colorInput-hue {
-  position: relative;
-  display: inline-block;
-  width: 20px;
-  height: 150px;
-  margin-left: 5px;
-  cursor: row-resize;
-  background: url(../img/colors.png) 0 0 no-repeat;
-}
-
-.colorInput .colorInput-hue i {
-  position: absolute;
-  left: -2px;
-  width: 22px;
-  height: 2px;
-  margin-top: -1px;
-  background: white;
-  border: 1px solid black;
-  border-radius: 2px;
-}
-
-.colorInput .colorInput-alpha {
-  position: relative;
-  display: inline-block;
-  width: 20px;
-  height: 150px;
-  margin-left: 5px;
-  cursor: row-resize;
-  background: url(../img/colors.png) -20px 0 no-repeat;
-}
-
-.colorInput .colorInput-alpha i {
-  position: absolute;
-  left: -2px;
-  width: 22px;
-  height: 2px;
-  margin-top: -1px;
-  background: white;
-  border: 1px solid black;
-  border-radius: 2px;
-}
-
-.colorInput .colorInput-saturation {
-  position: relative;
-  display: inline-block;
-  width: 150px;
-  height: 150px;
-  cursor: crosshair;
-  background: url(../img/colors.png) -40px 0 no-repeat;
-}
-
-.colorInput .colorInput-saturation i {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border: 1px solid black;
-  -webkit-border-radius: 11px;
-     -moz-border-radius: 11px;
-          border-radius: 11px;
-}
-
-.colorInput .colorInput-saturation i b {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 8px;
-  height: 8px;
-  border: 1px solid white;
-  -webkit-border-radius: 9px;
-     -moz-border-radius: 9px;
-          border-radius: 9px;
-}
-
-.colorInput .colorInput-palettes ul {
+.colorInput.skin-1 .colorInput-palettes ul {
   padding: 0;
   margin: 0;
 }
 
-.colorInput .colorInput-palettes ul li {
+.colorInput.skin-1 .colorInput-palettes li {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  margin-left: 5px;
-  text-indent: -9999px;
+  width: 23px;
+  height: 23px;
+  margin: 0 -2px -4px;
+  text-indent: -999px;
   list-style: none;
-  border: 1px solid #555;
+  cursor: pointer;
+  background-color: #ff0000;
+  border: 1px solid #363636;
 }
 
-.colorInput .colorInput-palettes ul .checked {
-  opacity: 0.5;
+.colorInput.skin-1 .colorInput-alpha,
+.colorInput.skin-1 .colorInput-hue {
+  position: absolute;
+  width: 256px;
+  height: 27px;
+  cursor: col-resize;
 }
 
-.colorInput .colorInput-hex {
-  width: 90px;
-  height: 19px;
-  margin-top: 9px;
+.colorInput.skin-1 .colorInput-alpha i,
+.colorInput.skin-1 .colorInput-hue i {
+  position: absolute;
+  top: -2px;
+  width: 2px;
+  height: 29px;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.35);
 }
 
-.colorInput .colorInput-preview {
-  float: right;
-  width: 66px;
-  height: 28px;
-  margin-top: 8px;
-  background-color: #E2B85F;
-  border: 1px solid #CCCCCC;
-  border-radius: 4px 4px 4px 4px;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+.colorInput.skin-1 .colorInput-alpha {
+  top: 57px;
+  left: 10px;
+  background: url("../image/alpha-horizontal.png") no-repeat transparent;
+  border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
-.colorInput.colorInput-flat {
-  position: relative;
+.colorInput.skin-1 .colorInput-alpha i {
+  left: 30%;
+}
+
+.colorInput.skin-1 .colorInput-hue {
+  top: 97px;
+  left: 10px;
+  background: url("../image/hue-horizontal.png") no-repeat transparent;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.colorInput.skin-1 .colorInput-hue i {
+  left: 50%;
+}
+
+.colorInput.skin-1 .colorInput-saturation {
+  position: absolute;
+  top: 143px;
+  left: 10px;
+  width: 173px;
+  height: 172px;
+  cursor: crosshair;
+  background: url("../image/saturation.png") no-repeat #4accda;
+  border: 1px solid #363636;
+}
+
+.colorInput.skin-1 .colorInput-saturation i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  -webkit-border-radius: 9px 9px 9px 9px;
+     -moz-border-radius: 9px 9px 9px 9px;
+          border-radius: 9px 9px 9px 9px;
+}
+
+.colorInput.skin-1 .colorInput-saturation b {
+  position: absolute;
   top: 0;
   left: 0;
+  width: 6px;
+  height: 6px;
+  border: 1px solid #fff;
+  -webkit-border-radius: 7px 7px 7px 7px;
+     -moz-border-radius: 7px 7px 7px 7px;
+          border-radius: 7px 7px 7px 7px;
+}
+
+.colorInput.skin-1 .colorInput-preview {
+  position: absolute;
+  top: 144px;
+  right: 10px;
+  width: 73px;
+  height: 45px;
+  background-color: #fff;
+}
+
+.colorInput.skin-1 .colorInput-preview .colorInput-preview-current {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.colorInput.skin-1 .colorInput-hex {
+  position: absolute;
+  top: 199px;
+  right: 10px;
+  width: 73px;
+  height: 25px;
+  padding: 0;
+  font-weight: bold;
+  color: #444;
+  text-align: center;
+  background-color: #fff;
+  border: none;
+  border-radius: none;
+}
+
+.colorInput.skin-1 .colorInput-check {
+  position: absolute;
+  top: 262px;
+  right: 10px;
+}
+
+.colorInput.skin-1 .colorInput-check a {
+  position: relative;
   display: block;
-  width: 200px;
-  height: 200px;
-  -webkit-border-radius: 3px;
-     -moz-border-radius: 3px;
-          border-radius: 3px;
-  -webkit-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
-     -moz-box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
-          box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
-}
-
-.colorInput-extra {
-  float: left;
-  width: 68px;
-  margin-left: 5px;
-  font-size: 11px;
-}
-
-.colorInput-extra ul {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-.colorInput-extra li {
-  padding: 0;
-  margin: 0;
-}
-
-.colorInput-sets {
-  width: 60px;
-  height: 20px;
-  margin-bottom: 5px !important;
-  overflow: hidden;
-  border: 1px solid #888;
-  border-color: rgba(0, 0, 0, 0.5);
-}
-
-.colorInput-sets li {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  overflow: hidden;
-  font-size: 0;
-  color: transparent;
-  text-indent: 100%;
-  white-space: nowrap;
+  width: 73px;
+  padding: 3px 0;
+  font-family: "proxima Nova";
+  font-weight: bold;
+  text-align: center;
+  text-transform: capitalize;
   cursor: pointer;
 }
 
-.colorInput-sets [data-color="white"] {
-  background: #fff;
+.colorInput.skin-1 .colorInput-check .colorInput-check-apply {
+  top: -15px;
+  color: #fff;
+  background-color: #9b9b9b;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
-.colorInput-sets [data-color="black"] {
-  background: #000;
+.colorInput.skin-1 .colorInput-check .colorInput-check-apply:hover {
+  background-color: #b2b2b2;
 }
 
-.colorInput-sets [data-color="transparent"] {
-  background: url(../img/colors.png) -1px -151px no-repeat;
+.colorInput.skin-1 .colorInput-check .colorInput-check-apply:active {
+  background-color: #565656;
 }
 
-.colorInput-info {
-  margin-bottom: 5px !important;
-  line-height: 16px;
+.colorInput.skin-1 .colorInput-check .colorInput-check-cancel {
+  top: -6px;
+  color: #c3c3c3;
+  background-color: #272727;
+  border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
-.colorInput-info label {
-  margin-left: 15px;
+.colorInput.skin-1 .colorInput-check .colorInput-check-cancel:hover {
+  background-color: #343434;
 }
 
-.colorInput-info input {
-  width: 35px;
-  padding: 0;
-  margin: 0 0 0 5px;
-  border: none;
+.colorInput.skin-1 .colorInput-check .colorInput-check-cancel:active {
+  background-color: #000;
+}
+
+.colorInput-trigger.skin-2 {
+  width: 64px;
+  height: 25px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  background-color: #434343;
+  border: 1px solid #000;
+  -webkit-border-radius: 5px 5px 5px 5px;
+     -moz-border-radius: 5px 5px 5px 5px;
+          border-radius: 5px 5px 5px 5px;
+}
+
+.colorInput-trigger.skin-2 span {
+  position: absolute;
+  display: inline-block;
+  width: 40px;
+  height: 19px;
+  margin: 2px 3px;
+  background-color: #5ac5d5;
+  border: 1px solid #000;
+}
+
+.colorInput-trigger.skin-2 span:after {
+  position: absolute;
+  top: 8px;
+  right: -16px;
+  border: 6px solid transparent;
+  border-top-color: #adadad;
+  content: '';
+}
+
+.colorInput.skin-2 {
+  position: relative;
+  width: 297px;
+  height: 230px;
+  overflow: hidden;
+  background-color: #434343;
+  border: 1px solid #000;
+  -webkit-border-radius: 5px 5px 5px 5px;
+     -moz-border-radius: 5px 5px 5px 5px;
+          border-radius: 5px 5px 5px 5px;
+  -webkit-box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6) inset;
+     -moz-box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6) inset;
+          box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.6) inset;
+}
+
+.colorInput.skin-2 .colorInput-saturation {
+  position: absolute;
+  top: 11px;
+  left: 11px;
+  width: 173px;
+  height: 172px;
+  cursor: crosshair;
+  background: url("../image/saturation.png") no-repeat #4accda;
+  border: 3px solid #000;
+  -webkit-box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.3);
+     -moz-box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.3);
+          box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.colorInput.skin-2 .colorInput-saturation i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  -webkit-border-radius: 9px 9px 9px 9px;
+     -moz-border-radius: 9px 9px 9px 9px;
+          border-radius: 9px 9px 9px 9px;
+}
+
+.colorInput.skin-2 .colorInput-saturation b {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border: 1px solid #fff;
+  -webkit-border-radius: 7px 7px 7px 7px;
+     -moz-border-radius: 7px 7px 7px 7px;
+          border-radius: 7px 7px 7px 7px;
+}
+
+.colorInput.skin-2 .colorInput-saturation b:before {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 2px;
+  height: 2px;
+  background-color: #fff;
+  content: '';
+}
+
+.colorInput.skin-2 .colorInput-alpha,
+.colorInput.skin-2 .colorInput-hue {
+  position: absolute;
+  width: 19px;
+  height: 168px;
+  cursor: row-resize;
+  border: 2px solid #000;
+}
+
+.colorInput.skin-2 .colorInput-alpha i,
+.colorInput.skin-2 .colorInput-hue i {
+  position: absolute;
+  left: -13px;
+  width: 18px;
+  height: 13px;
+  background: url("../image/arrow-left.png") no-repeat transparent;
+}
+
+.colorInput.skin-2 .colorInput-alpha i:before,
+.colorInput.skin-2 .colorInput-hue i:before {
+  position: absolute;
+  right: -27px;
+  width: 18px;
+  height: 13px;
+  background: url("../image/arrow-right.png") no-repeat transparent;
+  content: '';
+}
+
+.colorInput.skin-2 .colorInput-alpha {
+  top: 11px;
+  right: 15px;
+  background: url("../image/alpha-vertical.png") no-repeat -6px -6px transparent;
+}
+
+.colorInput.skin-2 .colorInput-alpha i {
+  top: 0;
+}
+
+.colorInput.skin-2 .colorInput-hue {
+  top: 11px;
+  right: 61px;
+  background: url("../image/hue-vertical.png") no-repeat -1px -1px transparent;
+}
+
+.colorInput.skin-2 .colorInput-hue i {
+  top: 0;
+}
+
+.colorInput.skin-2 .colorInput-hex {
+  position: absolute;
+  bottom: 5px;
+  left: 12px;
+  width: 85px;
+  height: 25px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  background-color: #252525;
+  border: 1px solid #000;
+  -webkit-box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.3);
+     -moz-box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.3);
+          box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.3);
+}
+
+.colorInput.skin-2 .colorInput-check {
+  position: absolute;
+  right: 12px;
+  bottom: 7px;
+}
+
+.colorInput.skin-2 .colorInput-check a {
+  position: relative;
+  display: inline-block;
+  width: 73px;
+  padding: 3px 0;
+  font-family: "proxima Nova";
+  font-weight: bold;
+  text-align: center;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.colorInput.skin-2 .colorInput-check .colorInput-check-apply {
+  color: #444;
+  -webkit-text-shadow: 1px 1px 0 #ffffff;
+     -moz-text-shadow: 1px 1px 0 #ffffff;
+          text-shadow: 1px 1px 0 #ffffff;
+  background-color: #fff;
+  background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2QyZDJkMiIgc3RvcC1vcGFjaXR5PSIwLjYiLz4KICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzgxODE4MSIgc3RvcC1vcGFjaXR5PSIwLjYiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9InVybCgjZ3JhZC11Y2dnLWdlbmVyYXRlZCkiIC8+Cjwvc3ZnPg==);
+  background-image: -moz-linear-gradient(top, rgba(210, 210, 210, 0.6) 0, rgba(129, 129, 129, 0.6) 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, rgba(210, 210, 210, 0.6)), color-stop(100%, rgba(129, 129, 129, 0.6)));
+  background-image: -webkit-linear-gradient(top, rgba(210, 210, 210, 0.6) 0, rgba(129, 129, 129, 0.6) 100%);
+  background-image: -o-linear-gradient(top, rgba(210, 210, 210, 0.6) 0, rgba(129, 129, 129, 0.6) 100%);
+  background-image: -ms-linear-gradient(top, rgba(210, 210, 210, 0.6) 0, rgba(129, 129, 129, 0.6) 100%);
+  background-image: linear-gradient(to bottom, rgba(210, 210, 210, 0.6) 0, rgba(129, 129, 129, 0.6) 100%);
+  border: 1px solid #000;
+  -webkit-border-radius: 5px 5px 5px 5px;
+     -moz-border-radius: 5px 5px 5px 5px;
+          border-radius: 5px 5px 5px 5px;
+  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 #ffffff;
+     -moz-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 #ffffff;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 #ffffff;
+}
+
+.colorInput.skin-2 .colorInput-check .colorInput-check-apply:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.colorInput.skin-2 .colorInput-check .colorInput-check-apply:active {
+  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 5px 0 #000000;
+     -moz-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 5px 0 #000000;
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.5), inset 0 1px 5px 0 #000000;
+}
+
+.colorInput.skin-2 .colorInput-check .colorInput-check-cancel {
+  color: #fff;
+}
+
+.colorInput.skin-2 .colorInput-check .colorInput-check-cancel:hover {
+  text-decoration: underline;
 }

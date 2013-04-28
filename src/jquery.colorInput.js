@@ -437,8 +437,6 @@
             this._comps.splice(this._comps.indexOf('trigger'),1);
         }
 
-        console.log(this._comps);
-
         // color value and format
         if (this.input.value === '') {
             this.color = new Color({
@@ -465,11 +463,15 @@
         create: function() {
             var self = this;
             // Create picker
-            this.$picker = $('<div class="colorInput"></div>');
+            this.$picker = $('<div draggable=”false" class="colorInput '+ this.options.skin +'"></div>');
 
             // Init components
             $.each(this._comps,function(i,v) {
                 self.components[v] && self.components[v].init(self);
+            });
+
+            this.$picker.on('drag','img',function() {
+                return false;
             });
 
             this.$input.addClass('colorInput-input');
@@ -506,8 +508,6 @@
 
             this.opened = true;
 
-            console.log(this.originalColor);
-
             if (this.$input.prop('disabled')) {
                 return false;
             }
@@ -530,6 +530,9 @@
 
                 // bind input element action
                 $(document).on('mousedown.colorInput', function(e) {
+
+                    console.log('document mousedown');
+
                     if ($(e.target).is(self.$input)) {
                         return;
                     }
@@ -559,18 +562,14 @@
         update: function(color,trigger) {
             var self = this;
 
-            console.log(color)
-
             //set chosen color to color object
             if (color !== {}) {
                 self.color.set(color);
             }
 
-            console.log(self.color.toHEX())
-
-            // update all components
+            // update all components 
             $.each(this._comps,function(i,v) {
-
+                
                 if (trigger !== v) {
                     self.components[v] && self.components[v].update && self.components[v].update(self);
                 }
@@ -637,8 +636,8 @@
             this.$picker.hide();
             this.$input.blur();
 
-            $(document).off('mousedown.colorinput');
-            $(window).off('resize.colorinput');
+            $(document).off('mousedown.colorInput');
+            $(window).off('resize.colorInput');
         },
         destroy: function() {},
         position: function() {
@@ -677,7 +676,7 @@
     ColorInput.defaults = {
         disabled: false,
         readonly: false,
-        skin: 'skin-fansion',
+        skin: 'skin-1',
 
         flat: false,
 
@@ -692,13 +691,16 @@
             check: {
                 applyText: 'apply',
                 cancelText: 'cancel'
-            }
+            },
+
         }
     };
 
     ColorInput.skins = {
         'skin-simple': 'trigger,palettes',
-        'skin-fansion': 'trigger,saturation,hue,alpha,hex,preview'
+        'skin-fansion': 'trigger,saturation,hue,alpha,hex,preview',
+        'skin-1': 'trigger,saturation,h-hue,h-alpha,hex,preview,palettes,check',
+        'skin-2': 'trigger,saturation,hue,alpha,hex,preview,check',
     };
 
 
@@ -706,7 +708,7 @@
         template: '<div class="colorinput-trigger"><span></span></div>',
         init: function(api) {
 
-            api.$trigger = $(this.template);
+            api.$trigger = $(this.template).addClass(api.options.skin);
             this.$trigger_inner = api.$trigger.children('span');
 
             api.$trigger.insertAfter(api.$input);
@@ -776,18 +778,10 @@ $.colorInput.registerComponent('saturation', {
         this.height = this.$saturation.height();
         this.size = this.$handle.width() / 2;
 
-        console.log(this.width)
-        console.log(this.height)
-        console.log(this.size)
-
         //bind action
         this.$saturation.on('mousedown.colorInput',function(e) {             
             $.proxy(self.mousedown,self)(api,e);
         });
-
-        api.$picker.on('change.colorInput',function(api) {
-
-        })
 
         this.update(api);
     },
@@ -848,7 +842,7 @@ $.colorInput.registerComponent('saturation', {
         }
     },
     update: function(api) {
-        console.log(api.color.value.h)
+        
         if (api.color.value.h === undefined) {
             api.color.value.h = 0;
         }
@@ -857,12 +851,6 @@ $.colorInput.registerComponent('saturation', {
             s: 1,
             l: 0.5
         }));
-
-        console.log($.colorValue.HSLToHEX({
-            h: api.color.value.h,
-            s: 1,
-            l: 0.5
-        }))
 
         var x = api.color.value.s * this.width;
         var y = (1 - api.color.value.v) * this.height;
@@ -886,6 +874,8 @@ $.colorInput.registerComponent('hue', {
         var self = this;
         this.$hue = $(this.template).appendTo(api.$picker);
         this.$handle = this.$hue.children('i');
+
+        this.height = this.$hue.height();
 
         //bind action
         this.$hue.on('mousedown.colorInput',function(e) {             
@@ -961,6 +951,93 @@ $.colorInput.registerComponent('hue', {
     }
 });
 
+$.colorInput.registerComponent('h-hue', {
+    selector: '.colorInput-picker-hue',
+    template: '<div class="colorInput-hue"><i></i></div>',
+    width: 150,
+    data: {},
+    init: function(api) {
+        var self = this;
+        this.$hue = $(this.template).appendTo(api.$picker);
+        this.$handle = this.$hue.children('i');
+
+        this.width = this.$hue.width();
+
+        //bind action
+        this.$hue.on('mousedown.colorInput',function(e) {             
+            $.proxy(self.mousedown,self)(api,e);
+        });
+
+        this.update(api);
+    },
+    mousedown: function(api, e) {
+        var offset = this.$hue.offset();
+
+        this.data.startX = e.pageX;
+        this.data.left = e.pageX - offset.left;
+
+        this.move(api, this.data.left);
+
+        this.mousemove = function(e) {
+
+            var position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
+
+            console.log(position)
+
+            this.move(api, position);
+            return false;
+        };
+
+        this.mouseup = function(e) {
+
+            $(document).off({
+                mousemove: this.mousemove,
+                mouseup: this.mouseup
+            });
+            return false;
+        };
+
+        $(document).on({
+            mousemove: $.proxy(this.mousemove, this),
+            mouseup: $.proxy(this.mouseup, this)
+        });
+        return false;
+    },
+    move: function(api, position, hub, update) {
+        console.log(position);
+        position = Math.max(0, Math.min(this.width, position));
+
+        if (typeof hub === 'undefined') {
+            hub = (1 - position / this.width) * 360;
+        }
+        hub = Math.max(0, Math.min(360, hub));
+        this.$handle.css({
+            left: position,
+            background: $.colorValue.HSVtoHEX({
+                h: hub,
+                s: 1,
+                v: 1
+            })
+        });
+        if (update !== false) {
+            api.update({
+                h: hub
+            }, 'h-hue');
+        }
+    },
+    update: function(api) {
+        var position = (api.color.value.h === 0) ? 0 : this.width * (1 - api.color.value.h / 360);
+        console.log(position)
+        this.move(api, position, api.color.value.h, false);
+    },
+    destroy: function(api) {
+        $(document).off({
+            mousemove: this.mousemove,
+            mouseup: this.mouseup
+        });
+    }
+});
+
 $.colorInput.registerComponent('alpha', {
     selector: '.colorInput-alpha',
     template: '<div class="colorInput-alpha"><i></i></div>',
@@ -971,6 +1048,8 @@ $.colorInput.registerComponent('alpha', {
 
         this.$alpha = $(this.template).appendTo(api.$picker);
         this.$handle = this.$alpha.children('i');
+
+        this.height = this.$alpha.height();
 
         //bind action
         this.$alpha.on('mousedown.colorinput',function(e) {             
@@ -1039,13 +1118,95 @@ $.colorInput.registerComponent('alpha', {
     }
 });
 
+$.colorInput.registerComponent('h-alpha', {
+    selector: '.colorInput-alpha',
+    template: '<div class="colorInput-alpha"><i></i></div>',
+    width: 150,
+    data: {},
+    init: function(api) {
+        var self = this;
+
+        this.$alpha = $(this.template).appendTo(api.$picker);
+        this.$handle = this.$alpha.children('i');
+
+        this.width = this.$alpha.width();
+
+        //bind action
+        this.$alpha.on('mousedown.colorinput',function(e) {             
+            $.proxy(self.mousedown,self)(api,e);
+        });
+
+        this.update(api);
+    },
+    mousedown: function(api, e) {
+        var offset = this.$alpha.offset();
+
+        this.data.startX= e.pageX;
+        this.data.left = e.pageX - offset.left;
+
+        this.move(api, this.data.left);
+
+        this.mousemove = function(e) {
+
+            var position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
+
+            this.move(api, position);
+            return false;
+        };
+
+        this.mouseup = function(e) {
+
+            $(document).off({
+                mousemove: this.mousemove,
+                mouseup: this.mouseup
+            });
+            return false;
+        };
+
+        $(document).on({
+            mousemove: $.proxy(this.mousemove, this),
+            mouseup: $.proxy(this.mouseup, this)
+        });
+        return false;
+    },
+    move: function(api, position, alpha, update) {
+        position = Math.max(0, Math.min(this.width, position));
+        if (typeof alpha === 'undefined') {
+            alpha = 1 - (position / this.width);
+        }
+        alpha = Math.max(0, Math.min(1, alpha));
+        this.$handle.css({
+            left: position
+        });
+        if (update !== false) {
+            api.update({
+                a: Math.round(alpha * 100) / 100
+            }, 'h-alpha');
+        }
+    },
+    update: function(api) {
+        var position = this.width * (1 - api.color.value.a);
+        this.$alpha.css('backgroundColor', api.color.toHEX());
+
+        this.move(api, position, api.color.value.a, false);
+    },
+    destroy: function(api) {
+        $(document).off({
+            mousemove: this.mousemove,
+            mouseup: this.mouseup
+        });
+    }
+});
+
 $.colorInput.registerComponent('palettes', {
     selector: '.colorInput-palettes',
     template: '<div class="colorInput-palettes"></div>',
     height: 150,
     colors: {
         white: '#fff',
-        black: '#000'
+        black: '#000',
+        a: '#555',
+        b: '#ccc'
     },
     init: function(api) {
         var list = '<ul>',
@@ -1062,7 +1223,7 @@ $.colorInput.registerComponent('palettes', {
 
         this.$palettes.delegate('li', 'click', function(e) {
             var type = $(e.target).data('color');
-            self.$palettes.find('li').removeClass('checked');
+            self.$palettes.find('li').removeClass('colorInput-palettes-checked');
             $(e.target).addClass('checked');
             api.value(colors[type]);
             api.hide();
@@ -1149,22 +1310,23 @@ $.colorInput.registerComponent('hex', {
 
 $.colorInput.registerComponent('preview', {
     selector: '.colorInput-preview',
-    template: '<div class="colorInput-preview"><div></div></div>',
+    template: '<div class="colorInput-preview"><span class="colorInput-preview-previous"></span><span class="colorInput-preview-current"></span></div>',
     height: 150,
     init: function(api) {
-        this.$preview = $(this.template).appendTo(api.$picker);;
+        this.$preview = $(this.template).appendTo(api.$picker);
+        this.$current = this.$preview.find('.colorInput-preview-current');
         this.update(api);
 
     },
     update: function(api) {
-        this.$preview.css('backgroundColor', api.color.toRGBA());
+        this.$current.css('backgroundColor', api.color.toRGBA());
     },
 });
 
 $.colorInput.registerComponent('check', {
     selector: '.colorInput-check',
     template: '<div class="colorInput-check"><a class="colorInput-check-apply"></a><a class="colorInput-check-cancel"></a></div>',
-    init: function() {
+    init: function(api) {
         var opts = $.extend(this.defaults,api.options.components.check),
             self = this;
 
