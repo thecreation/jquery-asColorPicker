@@ -569,7 +569,7 @@
 
             // update all components 
             $.each(this._comps,function(i,v) {
-                
+
                 if (trigger !== v) {
                     self.components[v] && self.components[v].update && self.components[v].update(self);
                 }
@@ -982,8 +982,6 @@ $.colorInput.registerComponent('h-hue', {
 
             var position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
 
-            console.log(position)
-
             this.move(api, position);
             return false;
         };
@@ -1004,7 +1002,6 @@ $.colorInput.registerComponent('h-hue', {
         return false;
     },
     move: function(api, position, hub, update) {
-        console.log(position);
         position = Math.max(0, Math.min(this.width, position));
 
         if (typeof hub === 'undefined') {
@@ -1027,7 +1024,6 @@ $.colorInput.registerComponent('h-hue', {
     },
     update: function(api) {
         var position = (api.color.value.h === 0) ? 0 : this.width * (1 - api.color.value.h / 360);
-        console.log(position)
         this.move(api, position, api.color.value.h, false);
     },
     destroy: function(api) {
