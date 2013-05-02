@@ -26,5 +26,8 @@ _(Coming soon)_
 ## Examples
 _(Coming soon)_
 
+## Todo
+add select start event to prevent drag
+
 ## Release History
 _(Nothing yet)_

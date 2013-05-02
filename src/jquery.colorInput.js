@@ -402,6 +402,8 @@
         return hex.length === 6 ? hex : null;
     };
 
+    var hasTouch = ('ontouchstart' in window);
+
     // Constructor
     var ColorInput = $.colorInput = function(input, options) {
         this.input = input;
@@ -422,6 +424,7 @@
         });
 
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
+        this.hasTouch = hasTouch;
 
         //copy a registered components from prototype 
         //so every instance has their own components
@@ -498,6 +501,36 @@
                     }
                 });
             }
+
+            // stop dragging in colorInput
+            this.$picker.on('mousedown',function(e) {
+                var duringDragEvents = {};
+                duringDragEvents['selectstart'] = prevent;
+                duringDragEvents['dragstart'] = prevent;
+                duringDragEvents['mouseup'] = off;
+
+                function prevent(e) {
+                    if (e.stopPropagation) {
+                        e.stopPropagation();
+                    }
+                    if (e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    e.returnValue = false;
+                }
+
+                function off(e) {
+                    console.log('off drag')
+                    $(document).off(duringDragEvents);
+                }
+
+                $(document).on(duringDragEvents);
+
+                console.log('bind drag')
+
+                return false;
+            });
+
         },
         show: function() {
             var self = this;
@@ -913,7 +946,10 @@ $.colorInput.registerComponent('hue', {
             mousemove: $.proxy(this.mousemove, this),
             mouseup: $.proxy(this.mouseup, this)
         });
-        return false;
+
+        // here we let colorInput container deal with mousedown event propagation
+
+        //return false;
     },
     move: function(api, position, hub, update) {
         position = Math.max(0, Math.min(this.height, position));
