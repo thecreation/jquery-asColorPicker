@@ -520,17 +520,13 @@
                 }
 
                 function off(e) {
-                    console.log('off drag')
                     $(document).off(duringDragEvents);
                 }
 
                 $(document).on(duringDragEvents);
 
-                console.log('bind drag')
-
                 return false;
             });
-
         },
         show: function() {
             var self = this;
@@ -808,7 +804,12 @@ $.colorInput.registerComponent('saturation', {
         this.size = this.$handle.width() / 2;
 
         //bind action
-        this.$saturation.on('mousedown.colorInput',function(e) {             
+        this.$saturation.on('mousedown.colorInput',function(e) { 
+            var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
+            if (rightclick) {
+                return false;
+            }            
+
             $.proxy(self.mousedown,self)(api,e);
         });
 
@@ -849,6 +850,7 @@ $.colorInput.registerComponent('saturation', {
             mousemove: $.proxy(this.mousemove, this),
             mouseup: $.proxy(this.mouseup, this)
         });
+
         return false;
     },
     move: function(api, x, y, update) {
@@ -907,7 +909,11 @@ $.colorInput.registerComponent('hue', {
         this.height = this.$hue.height();
 
         //bind action
-        this.$hue.on('mousedown.colorInput',function(e) {             
+        this.$hue.on('mousedown.colorInput',function(e) { 
+            var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
+            if (rightclick) {
+                return false;
+            }              
             $.proxy(self.mousedown,self)(api,e);
         });
 
@@ -947,9 +953,7 @@ $.colorInput.registerComponent('hue', {
             mouseup: $.proxy(this.mouseup, this)
         });
 
-        // here we let colorInput container deal with mousedown event propagation
-
-        //return false;
+        return false;
     },
     move: function(api, position, hub, update) {
         position = Math.max(0, Math.min(this.height, position));
@@ -996,7 +1000,11 @@ $.colorInput.registerComponent('h-hue', {
         this.width = this.$hue.width();
 
         //bind action
-        this.$hue.on('mousedown.colorInput',function(e) {             
+        this.$hue.on('mousedown.colorInput',function(e) {   
+            var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
+            if (rightclick) {
+                return false;
+            }            
             $.proxy(self.mousedown,self)(api,e);
         });
 
@@ -1080,7 +1088,11 @@ $.colorInput.registerComponent('alpha', {
         this.height = this.$alpha.height();
 
         //bind action
-        this.$alpha.on('mousedown.colorinput',function(e) {             
+        this.$alpha.on('mousedown.colorinput',function(e) {   
+            var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
+            if (rightclick) {
+                return false;
+            }            
             $.proxy(self.mousedown,self)(api,e);
         });
 
@@ -1160,7 +1172,11 @@ $.colorInput.registerComponent('h-alpha', {
         this.width = this.$alpha.width();
 
         //bind action
-        this.$alpha.on('mousedown.colorinput',function(e) {             
+        this.$alpha.on('mousedown.colorinput',function(e) {  
+            var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
+            if (rightclick) {
+                return false;
+            }             
             $.proxy(self.mousedown,self)(api,e);
         });
 
