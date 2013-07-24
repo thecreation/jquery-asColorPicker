@@ -1,0 +1,25 @@
+{
+  "name": "colorInput",
+  "title": "jQuery colorInput",
+  "description": "The powerful jQuery plugin that creates a tab",
+  "keywords": [],
+  "version": "0.1.1",
+  "author": {
+    "name": "amazingSurge",
+    "email": "amazingSurge@yahoo.com",
+    "url": "amazingSurge.com"
+  },
+  "bugs": "https://github.com/amazingSurge/jquery-colorInput/issues",
+  "licenses": [
+    {
+      "type": "GPL",
+      "url": "https://github.com/amazingSurge/jquery-colorInput/blob/master/LICENSE-GPL"
+    }
+  ],
+  "bugs": "https://github.com/amazingSurge/jquery-colorInput/issues",
+  "homepage": "https://github.com/amazingSurge/jquery-colorInput",
+  "docs": "https://github.com/amazingSurge/jquery-colorInput",
+  "dependencies": {
+    "jquery": ">= 1.8.3"
+  }
+}
