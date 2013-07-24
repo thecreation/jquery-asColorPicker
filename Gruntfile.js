@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 stripBanners: true
             },
             dist: {
-                src: ['src/<%= pkg.name %>.js'],
+                src: ['src/jquery-colorInput.js','src/jquery-colorInput-Halpha.js','src/jquery-colorInput-Hhue.js','src/jquery-colorInput-alpha.js','src/jquery-colorInput.js','src/jquery-colorInput.js','src/jquery-colorInput.js','src/jquery-colorInput.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
         },
@@ -96,6 +96,37 @@ module.exports = function(grunt) {
                 }
             }
         },
+        replace: {
+            bower: {
+                src: ['bower.json'],
+                overwrite: true, // overwrite matched source files
+                replacements: [{
+                    from: /("version": ")([0-9\.]+)(")/g,
+                    to: "$1<%= pkg.version %>$3"
+                }]
+            },
+            jquery: {
+                src: ['tabs.jquery.json'],
+                overwrite: true, // overwrite matched source files
+                replacements: [{
+                    from: /("version": ")([0-9\.]+)(")/g,
+                    to: "$1<%= pkg.version %>$3"
+                }]
+            },
+        },
+        copy: {
+            bower: {
+                files: [{
+                    expand: true,
+                    flatten: true,
+                    cwd: 'bower_components/',
+                    src: [
+                        'jquery-color/dist/*.js',
+                    ],
+                    dest: 'demo/js/'
+                }]
+            }
+        }
     });
 
     // These plugins provide necessary tasks.
@@ -107,13 +138,21 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-jsbeautifier');
     grunt.loadNpmTasks('grunt-recess');
+    grunt.loadNpmTasks('grunt-text-replace');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // Default task.
     grunt.registerTask('default', ['jshint', 'clean', 'concat']);
-    grunt.registerTask('dist', ['concat','uglify']);
+    grunt.registerTask('dist', ['concat', 'uglify']);
 
     grunt.registerTask('css', ['recess']);
+    grunt.registerTask('cp', ['copy']);
 
     grunt.registerTask('js', ['jsbeautifier', 'jshint']);
+
+    grunt.registerTask('version', [
+        'replace:bower',
+        'replace:jquery'
+    ]);
 
 };

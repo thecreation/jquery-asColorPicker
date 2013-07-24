@@ -1,52 +1,49 @@
 //mixins
 //================================================
-.background-vertical (@color-first: #000, @color-last: #000, @location-first: 0%, @location-last: 100%) {
-    background-image: -moz-linear-gradient(top,  @color-first @location-first, @color-last @location-last);
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(@location-first,@color-first), color-stop(@location-last,@color-last));
-    background-image: -webkit-linear-gradient(top,  @color-first @location-first,@color-last @location-last);
-    background-image: -o-linear-gradient(top,  @color-first @location-first,@color-last @location-last);
-    background-image: -ms-linear-gradient(top,  @color-first @location-first,@color-last @location-last);
-    background-image: linear-gradient(to bottom,  @color-first @location-first,@color-last @location-last);
+.background - vertical(@color - first: #000, @color-last: # 000, @location - first: 0 % , @location - last: 100 % ) {
+    background - image: -moz - linear - gradient(top, @color - first@ location - first, @color - last@ location - last);
+    background - image: -webkit - gradient(linear, left top, left bottom, color - stop(@location - first, @color - first), color - stop(@location - last, @color - last));
+    background - image: -webkit - linear - gradient(top, @color - first@ location - first, @color - last@ location - last);
+    background - image: -o - linear - gradient(top, @color - first@ location - first, @color - last@ location - last);
+    background - image: -ms - linear - gradient(top, @color - first@ location - first, @color - last@ location - last);
+    background - image: linear - gradient(to bottom, @color - first@ location - first, @color - last@ location - last);
 }
-.background-horizontal (@color-first: #000, @color-last: #000, @location-first: 0%, @location-last: 100%) {
-    background-image: -moz-linear-gradient(left,  @color-first @location-first, @color-last @location-last);
-    background-image: -webkit-gradient(linear, left top, right top, color-stop(@location-first,@color-first), color-stop(@location-last,@color-last));
-    background-image: -webkit-linear-gradient(left,  @color-first @location-first,@color-last @location-last);
-    background-image: -o-linear-gradient(left,  @color-first @location-first,@color-last @location-last);
-    background-image: -ms-linear-gradient(left,  @color-first @location-first,@color-last @location-last);
-    background-image: linear-gradient(to right,  @color-first @location-first,@color-last @location-last);
+    .background - horizontal(@color - first: #000, @color-last: # 000, @location - first: 0 % , @location - last: 100 % ) {
+        background - image: -moz - linear - gradient(left, @color - first@ location - first, @color - last@ location - last);
+        background - image: -webkit - gradient(linear, left top, right top, color - stop(@location - first, @color - first), color - stop(@location - last, @color - last));
+        background - image: -webkit - linear - gradient(left, @color - first@ location - first, @color - last@ location - last);
+        background - image: -o - linear - gradient(left, @color - first@ location - first, @color - last@ location - last);
+        background - image: -ms - linear - gradient(left, @color - first@ location - first, @color - last@ location - last);
+        background - image: linear - gradient(to right, @color - first@ location - first, @color - last@ location - last);
 }
-.text-shadow (@Horizontal, @Vertical, @Blur, @color: #000) {
+    .text - shadow(@Horizontal, @Vertical, @Blur, @color: #000) {
     -webkit-text-shadow: @Horizontal @Vertical @Blur @color;
     -moz-text-shadow:    @Horizontal @Vertical @Blur @color;
     text-shadow:         @Horizontal @Vertical @Blur @color;
 }
-.box-shadow (@Horizontal, @Vertical, @Blur, @Spread, @color: #000) {
-    -webkit-box-shadow: @Horizontal @Vertical @Blur @Spread @color;
-    -moz-box-shadow:    @Horizontal @Vertical @Blur @Spread @color;
-    box-shadow:         @Horizontal @Vertical @Blur @Spread @color;
+.box-shadow (@Horizontal, @Vertical, @Blur, @Spread, @color: # 000) {
+        -webkit - box - shadow: @Horizontal@ Vertical@ Blur@ Spread@ color; - moz - box - shadow: @Horizontal@ Vertical@ Blur@ Spread@ color;
+        box - shadow: @Horizontal@ Vertical@ Blur@ Spread@ color;
 }
-.box-shadow-inset (@Horizontal, @Vertical, @Blur, @Spread, @color: #000) {
+    .box - shadow - inset(@Horizontal, @Vertical, @Blur, @Spread, @color: #000) {
     -webkit-box-shadow: @Horizontal @Vertical @Blur @Spread @color inset;
     -moz-box-shadow:    @Horizontal @Vertical @Blur @Spread @color inset;
     box-shadow:         @Horizontal @Vertical @Blur @Spread @color inset;
 }
-.box-shadow-bothWay (@Horizontal, @Vertical, @Blur, @Spread, @color: #000,@Horizontal-inset: none,@Vertical-inset: none,@Blur-inset: none, @Spread-inset: none, @color-inset: rgba(0,0,0,0)) {
-    -webkit-box-shadow: @Horizontal @Vertical @Blur @Spread @color,inset @Horizontal-inset @Vertical-inset @Blur-inset @Spread-inset @color-inset;
-    -moz-box-shadow:    @Horizontal @Vertical @Blur @Spread @color,inset @Horizontal-inset @Vertical-inset @Blur-inset @Spread-inset @color-inset;
-    box-shadow:         @Horizontal @Vertical @Blur @Spread @color,inset @Horizontal-inset @Vertical-inset @Blur-inset @Spread-inset @color-inset;  
+.box-shadow-bothWay (@Horizontal, @Vertical, @Blur, @Spread, @color: # 000, @Horizontal - inset: none, @Vertical - inset: none, @Blur - inset: none, @Spread - inset: none, @color - inset: rgba(0, 0, 0, 0)) {
+        -webkit - box - shadow: @Horizontal@ Vertical@ Blur@ Spread@ color,
+        inset@ Horizontal - inset@ Vertical - inset@ Blur - inset@ Spread - inset@ color - inset; - moz - box - shadow: @Horizontal@ Vertical@ Blur@ Spread@ color,
+        inset@ Horizontal - inset@ Vertical - inset@ Blur - inset@ Spread - inset@ color - inset;
+        box - shadow: @Horizontal@ Vertical@ Blur@ Spread@ color,
+        inset@ Horizontal - inset@ Vertical - inset@ Blur - inset@ Spread - inset@ color - inset;
 }
-.border-radius (@TopLeft,@TopRight,@BottomRight,@BottomLeft) {
-    -webkit-border-radius: @TopLeft @TopRight @BottomRight @BottomLeft;
-    -moz-border-radius:    @TopLeft @TopRight @BottomRight @BottomLeft;
-    border-radius:         @TopLeft @TopRight @BottomRight @BottomLeft;
+    .border - radius(@TopLeft, @TopRight, @BottomRight, @BottomLeft) {
+        -webkit - border - radius: @TopLeft@ TopRight@ BottomRight@ BottomLeft; - moz - border - radius: @TopLeft@ TopRight@ BottomRight@ BottomLeft;
+        border - radius: @TopLeft@ TopRight@ BottomRight@ BottomLeft;
 }
-.rotate (@rotate) {
-    -webkit-transform: rotate(@rotate);
-    -moz-transform:    rotate(@rotate);
-    -ms-transform:     rotate(@rotate);
-    -o-transform:      rotate(@rotate);
-    transform:         rotate(@rotate);
+    .rotate(@rotate) {
+        -webkit - transform: rotate(@rotate); - moz - transform: rotate(@rotate); - ms - transform: rotate(@rotate); - o - transform: rotate(@rotate);
+        transform: rotate(@rotate);
 }
 //================================================
 
@@ -54,32 +51,31 @@
 
 //colorinput-skin1
 //==============================================
-.colorInput-trigger.skin-1 {
+.colorInput - trigger.skin - 1 {
     height: 25px;
     width: 25px;
     padding: 0;
     border: 1px solid #000;
-    background-color: #434343;
+    background-color: # 434343;
     cursor: pointer;
     span {
         position: absolute;
-        display: inline-block;
+        display: inline - block;
         width: 17px;
         height: 17px;
         margin: 3px;
         padding: 0;
         border: 1px solid #000;
-        background-color: #4accda;
-        &:before {
+        background-color: # 4accda; & : before {
             position: absolute;
             bottom: -1px;
             right: -1px;
             content: '';
             width: 6px;
             height: 6px;
-            background-color: #434343;
-            border-top: 1px solid #000;
-            border-left: 1px solid #000;
+            background - color: #434343;
+            border-top: 1px solid # 000;
+            border - left: 1px solid #000;
         }
         &:after {
             position: absolute;
@@ -87,25 +83,25 @@
             right: -4px;
             content: '';
             border: 4px solid transparent;
-            border-top-color: #787878;
+            border-top-color: # 787878;
         }
     }
 }
-.colorInput.colorInput-flat {
-    position: relative;
+    .colorInput.colorInput - flat {
+        position: relative;
 }
-.colorInput.skin-1 {
-    position: absolute;
-    width: 278px;
-    height: 327px;
-    margin: 0;
-    padding: 0;
-    background-color: #434343;
-    border: 1px solid #000;
-    overflow: hidden;
-    .colorInput-palettes {
-        padding: 11px 12px;
-        border-bottom: 1px solid #000;
+    .colorInput.skin - 1 {
+        position: absolute;
+        width: 278px;
+        height: 327px;
+        margin: 0;
+        padding: 0;
+        background - color: #434343;
+    border: 1px solid # 000;
+        overflow: hidden;
+            .colorInput - palettes {
+                padding: 11px 12px;
+                border - bottom: 1px solid #000;
         overflow: hidden;
         ul {
             margin: 0;
@@ -117,8 +113,8 @@
             height: 23px;
             margin: 0 3px 0 0;
             list-style: none;
-            background-color: #ff0000;
-            border: 1px solid #363636;
+            background-color: # ff0000;
+                border: 1px solid #363636;
             cursor: pointer;
             text-indent: -999px;
             &:last-child {
@@ -138,29 +134,29 @@
             top: -2px;
             width: 2px;
             height: 29px;
-            background-color: #fff;
-            border: 1px solid rgba(0,0,0,0.35);
+            background-color: # fff;
+                border: 1px solid rgba(0, 0, 0, 0.35);
         }
-    }
-    .colorInput-alpha {
+}
+    .colorInput - alpha {
         top: 57px;
         left: 10px;
-        background: url("../image/alpha-horizontal.png") no-repeat transparent;
-        border: 1px solid rgba(0,0,0,0.15);
+        background: url("../image/alpha-horizontal.png") no - repeat transparent;
+        border: 1px solid rgba(0, 0, 0, 0.15);
         i {
-            left: 30%;
+            left: 30 % ;
         }
-    }
-    .colorInput-hue {
+}
+    .colorInput - hue {
         top: 97px;
         left: 10px;
-        background: url("../image/hue-horizontal.png") no-repeat transparent;
-        border: 1px solid rgba(0,0,0,0.15);
+        background: url("../image/hue-horizontal.png") no - repeat transparent;
+        border: 1px solid rgba(0, 0, 0, 0.15);
         i {
-            left: 50%;
+            left: 50 % ;
         }
-    }
-    .colorInput-saturation {
+}
+    .colorInput - saturation {
         position: absolute;
         top: 143px;
         left: 10px;
@@ -168,15 +164,15 @@
         height: 172px;
         margin: 0;
         padding: 0;
-        background: url("../image/saturation.png") no-repeat #4accda;
-        border: 1px solid #363636;
+        background: url("../image/saturation.png") no - repeat #4accda;
+        border: 1px solid # 363636;
         cursor: crosshair;
         i {
             position: absolute;
             width: 8px;
             height: 8px;
-            border: 1px solid rgba(0,0,0,0.15);
-            .border-radius (9px,9px,9px,9px);
+            border: 1px solid rgba(0, 0, 0, 0.15);
+                .border - radius(9px, 9px, 9px, 9px);
         }
         b {
             position: absolute;
@@ -184,11 +180,11 @@
             top: 0;
             width: 6px;
             height: 6px;
-            border: 1px solid #fff;
-            .border-radius (7px,7px,7px,7px);
+            border: 1px solid# fff;
+                .border - radius(7px, 7px, 7px, 7px);
         }
-    }
-    .colorInput-preview {
+}
+    .colorInput - preview {
         position: absolute;
         top: 144px;
         right: 10px;
@@ -196,19 +192,19 @@
         height: 45px;
         margin: 0;
         padding: 0;
-        background-color: #fff;
-    }
-    .colorInput-preview-previous {
+        background - color: #fff;
+}
+    .colorInput - preview - previous {
         display: none;
-    }
-    .colorInput-preview-current {
+}
+    .colorInput - preview - current {
         position: absolute;
         top: 0;
         left: 0;
         display: block;
-        width: 100%;
-        height: 100%;
-        background-color: #4accda;
+        width: 100 % ;
+        height: 100 % ;
+        background - color: #4accda;
     }
     .colorInput-hex {
         position: absolute;
@@ -218,13 +214,13 @@
         height: 25px;
         margin: 0;
         padding: 0;
-        color: #444;
-        font-weight: bold;
-        text-align: center;
-        background-color: #fff;
+        color: # 444;
+        font - weight: bold;
+        text - align: center;
+        background - color: #fff;
         border: none;
-    }
-    .colorInput-check {
+}
+    .colorInput - check {
         position: absolute;
         right: 10px;
         bottom: 10px;
@@ -235,132 +231,128 @@
             display: block;
             width: 73px;
             padding: 3px 0;
-            font-family: "proxima Nova";
-            font-weight: bold;
-            text-align: center;
-            text-transform: capitalize;
+            font - family: "proxima Nova";
+            font - weight: bold;
+            text - align: center;
+            text - transform: capitalize;
             cursor: pointer;
         }
-        .colorInput-check-apply {
-            right: 0;
-            bottom: 36px;
-            color: #fff;
-            background-color: #9b9b9b;
+            .colorInput - check - apply {
+                right: 0;
+                bottom: 36px;
+                color: #fff;
+                background - color: #9b9b9b;
             border: 1px solid rgba(0,0,0,0.2);
             &:hover {
-                background-color: #b2b2b2;
-            }
-            &:active {
-                background-color: #565656;
+                background-color: # b2b2b2;
+        } & : active {
+            background - color: #565656;
             }
         }
         .colorInput-check-cancel {
             right: 0;
             bottom: 0;
-            color: #c3c3c3;
-            background-color: #272727;
+            color: # c3c3c3;
+            background - color: #272727;
             border: 1px solid rgba(0,0,0,0.15);
             &:hover {
-                background-color: #343434;
-            }
-            &:active {
-                background-color: #000;
+                background-color: # 343434;
+        } & : active {
+            background - color: #000;
             }
         }
     }
 }
-//==============================================
+//= === === === === === === === === === === === === === === ===
 
 
 
-//colorinput-skin2
-//==============================================
-.colorInput-trigger.skin-2 {
-    height: 25px;
-    width: 64px;
-    padding: 0;
-    border: 1px solid #000;
-    background-color: #434343;
-    cursor: pointer;
-    .border-radius (5px,5px,5px,5px);
-    span {
-        position: absolute;
-        display: inline-block;
-        width: 40px;
-        height: 19px;
-        margin: 2px 3px;
-        border: 1px solid #000;
-        background-color: #5ac5d5;
-        &:after {
-            position: absolute;
-            top: 8px;
-            right: -16px;
-            content: '';
-            border: 6px solid transparent;
-            border-top-color: #adadad;
-        }
-    }
-}
-.colorInput.colorInput-flat {
-    position: relative;
-}
-.colorInput.skin-2 {
-    position: absolute;
-    width: 297px;
-    height: 230px;
-    margin: 0;
-    padding: 0;
-    background-color: #434343;
-    border: 1px solid #000;
-    overflow: hidden;
-    .border-radius (5px,5px,5px,5px);
-    .box-shadow-inset (0,1px,0,0,rgba(255,255,255,0.6));
-    .colorInput-saturation {
-        position: absolute;
-        top: 11px;
-        left: 11px;
-        width: 173px;
-        height: 172px;
-        margin: 0;
-        padding: 0;
-        background: url("../image/saturation.png") no-repeat #4accda;
-        border: 3px solid #000;
-        cursor: crosshair;
-        .box-shadow (0,1px,1px,0,rgba(255,255,255,0.3));
-        i {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border: 1px solid rgba(0,0,0,0.15);
-            .border-radius (9px,9px,9px,9px);
-        }
-        b {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 6px;
-            height: 6px;
-            border: 1px solid #fff;
-            .border-radius (7px,7px,7px,7px);
-            &:before {
-                position: absolute;
-                top: 2px;
-                left: 2px;
-                content: '';
-                width: 2px;
-                height: 2px;
-                background-color: #fff;
+            //colorinput-skin2
+            //==============================================
+            .colorInput - trigger.skin - 2 {
+                height: 25px;
+                width: 64px;
+                padding: 0;
+                border: 1px solid #000;
+    background-color: # 434343;
+                cursor: pointer;
+                    .border - radius(5px, 5px, 5px, 5px);
+                span {
+                    position: absolute;
+                    display: inline - block;
+                    width: 40px;
+                    height: 19px;
+                    margin: 2px 3px;
+                    border: 1px solid #000;
+        background-color: # 5ac5d5; & : after {
+                        position: absolute;
+                        top: 8px;
+                        right: -16px;
+                        content: '';
+                        border: 6px solid transparent;
+                        border - top - color: #adadad;
+                    }
+                }
             }
-        }
-    }
-    .colorInput-alpha,.colorInput-hue {
-        position: absolute;
-        width: 19px;
-        height: 168px;
-        margin: 0;
-        padding: 0;
-        cursor: row-resize;
-        border: 2px solid #000;
+                .colorInput.colorInput - flat {
+                    position: relative;
+            }
+                .colorInput.skin - 2 {
+                    position: absolute;
+                    width: 297px;
+                    height: 230px;
+                    margin: 0;
+                    padding: 0;
+                    background - color: #434343;
+    border: 1px solid # 000;
+                    overflow: hidden;
+                        .border - radius(5px, 5px, 5px, 5px);
+                        .box - shadow - inset(0, 1px, 0, 0, rgba(255, 255, 255, 0.6));
+                        .colorInput - saturation {
+                            position: absolute;
+                            top: 11px;
+                            left: 11px;
+                            width: 173px;
+                            height: 172px;
+                            margin: 0;
+                            padding: 0;
+                            background: url("../image/saturation.png") no - repeat #4accda;
+        border: 3px solid # 000;
+                            cursor: crosshair;
+                                .box - shadow(0, 1px, 1px, 0, rgba(255, 255, 255, 0.3));
+                            i {
+                                position: absolute;
+                                width: 8px;
+                                height: 8px;
+                                border: 1px solid rgba(0, 0, 0, 0.15);
+                                    .border - radius(9px, 9px, 9px, 9px);
+                            }
+                            b {
+                                position: absolute;
+                                left: 0;
+                                top: 0;
+                                width: 6px;
+                                height: 6px;
+                                border: 1px solid# fff;
+                                    .border - radius(7px, 7px, 7px, 7px); & : before {
+                                        position: absolute;
+                                        top: 2px;
+                                        left: 2px;
+                                        content: '';
+                                        width: 2px;
+                                        height: 2px;
+                                        background - color: #fff;
+                                }
+                            }
+                    }
+                        .colorInput - alpha, .colorInput - hue {
+                            position: absolute;
+                            width: 19px;
+                            height: 168px;
+                            margin: 0;
+                            padding: 0;
+                            cursor: row - resize;
+                            border: 2px solid #000;
         i {
             position: absolute;
             left: -13px;
@@ -399,64 +391,59 @@
         left: 12px;
         width: 85px;
         height: 25px;
-        color: #fff;
-        font-weight: bold;
-        text-align: center;
-        background-color: #252525;
-        border: 1px solid #000;
-        .box-shadow (0,1px,0,0,rgba(255,255,255,0.3));
-    }
-    .colorInput-check {
-        position: absolute;
-        right: 15px;
-        bottom: 6px;
-        a {
-            position: absolute;
-            display: inline-block;
-            width: 73px;
-            padding: 3px 0;
-            font-family: "proxima Nova";
-            font-weight: bold;
-            text-align: center;
-            text-transform: capitalize;
-            cursor: pointer;
-        }
-        .colorInput-check-apply {
-            right: 0;
-            bottom: 0;
-            color: #444;
-            background-color: #fff;
-            background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2QyZDJkMiIgc3RvcC1vcGFjaXR5PSIwLjYiLz4KICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzgxODE4MSIgc3RvcC1vcGFjaXR5PSIwLjYiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9InVybCgjZ3JhZC11Y2dnLWdlbmVyYXRlZCkiIC8+Cjwvc3ZnPg==);
-            .background-vertical (rgba(210,210,210,0.6),rgba(129,129,129,0.6));
-            border: 1px solid #000;
-            .text-shadow (1px,1px,0,#fff);
-            .box-shadow-bothWay (0,2px,2px,0,rgba(0,0,0,0.5),0,1px,0,0,#fff);
-            .border-radius (5px,5px,5px,5px);
-            &:hover {
-                background-color: rgba(255,255,255,0.8);
-            }
-            &:active {
-                .box-shadow-bothWay (0,2px,2px,0,rgba(0,0,0,0.5),0,1px,5px,0,#000);
+        color: # fff;
+                            font - weight: bold;
+                            text - align: center;
+                            background - color: #252525;
+        border: 1px solid # 000;
+                                .box - shadow(0, 1px, 0, 0, rgba(255, 255, 255, 0.3));
+                    }
+                        .colorInput - check {
+                            position: absolute;
+                            right: 15px;
+                            bottom: 6px;
+                            a {
+                                position: absolute;
+                                display: inline - block;
+                                width: 73px;
+                                padding: 3px 0;
+                                font - family: "proxima Nova";
+                                font - weight: bold;
+                                text - align: center;
+                                text - transform: capitalize;
+                                cursor: pointer;
+                            }
+                                .colorInput - check - apply {
+                                    right: 0;
+                                    bottom: 0;
+                                    color: #444;
+            background-color: # fff;
+                                    background - image: url(data: image / svg + xml; base64, PD94bWwgdmVyc2lvbj0iMS4wIiA / Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI + CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2QyZDJkMiIgc3RvcC1vcGFjaXR5PSIwLjYiLz4KICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzgxODE4MSIgc3RvcC1vcGFjaXR5PSIwLjYiLz4KICA8L2xpbmVhckdyYWRpZW50PgogIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9InVybCgjZ3JhZC11Y2dnLWdlbmVyYXRlZCkiIC8 + Cjwvc3ZnPg == );
+                                        .background - vertical(rgba(210, 210, 210, 0.6), rgba(129, 129, 129, 0.6));
+                                    border: 1px solid #000;
+            .text-shadow (1px,1px,0,# fff);
+                                .box - shadow - bothWay(0, 2px, 2px, 0, rgba(0, 0, 0, 0.5), 0, 1px, 0, 0, #fff);
+                                .border - radius(5px, 5px, 5px, 5px); & : hover {
+                                    background - color: rgba(255, 255, 255, 0.8);
+                            } & : active {
+                                    .box - shadow - bothWay(0, 2px, 2px, 0, rgba(0, 0, 0, 0.5), 0, 1px, 5px, 0, #000);
             }
         }
         .colorInput-check-cancel {
             right: 78px;
             bottom: 0;
-            color: #fff;
-            &:hover {
-                text-decoration: underline;
-            }
-        }
-    }
-}
-//==============================================
+            color: # fff; & : hover {
+                                            text - decoration: underline;
+                                        }
+                                }
+                            }
+                    }
+                    //==============================================
 
 
-.colorInput {
-    .drag-disable {
-        -webkit-user-select:none;
-        -moz-user-select: -moz-none;
-        -o-user-select:none;
-        user-select: none;
-    }
-}
+                    .colorInput {
+                            .drag - disable {
+                                -webkit - user - select: none; - moz - user - select: -moz - none; - o - user - select: none;
+                                user - select: none;
+                        }
+                    }
