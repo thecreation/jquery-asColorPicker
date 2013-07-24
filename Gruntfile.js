@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 stripBanners: true
             },
             dist: {
-                src: ['src/jquery-colorInput.js','src/jquery-colorInput-Halpha.js','src/jquery-colorInput-Hhue.js','src/jquery-colorInput-alpha.js','src/jquery-colorInput.js','src/jquery-colorInput.js','src/jquery-colorInput.js','src/jquery-colorInput.js'],
+                src: ['src/jquery-colorInput.js','src/jquery-colorInput-Halpha.js','src/jquery-colorInput-Hhue.js','src/jquery-colorInput-alpha.js','src/jquery-colorInput-check.js','src/jquery-colorInput-hex.js','src/jquery-colorInput-hue.js','src/jquery-colorInput-info.js','src/jquery-colorInput-palettes.js','src/jquery-colorInput-preview.js','src/jquery-colorInput-saturation.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
         },
