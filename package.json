@@ -1,12 +1,12 @@
 {
   "name": "jquery-colorInput",
-  "title": "Paginator",
+  "title": "colorInput",
   "description": "a jquery colorInput",
   "version": "0.1.0",
   "homepage": "https://github.com/amazingSurge/jquery-colorInput",
   "author": {
-    "name": "joeylin",
-    "email": "yao.lin.joe@gmail.com"
+    "name": "amazingSurge",
+    "email": "amazingSurge@gmail.com"
   },
   "repository": {
     "type": "git",
@@ -15,8 +15,8 @@
   "bugs": "https://github.com/amazingSurge/jquery-colorInput/issues",
   "licenses": [
     {
-      "type": "MIT",
-      "url": "https://github.com/amazingSurge/jquery-colorInput/blob/master/LICENSE-MIT"
+      "type": "GPL",
+      "url": "https://github.com/amazingSurge/jquery-colorInput/blob/master/LICENSE-GPL"
     }
   ],
   "devDependencies": {
