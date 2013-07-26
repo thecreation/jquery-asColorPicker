@@ -8,9 +8,9 @@ $.colorInput.registerComponent('preview', {
         this.$preview = $(this.template).appendTo(api.$picker);
         this.$current = this.$preview.find('.colorInput-preview-current');
         this.update(api);
-
     },
     update: function(api) {
         this.$current.css('backgroundColor', api.color.toRGBA());
     },
 });
+

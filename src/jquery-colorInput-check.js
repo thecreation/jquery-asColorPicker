@@ -13,3 +13,5 @@ $.colorInput.registerComponent('check', {
         this.$cancel.on('click', $.proxy(api.cancel, api));
     }
 });
+
+

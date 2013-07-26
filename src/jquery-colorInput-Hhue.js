@@ -21,7 +21,10 @@ $.colorInput.registerComponent('Hhue', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        this.update(api);
+        $(document).on('colorInput::init', function(event, instance) {
+            self.width = self.$hue.width();
+            self.update(api);
+        });
     },
     mousedown: function(api, e) {
         var offset = this.$hue.offset();
@@ -86,3 +89,4 @@ $.colorInput.registerComponent('Hhue', {
         });
     }
 });
+ 

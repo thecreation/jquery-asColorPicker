@@ -33,7 +33,13 @@ $.colorInput.registerComponent('saturation', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        this.update(api);
+        $(document).on('colorInput::init', function(event, instance) {
+            self.width = self.$saturation.width();
+            self.height = self.$saturation.height();
+            self.size = self.$handle.width() / 2;
+            self.update(api);
+        });
+
     },
     mousedown: function(api, e) {
         var offset = this.$saturation.offset();
@@ -114,3 +120,4 @@ $.colorInput.registerComponent('saturation', {
         });
     }
 });
+

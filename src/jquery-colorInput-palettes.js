@@ -27,12 +27,10 @@ $.colorInput.registerComponent('palettes', {
             var type = $(e.target).data('color');
             self.$palettes.find('li').removeClass('colorInput-palettes-checked');
             $(e.target).addClass('checked');
-            api.value(colors[type]);
-            api.hide();
+            api.set(colors[type]);
+            api.close();
         });
-
-    },
-    update: function(api) {
 
     }
 });
+

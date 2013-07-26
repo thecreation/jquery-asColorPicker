@@ -3,7 +3,6 @@
 $.colorInput.registerComponent('info', {
     selector: '.colorInput-info',
     template: '<ul class="colorInput-info">' + '<li><label>R:<input type="text" data-type="r"/></label></li>' + '<li><label>G:<input type="text" data-type="g"/></label></li>' + '<li><label>B:<input type="text" data-type="b"/></label></li>' + '<li><label>A:<input type="text" data-type="a"/></label></li>' + '</ul>',
-    height: 150,
     color: ['white', 'black', 'transparent'],
     init: function(api) {
         this.$info = $(this.template).appendTo(api.$picker);;
@@ -53,3 +52,4 @@ $.colorInput.registerComponent('info', {
         this.$a.val(api.color.value.a);
     },
 });
+

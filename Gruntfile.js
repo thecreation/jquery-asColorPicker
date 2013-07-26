@@ -20,6 +20,7 @@ module.exports = function(grunt) {
                 src: ['src/jquery-colorInput.js','src/jquery-colorInput-Halpha.js','src/jquery-colorInput-Hhue.js','src/jquery-colorInput-alpha.js','src/jquery-colorInput-check.js','src/jquery-colorInput-hex.js','src/jquery-colorInput-hue.js','src/jquery-colorInput-info.js','src/jquery-colorInput-palettes.js','src/jquery-colorInput-preview.js','src/jquery-colorInput-saturation.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
+            
         },
         uglify: {
             options: {
@@ -92,7 +93,7 @@ module.exports = function(grunt) {
                     compile: true
                 },
                 files: {
-                    'demo/css/colorInput.css': ['less/jquery.colorInput.less']
+                    'demo/css/colorInput.css': ['less/jquery-colorInput.less']
                 }
             }
         },
@@ -144,6 +145,7 @@ module.exports = function(grunt) {
     // Default task.
     grunt.registerTask('default', ['jshint', 'clean', 'concat']);
     grunt.registerTask('dist', ['concat', 'uglify']);
+    grunt.registerTask('dev', ['concat']);
 
     grunt.registerTask('css', ['recess']);
     grunt.registerTask('cp', ['copy']);

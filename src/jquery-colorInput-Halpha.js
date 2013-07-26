@@ -11,23 +11,24 @@ $.colorInput.registerComponent('Halpha', {
         this.$alpha = $(this.template).appendTo(api.$picker);
         this.$handle = this.$alpha.children('i');
 
-        this.width = this.$alpha.width();
-
         //bind action
-        this.$alpha.on('mousedown.colorinput', function(e) {
+        this.$alpha.on('mousedown.colorinput',function(e) {  
             var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
             if (rightclick) {
                 return false;
-            }
-            $.proxy(self.mousedown, self)(api, e);
+            }             
+            $.proxy(self.mousedown,self)(api,e);
         });
 
-        this.update(api);
+        $(document).on('colorInput::init', function(event, instance) {
+            self.width = self.$alpha.width();
+            self.update(api);
+        });
     },
     mousedown: function(api, e) {
         var offset = this.$alpha.offset();
 
-        this.data.startX = e.pageX;
+        this.data.startX= e.pageX;
         this.data.left = e.pageX - offset.left;
 
         this.move(api, this.data.left);

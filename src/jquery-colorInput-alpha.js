@@ -22,7 +22,10 @@ $.colorInput.registerComponent('alpha', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        this.update(api);
+        $(document).on('colorInput::init', function(event, instance) {
+            self.height = self.$alpha.height();
+            self.update(api);
+        });
     },
     mousedown: function(api, e) {
         var offset = this.$alpha.offset();
@@ -83,3 +86,4 @@ $.colorInput.registerComponent('alpha', {
         });
     }
 });
+ 

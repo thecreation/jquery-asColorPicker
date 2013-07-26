@@ -21,7 +21,10 @@ $.colorInput.registerComponent('hue', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        this.update(api);
+        $(document).on('colorInput::init', function(event, instance) {
+            self.height = self.$hue.height();
+            self.update(api);
+        });
     },
     mousedown: function(api, e) {
         var offset = this.$hue.offset();
@@ -90,3 +93,4 @@ $.colorInput.registerComponent('hue', {
         });
     }
 });
+
