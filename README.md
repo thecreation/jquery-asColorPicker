@@ -110,10 +110,10 @@ the most important thing is you should set skin value to let plugin find his ski
             <td>components</td>
             <td>
               {
-                check: {
+                check: {<br/>
                      applyText: 'apply',
                      cancelText: 'cancel'
-                }
+                }<br>
               }
             </td>
             <td>Optional property,set component</td>
