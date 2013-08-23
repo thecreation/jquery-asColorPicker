@@ -48,16 +48,18 @@
         // this._comps.splice(this._comps.indexOf('trigger'),1);
 
         // color value and format
-        if (this.input.value === '') {
+        if (this.input.value === '' && this.options.color == undefined) {
             this.color = new Color({
                 r: 255,
                 g: 255,
                 b: 255,
                 a: 1
             }, this.options.format);
-        } else {
+        } else if(this.input.value !== '' && this.options.color == undefined){
             this.color = new Color(this.input.value, this.options.format);
-        }
+        }else {
+            this.color = new Color(this.options.color, this.options.format);
+        };
 
         //save this.color  as a rgba value 
         this.originalColor = this.color.toRGBA();
@@ -275,7 +277,7 @@
         skin: 'skin-1',
 
         flat: false,
-
+        color: '#fff',
         //not ready
         showSelected: false,
 
