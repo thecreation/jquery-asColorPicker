@@ -276,7 +276,7 @@
         namespace: 'colorInput',
 
         readonly: false,
-        skin: 'skin-1',
+        skin: null,
 
         flat: false,
 
