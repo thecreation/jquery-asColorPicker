@@ -155,8 +155,8 @@ Mobile browsers (like Opera mini, Chrome mobile, Safari mobile, Android browser 
 ## Changes
 
 | Version | Notes                                                            |
-|   0.1.x | ([compare][compare-1.1]) add position function                   |
 |---------|------------------------------------------------------------------|
+|   0.1.x | ([compare][compare-1.1]) add position function                   |
 |     ... | ...                                                              |
 
 [compare-1.1]: https://github.com/amazingSurge/jquery-colorInput/compare/v1.1.0...v1.2.0
