@@ -76,7 +76,7 @@ the most important thing is you should set skin value to let plugin find his ski
     //The default color. String for hex color or hash for RGB or HSl
     color: '#ffffff',
 
-    //Optional property,    Whatever if the color picker is appended to the element or triggered by an event.
+    //Optional property, Whatever if the color picker is appended to the element or triggered by an event.
     flat: false,
 
     //Optional property, 
@@ -154,8 +154,8 @@ Mobile browsers (like Opera mini, Chrome mobile, Safari mobile, Android browser 
 
 ## Changes
 
-| Version | Notes
-|   0.1.x | ([compare][compare-1.1]) add position function                   |                                                            
+| Version | Notes                                                            |
+|   0.1.x | ([compare][compare-1.1]) add position function                   |
 |---------|------------------------------------------------------------------|
 |     ... | ...                                                              |
 
