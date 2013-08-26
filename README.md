@@ -1,12 +1,15 @@
 # jQuery colorInput
 
-The powerful jQuery plugin that creates a different styles colorpicker. <a href="http://amazingsurge.github.io/jquery-colorinput/">Project page and demos</a><br />
+The powerful jQuery plugin that provides a different styles colorpicker. <a href="http://amazingsurge.github.io/jquery-colorinput/">Project page and demos</a><br />
 Download: <a href="https://github.com/amazingSurge/jquery-colorinput/archive/master.zip">jquery-colorinput-master.zip</a>
 
 ***
 
 ## Features
 
+* **Flat mode** — as element in page
+* **Powerful controls for color selection**
+* **Fits into the viewport**
 * **Lightweight size** — 1 kb gzipped
 
 ## Dependencies
@@ -57,65 +60,47 @@ the most important thing is you should set skin value to let plugin find his ski
 
 ## Settings
 
-<table>
-    <thead>
-        <tr>
-            <th>Property</th>
-            <th>Default</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>namespace</td>
-            <td>'colorInput'</td>
-            <td>Optional property, set a namspace for css class, for example, we have <code>.colorInput_active</code> class for active effect, if namespace set to 'as-colorInput', then it will be <code>.as-colorInput_active</code></td>
-        </tr>
-        <tr>
-            <td>readonly</td>
-            <td>false</td>
-            <td>Optional property</td>
-        </tr>
-        <tr>
-            <td>skin</td>
-            <td>skin-1</td>
-            <td>Optional property,it set what components will add to colorpicker</td>
-        </tr>
-        <tr>
-            <td>flat</td>
-            <td>false</td>
-            <td>Optional property, set colorpicker as flat</td>
-        </tr>
-        <tr>
-            <td>onlyBtn</td>
-            <td>false</td>
-            <td>Optional property</td>
-        </tr>
-        <tr>
-            <td>showSelected</td>
-            <td>false</td>
-            <td>Optional property</td>
-        </tr>
-        <tr>
-            <td>hideFireChange</td>
-            <td>false</td>
-            <td>Optional property, if true, it will save change when you click outside calorpicker</td>
-        </tr>
-        <tr>
-            <td>format</td>
-            <td>'hex'</td>
-            <td>Optional property, set value's format, optional 'rgb','hsl'  
-        </tr>
-        <tr>
-            <td>components</td>
-            <td>
-                 {check:{applyText: 'apply',cancelText: 'cancel'}}
-            </td>
-            <td>Optional property,set component</td>
-        </tr>
-    </tbody>
-</table>
+```javascript
+{
+    //Optional property, set a namspace for css class, for example, we have <code>.
+    //colorInput_active</code> class for active effect, if namespace set to 'as-
+    //colorInput', then it will be <code>.as-colorInput_active</code>
+    namespace: 'colorInput',
 
+    //Optional property
+    readonly: false,
+
+    //Optional property,it set what components will add to colorpicker
+    skin: skin-1,
+
+    //The default color. String for hex color or hash for RGB or HSl
+    color: '#ffffff',
+
+    //Optional property,    Whatever if the color picker is appended to the element or triggered by an event.
+    flat: false,
+
+    //Optional property, 
+    onlyBtn: false,
+
+    //Optional property
+    showSelected: false,
+
+    //Optional property, if true, it will save change when you click outside calorpicker
+    hideFireChange: false,
+
+    //Optional property, set value's format, optional 'rgb','hsl'
+    format: 'hex',
+
+    //Optional property,colorpicker's component
+    components: {
+         check:{
+             applyText: 'apply',
+             cancelText: 'cancel'
+         }
+    } 
+
+}
+```
 ## Public methods
 
 jquery colorInput has different methods , we can use it as below :
@@ -169,11 +154,12 @@ Mobile browsers (like Opera mini, Chrome mobile, Safari mobile, Android browser 
 
 ## Changes
 
-| Version | Notes                                                            |
+| Version | Notes
+|   0.1.x | ([compare][compare-1.1]) add position function                   |                                                            
 |---------|------------------------------------------------------------------|
 |     ... | ...                                                              |
 
-
+[compare-1.1]: https://github.com/amazingSurge/jquery-colorInput/compare/v1.1.0...v1.2.0
 ## Author
 [amazingSurge](http://amazingSurge.com)
 
