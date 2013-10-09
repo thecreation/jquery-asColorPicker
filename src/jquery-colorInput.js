@@ -153,6 +153,11 @@
                 self.color.set(color);
             }
 
+            $doc.trigger('colorInput::change', this);
+            if ($.type(this.options.onChange) === 'function') {
+                this.options.onChange(this);
+            }
+
             // update all components 
             $.each(this._comps,function(i,v) {
                 if (trigger !== v) {
@@ -226,6 +231,9 @@
 
             this.opened = true;
             $doc.trigger('colorInput::show', this);
+            if ($.type(this.options.onChange) === 'function') {
+                this.options.onShow(this);
+            }
         },
         close: function() {
             if (this.options.flat === true) {
@@ -234,6 +242,11 @@
             this.unbindEvent();
             this.$picker.css({display:'none'});
             this.$input.blur();
+
+            $doc.trigger('colorInput::close', this);
+            if ($.type(this.options.onChange) === 'function') {
+                this.options.onClose(this);
+            }
         },
         cancel: function() {
             this.color.from(this.originalColor);
@@ -263,7 +276,7 @@
             return this;
         },
         destroy: function() {
-
+            // need to fix
         }
     };
 
@@ -292,6 +305,15 @@
                 applyText: 'apply',
                 cancelText: 'cancel'
             }
+        },
+        onChange: function(instance) {
+            console.log(instance);
+        },
+        onClose: function(instance) {
+            console.log('close');
+        },
+        onShow: function(instance) {
+            console.log('show');
         }
     };
 
