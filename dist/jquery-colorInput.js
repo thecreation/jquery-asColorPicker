@@ -1,4 +1,4 @@
-/*! colorInput - v0.1.0 - 2013-07-25
+/*! colorInput - v0.1.0 - 2013-10-11
 * https://github.com/amazingSurge/jquery-colorInput
 * Copyright (c) 2013 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -15,7 +15,6 @@
     };
 
     var hasTouch = ('ontouchstart' in window);
-    var $doc = $(document);
 
     // Constructor
     var ColorInput = $.colorInput = function(input, options) {
@@ -26,6 +25,7 @@
         //flag
         this.opened = false;
         this.enabled = true;
+        this.isFirstOpen = true;
 
         // options
         var meta_data = [];
@@ -106,14 +106,17 @@
                     }
                 });
             }
-            $doc.trigger('colorInput::init', this);
+            this.$picker.trigger('colorInput::init', this);
+            if ($.type(this.options.onInit) === 'function') {
+                this.options.onInit(this);
+            }
         },
         create: function() {
             var self = this;
             $.each(this._comps,function(i,v) {
                 self.components[v] && self.components[v].init(self);
             });
-            $doc.trigger('colorInput::create');
+            this.$picker.trigger('colorInput::create');
         },
         bindEvent: function() {
             var self = this;
@@ -147,6 +150,11 @@
             //set chosen color to color object
             if (color !== {}) {
                 self.color.set(color);
+            }
+
+            this.$picker.trigger('colorInput::change', this);
+            if ($.type(this.options.onChange) === 'function') {
+                this.options.onChange(this);
             }
 
             // update all components 
@@ -202,7 +210,6 @@
          */
 
         show: function() {
-            var self = this;
 
             if (this.enabled === false) {
                 return;
@@ -221,7 +228,11 @@
             } 
 
             this.opened = true;
-            $doc.trigger('colorInput::show', this);
+            this.$picker.trigger('colorInput::show', this);
+            if ($.type(this.options.onChange) === 'function') {
+                this.options.onShow(this);
+            }
+            this.isFirstOpen = false;
         },
         close: function() {
             if (this.options.flat === true) {
@@ -230,6 +241,11 @@
             this.unbindEvent();
             this.$picker.css({display:'none'});
             this.$input.blur();
+
+            this.$picker.trigger('colorInput::close', this);
+            if ($.type(this.options.onChange) === 'function') {
+                this.options.onClose(this);
+            }
         },
         cancel: function() {
             this.color.from(this.originalColor);
@@ -239,6 +255,11 @@
         apply: function() {
             this.originalColor = this.color.toRGBA();
             this.close();
+
+            this.$picker.trigger('colorInput::apply', this);
+            if ($.type(this.options.onApply) === 'function') {
+                this.options.onApply(this);
+            }
         },
         set: function(value) {
             this.color.from(value);
@@ -259,7 +280,7 @@
             return this;
         },
         destroy: function() {
-
+            // need to fix
         }
     };
 
@@ -272,7 +293,7 @@
         namespace: 'colorInput',
 
         readonly: false,
-        skin: 'skin-1',
+        skin: null,
 
         flat: false,
 
@@ -288,6 +309,15 @@
                 applyText: 'apply',
                 cancelText: 'cancel'
             }
+        },
+        onChange: function(instance) {
+            console.log(instance);
+        },
+        onClose: function(instance) {
+            console.log('close');
+        },
+        onShow: function(instance) {
+            console.log('show');
         }
     };
 
@@ -822,33 +852,43 @@ $.colorInput.registerComponent('palettes', {
     selector: '.colorInput-palettes',
     template: '<div class="colorInput-palettes"></div>',
     height: 150,
-    colors: {
-        white: '#fff',
-        black: '#000',
-        a: '#555',
-        b: '#ccc'
+    palettes: {
+        colors: ['#fff','#000','#000','#ccc'],
+        max: 6
     },
     init: function(api) {
         var list = '<ul>',
             self = this,
-            colors = $.extend(true, {}, this.colors, api.options.components.palettes);
+            palettes = $.extend(true, {}, this.palettes, api.options.components.palettes);
 
-        $.each(this.colors, function(key, value) {
-            list += '<li style="background-color:' + value + '" data-color="' + key + '">' + key + '</li>';
+        $.each(palettes.colors, function(index,value) {
+            list += '<li style="background-color:' + value + '" data-color="' + value + '">' + value + '</li>';
         });
 
         list += '</ul>';
 
-        this.$palettes = $(this.template).append($(list)).appendTo(api.$picker);
+        this.$list = $(list);
+        this.$palettes = $(this.template).append(this.$list).appendTo(api.$picker);
 
         this.$palettes.delegate('li', 'click', function(e) {
-            var type = $(e.target).data('color');
-            self.$palettes.find('li').removeClass('colorInput-palettes-checked');
-            $(e.target).addClass('checked');
-            api.set(colors[type]);
+            var color = $(e.target).data('color');
+            self.$list.find('li').removeClass('colorInput-palettes-checked');
+            $(e.target).addClass('colorInput-palettes-checked');
+            api.set(color);
             api.close();
         });
 
+        api.$picker.on('colorInput::apply', function(event, api) {
+            if (palettes.colors.length > palettes.max) {
+                palettes.colors.shift();
+                self.$list.find('li').eq(0).remove();
+            } 
+            if (palettes.colors.indexOf(api.originalColor) !== -1) {
+                return;
+            }
+            palettes.colors.push(api.originalColor);
+            self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
+        });
     }
 });
 

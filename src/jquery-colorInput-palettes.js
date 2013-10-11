@@ -4,33 +4,43 @@ $.colorInput.registerComponent('palettes', {
     selector: '.colorInput-palettes',
     template: '<div class="colorInput-palettes"></div>',
     height: 150,
-    colors: {
-        white: '#fff',
-        black: '#000',
-        a: '#555',
-        b: '#ccc'
+    palettes: {
+        colors: ['#fff','#000','#000','#ccc'],
+        max: 6
     },
     init: function(api) {
         var list = '<ul>',
             self = this,
-            colors = $.extend(true, {}, this.colors, api.options.components.palettes);
+            palettes = $.extend(true, {}, this.palettes, api.options.components.palettes);
 
-        $.each(this.colors, function(key, value) {
-            list += '<li style="background-color:' + value + '" data-color="' + key + '">' + key + '</li>';
+        $.each(palettes.colors, function(index,value) {
+            list += '<li style="background-color:' + value + '" data-color="' + value + '">' + value + '</li>';
         });
 
         list += '</ul>';
 
-        this.$palettes = $(this.template).append($(list)).appendTo(api.$picker);
+        this.$list = $(list);
+        this.$palettes = $(this.template).append(this.$list).appendTo(api.$picker);
 
         this.$palettes.delegate('li', 'click', function(e) {
-            var type = $(e.target).data('color');
-            self.$palettes.find('li').removeClass('colorInput-palettes-checked');
-            $(e.target).addClass('checked');
-            api.set(colors[type]);
+            var color = $(e.target).data('color');
+            self.$list.find('li').removeClass('colorInput-palettes-checked');
+            $(e.target).addClass('colorInput-palettes-checked');
+            api.set(color);
             api.close();
         });
 
+        api.$picker.on('colorInput::apply', function(event, api) {
+            if (palettes.colors.length > palettes.max) {
+                palettes.colors.shift();
+                self.$list.find('li').eq(0).remove();
+            } 
+            if (palettes.colors.indexOf(api.originalColor) !== -1) {
+                return;
+            }
+            palettes.colors.push(api.originalColor);
+            self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
+        });
     }
 });
 

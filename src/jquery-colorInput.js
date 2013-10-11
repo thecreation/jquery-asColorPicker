@@ -19,7 +19,6 @@
     };
 
     var hasTouch = ('ontouchstart' in window);
-    var $doc = $(document);
 
     // Constructor
     var ColorInput = $.colorInput = function(input, options) {
@@ -30,6 +29,7 @@
         //flag
         this.opened = false;
         this.enabled = true;
+        this.isFirstOpen = true;
 
         // options
         var meta_data = [];
@@ -110,14 +110,17 @@
                     }
                 });
             }
-            $doc.trigger('colorInput::init', this);
+            this.$picker.trigger('colorInput::init', this);
+            if ($.type(this.options.onInit) === 'function') {
+                this.options.onInit(this);
+            }
         },
         create: function() {
             var self = this;
             $.each(this._comps,function(i,v) {
                 self.components[v] && self.components[v].init(self);
             });
-            $doc.trigger('colorInput::create');
+            this.$picker.trigger('colorInput::create');
         },
         bindEvent: function() {
             var self = this;
@@ -153,7 +156,7 @@
                 self.color.set(color);
             }
 
-            $doc.trigger('colorInput::change', this);
+            this.$picker.trigger('colorInput::change', this);
             if ($.type(this.options.onChange) === 'function') {
                 this.options.onChange(this);
             }
@@ -211,7 +214,6 @@
          */
 
         show: function() {
-            var self = this;
 
             if (this.enabled === false) {
                 return;
@@ -230,10 +232,11 @@
             } 
 
             this.opened = true;
-            $doc.trigger('colorInput::show', this);
+            this.$picker.trigger('colorInput::show', this);
             if ($.type(this.options.onChange) === 'function') {
                 this.options.onShow(this);
             }
+            this.isFirstOpen = false;
         },
         close: function() {
             if (this.options.flat === true) {
@@ -243,7 +246,7 @@
             this.$picker.css({display:'none'});
             this.$input.blur();
 
-            $doc.trigger('colorInput::close', this);
+            this.$picker.trigger('colorInput::close', this);
             if ($.type(this.options.onChange) === 'function') {
                 this.options.onClose(this);
             }
@@ -256,6 +259,11 @@
         apply: function() {
             this.originalColor = this.color.toRGBA();
             this.close();
+
+            this.$picker.trigger('colorInput::apply', this);
+            if ($.type(this.options.onApply) === 'function') {
+                this.options.onApply(this);
+            }
         },
         set: function(value) {
             this.color.from(value);
