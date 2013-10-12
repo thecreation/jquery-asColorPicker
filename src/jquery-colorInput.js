@@ -275,16 +275,20 @@
                 return this.color.toString();
             }
             if (type === 'rgb') {
-                return this.color.toString();
+                return this.color.toRGB();
             }
             if (type === 'rgba') {
-                return this.color.toString();
+                return this.color.toRGBA();
             }
-            if (type === 'rgb') {
-                return this.color.toString();
+            if (type === 'hsl') {
+                return this.color.toHSL();
             }
-
-            
+            if (type === 'hsla') {
+                return this.color.toHSLA();
+            }
+            if (type === 'hex') {
+                return this.color.toHEX();
+            }
         }, 
         enable: function() {
             this.enabled = true;
