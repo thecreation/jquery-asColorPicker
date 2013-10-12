@@ -270,8 +270,21 @@
             this.update();
             return this;
         },
-        get: function() {
-            return this.color.toString();
+        get: function(type) {
+            if (type === undefined) {
+                return this.color.toString();
+            }
+            if (type === 'rgb') {
+                return this.color.toString();
+            }
+            if (type === 'rgba') {
+                return this.color.toString();
+            }
+            if (type === 'rgb') {
+                return this.color.toString();
+            }
+
+            
         }, 
         enable: function() {
             this.enabled = true;
