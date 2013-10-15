@@ -89,22 +89,42 @@ $(".flat").colorInput({
     <section>
         <h2>Skin</h2>
         <section>
-            <h3>simple</h3>
+            <h3>skin-2</h3>
             <pre class="example"><code class="language-javascript">
 $(".simple").colorInput({
-    skin: 'skin-simple'
+    skin: 'skin-2'
 });
             </code></pre>
             <div class="example">
                 <input type='text' class="simple" />
                 
                 <script>
-                    
-                    // $(document).ready(function() {
-                    //     $(".simple").colorInput({
-                    //         skin: 'simple'
-                    //     });                          
-                    // });
+                    $(document).ready(function() {
+                        $(".simple").colorInput({
+                            skin: 'skin-2'
+                        });                          
+                    });
+                </script>
+            </div>
+        </section>
+        <section>
+            <h3>skin-3</h3>
+            <pre class="example"><code class="language-javascript">
+$(".skin-2").colorInput({
+    showInput: true,
+    skin: 'skin-2'
+});
+            </code></pre>
+            <div class="example">
+                <input type='text' class="style-skin-2" />
+                
+                <script>
+                    $(document).ready(function() {
+                        $(".style-skin-2").colorInput({
+                            showInput: true,
+                            skin: 'skin-2'
+                        });                          
+                    });
                 </script>
             </div>
         </section>

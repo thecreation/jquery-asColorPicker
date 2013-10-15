@@ -296,6 +296,7 @@
   height: 230px;
   padding: 0;
   margin: 0;
+  margin-top: 2px;
   overflow: hidden;
   background-color: #434343;
   border: 1px solid #000;
@@ -372,6 +373,7 @@
   left: -13px;
   width: 18px;
   height: 13px;
+  margin-top: -6px;
   background: url("../image/arrow-left.png") no-repeat transparent;
 }
 
@@ -407,7 +409,7 @@
 
 .colorInput.skin-2 .colorInput-hex {
   position: absolute;
-  bottom: 5px;
+  bottom: -7px;
   left: 12px;
   width: 85px;
   height: 25px;

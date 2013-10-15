@@ -70,11 +70,11 @@ $.colorInput.registerComponent('hue', {
         hub = Math.max(0, Math.min(360, hub));
         this.$handle.css({
             top: position,
-            background: $.colorValue.HSVtoHEX({
-                h: hub,
-                s: 1,
-                v: 1
-            })
+            // backgroundColor: $.colorValue.HSVtoHEX({
+            //     h: hub,
+            //     s: 1,
+            //     v: 1
+            // })
         });
         if (update !== false) {
             api.update({

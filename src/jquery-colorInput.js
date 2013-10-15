@@ -24,7 +24,7 @@
     var ColorInput = $.colorInput = function(input, options) {
 
         this.input = input;
-        this.$input = $(input).css({display: 'none'});
+        this.$input = $(input);
 
         //flag
         this.opened = false;
@@ -43,6 +43,10 @@
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
         this.namespace = this.options.namespace;
         this.hasTouch = hasTouch;
+
+        if (this.options.showInput === false) {
+            this.$input.css({display: 'none'});
+        }
 
         this.components = $.extend(true,{},this.components);
 
@@ -72,6 +76,7 @@
         constructor: ColorInput,
         components: {},
         init: function() {
+            var self = this;
             this.$picker = $('<div draggable=false class="' + this.namespace + ' '+ this.options.skin +' drag-disable"></div>');
             this.$input.addClass('colorInput-input');
 
@@ -168,8 +173,16 @@
                 }
             });
 
+            if (this.options.flat !== true) {
+                this.components.trigger.update(this);
+            }
+
             if (trigger !== 'input') {
-                self.$input.val(self.color.toString());
+                if (self.options.format) {
+                    self.$input.val(self.get(self.options.format));
+                } else {
+                    self.$input.val(self.color.toString());
+                }
             }
         },
         opacity: function(data) {
@@ -320,11 +333,12 @@
 
         //not ready
         showSelected: false,
+        showInput: false,
 
         hideFireChange: false,
 
         onlyBtn: false,
-        format: 'hex',
+        format: 'rgb',
         components: {
             check: {
                 applyText: 'apply',
