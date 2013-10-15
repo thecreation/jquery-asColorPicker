@@ -42,7 +42,7 @@ $(".colorInput").colorInput();
 
 Or initialize tabs with custom settings:
 ```javascript
-$(".colorInput").popup({
+$(".colorInput").colorInput({
 	showInput: true,
 	skin: 'simple'
 });
