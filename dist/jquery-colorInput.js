@@ -1,4 +1,4 @@
-/*! colorInput - v0.1.0 - 2013-10-11
+/*! colorInput - v0.1.0 - 2013-10-15
 * https://github.com/amazingSurge/jquery-colorInput
 * Copyright (c) 2013 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -266,8 +266,25 @@
             this.update();
             return this;
         },
-        get: function() {
-            return this.color.toString();
+        get: function(type) {
+            if (type === undefined) {
+                return this.color.toString();
+            }
+            if (type === 'rgb') {
+                return this.color.toRGB();
+            }
+            if (type === 'rgba') {
+                return this.color.toRGBA();
+            }
+            if (type === 'hsl') {
+                return this.color.toHSL();
+            }
+            if (type === 'hsla') {
+                return this.color.toHSLA();
+            }
+            if (type === 'hex') {
+                return this.color.toHEX();
+            }
         }, 
         enable: function() {
             this.enabled = true;
@@ -879,13 +896,14 @@ $.colorInput.registerComponent('palettes', {
         });
 
         api.$picker.on('colorInput::apply', function(event, api) {
-            if (palettes.colors.length > palettes.max) {
-                palettes.colors.shift();
-                self.$list.find('li').eq(0).remove();
-            } 
+            
             if (palettes.colors.indexOf(api.originalColor) !== -1) {
                 return;
             }
+            if (palettes.colors.length >= palettes.max) {
+                palettes.colors.shift();
+                self.$list.find('li').eq(0).remove();
+            } 
             palettes.colors.push(api.originalColor);
             self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
         });

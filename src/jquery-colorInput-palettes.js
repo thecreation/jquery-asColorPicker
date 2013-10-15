@@ -31,13 +31,14 @@ $.colorInput.registerComponent('palettes', {
         });
 
         api.$picker.on('colorInput::apply', function(event, api) {
-            if (palettes.colors.length > palettes.max) {
-                palettes.colors.shift();
-                self.$list.find('li').eq(0).remove();
-            } 
+            
             if (palettes.colors.indexOf(api.originalColor) !== -1) {
                 return;
             }
+            if (palettes.colors.length >= palettes.max) {
+                palettes.colors.shift();
+                self.$list.find('li').eq(0).remove();
+            } 
             palettes.colors.push(api.originalColor);
             self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
         });
