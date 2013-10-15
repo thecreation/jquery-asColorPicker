@@ -40,10 +40,6 @@
         this.namespace = this.options.namespace;
         this.hasTouch = hasTouch;
 
-        if (this.options.showInput === false) {
-            this.$input.css({display: 'none'});
-        }
-
         this.components = $.extend(true,{},this.components);
 
         var _comps =  ColorInput.skins[this.options.skin] || '';
@@ -61,6 +57,16 @@
             }, this.options.format);
         } else {
             this.color = new Color(this.input.value, this.options.format);
+        }
+
+        if (this.options.showInput === false) {
+            this.$input.css({display: 'none'});
+        } else {
+            if (this.options.format) {
+                this.$input.val(this.get(this.options.format));
+            } else {
+                this.$input.val(this.color.toString());
+            }
         }
 
         //save this.color  as a rgba value 
