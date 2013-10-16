@@ -68,6 +68,9 @@ $(".colorInput").colorInput({
     //Optional property, string, define the output color format on input element, not component element.
     format: 'hex',
 
+    //Optional property, object, config jquery.cookie options 
+    cookie: {}
+
     //Optional property, config every registered component using component name 
     components: {
     	check: {},
@@ -140,6 +143,13 @@ $(document).on('colorInput::init', function(event,instance) {
     // some stuff
 });
 ```
+
+## How to add new skin
+* add the component register file you want in your page
+* add new skin css files in your page
+* config your skin using <code>$.colorInput.skins['newSkinName'] = ['component1','component2', ...]</code>
+* instantiate colorInput with skin option <code>$('.colorInput').colorInput({skin:'your new skin'})</code>
+
 
 ## Browser support
 jquery-popup is verified to work in Internet Explorer 7+, Firefox 2+, Opera 9+, Google Chrome and Safari browsers. Should also work in many others.

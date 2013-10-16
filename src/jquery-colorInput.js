@@ -46,22 +46,32 @@
             }
         });
 
-        if ($.cookie) {
-            $.cookie.json = true;
-        }
+        createId(this);
 
-        var cookie_key = 'colorInput_' + this.id + '_input';
-        var cookie = $.cookie(cookie_key);
-
-        if (cookie) {
-            this.input.value = cookie;
-        }
+        
 
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
         this.namespace = this.options.namespace;
         this.hasTouch = hasTouch;
 
+        this.classes = {
+            skin: this.namespace + '_' + this.options.skin
+        };
+
         this.components = $.extend(true,{},this.components);
+
+        if (this.options.cookie !== false) {
+            if ($.cookie) {
+                $.cookie.json = true;
+            }
+
+            var cookie_key = 'colorInput_' + this.id + '_input';
+            var cookie = $.cookie(cookie_key);
+
+            if (cookie) {
+                this.input.value = cookie;
+            }
+        }
 
         var _comps =  ColorInput.skins[this.options.skin] || 'saturation,Hhue';
         this._comps = _comps.split(',');
@@ -100,10 +110,12 @@
         components: {},
         init: function() {
             var self = this;
-            this.$picker = $('<div draggable=false style="display:none;" class="' + this.namespace + ' '+ this.options.skin +' drag-disable"></div>');
+            this.$picker = $('<div draggable=false style="display:none;" class="' + this.namespace + ' drag-disable"></div>');
             this.$input.addClass('colorInput-input');
 
-            createId(this);
+            if (this.options.skin) {
+                this.$picker.addClass(this.classes.skin);
+            }
 
             if (this.options.flat === true) {
                 this.create();
@@ -209,6 +221,10 @@
                     self.$input.val(self.get(self.options.format));
                 } else {
                     self.$input.val(self.color.toString());
+                }
+                if (self.options.cookie !== false) {
+                    var cookie_key = 'colorInput_' + this.id + '_input';
+                    $.cookie(cookie_key, self.$input.val(), self.options.cookie);
                 }
             }
         },
@@ -358,8 +374,10 @@
         flat: false,
 
         //not ready
-        showSelected: false,
         showInput: false,
+        cookie: {
+            expires: 7
+        },
 
         hideFireChange: false,
 
@@ -393,8 +411,12 @@
         template: '<div class="colorInput-trigger"><span></span></div>',
         init: function(api) {
 
-            api.$trigger = $(this.template).addClass(api.options.skin);
+            api.$trigger = $(this.template);
             this.$trigger_inner = api.$trigger.children('span');
+
+            if (api.options.skin !== null) {
+                api.$trigger.addClass(api.classes.skin);
+            }
 
             api.$trigger.insertAfter(api.$input);
             api.$trigger.on('click',$.proxy(api.show, api));

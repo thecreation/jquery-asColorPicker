@@ -12,12 +12,14 @@ $.colorInput.registerComponent('palettes', {
     init: function(api) {
         var list = '<ul>',
             self = this,
-            cookie_key = 'colorInput_' + api.id + '_palettes',
-            cookie = $.cookie(cookie_key),
             palettes = $.extend(true, {}, this.palettes, api.options.components.palettes);
 
-        if (cookie) {
-            palettes.colors = cookie;
+        if (api.options.cookie !== true) {
+            var cookie_key = 'colorInput_' + api.id + '_palettes';
+            var cookie = $.cookie(cookie_key);
+            if (cookie) {
+                palettes.colors = cookie;
+            }
         }
 
         $.each(palettes.colors, function(index,value) {
@@ -37,8 +39,7 @@ $.colorInput.registerComponent('palettes', {
             api.close();
         });
 
-        api.$picker.on('colorInput::apply', function(event, api) {
-            
+        api.$picker.on('colorInput::apply', function(event, api) {          
             if (palettes.colors.indexOf(api.originalColor) !== -1) {
                 return;
             }
@@ -48,8 +49,10 @@ $.colorInput.registerComponent('palettes', {
             } 
             palettes.colors.push(api.originalColor);
             self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
-            
-            $.cookie(cookie_key, palettes.colors, palettes.cookie);
+               
+            if (api.options.cookie !== true) {
+                $.cookie(cookie_key, palettes.colors, palettes.cookie);
+            }
         });
     }
 });
