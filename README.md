@@ -144,6 +144,29 @@ $(document).on('colorInput::init', function(event,instance) {
     // some stuff
 });
 ```
+## How to register a new component
+* you can use $.colorInput.registerComponent('name', {init: function(){}}) to register
+* this function need two arguments, as you see above
+* init function is necessary, the function will be excuted when colorInput intantiate
+
+For Example: 
+```javascript 
+$.colorInput.registerComponent('check', {
+    selector: '.colorInput-check',
+    template: '&lt;div class=&quot;colorInput-check&quot;&gt;&lt;a class=&quot;colorInput-check-apply&quot;&gt;&lt;/a&gt;&lt;a class=&quot;colorInput-check-cancel&quot;&gt;&lt;/a&gt;&lt;/div&gt;',
+    init: function(api) {
+        var opts = $.extend(this.defaults, api.options.components.check),
+            self = this;
+
+        this.$check = $(this.template).appendTo(api.$picker);
+        this.$apply = this.$check.find('.colorInput-check-apply').text(opts.applyText);
+        this.$cancel = this.$check.find('.colorInput-check-cancel').text(opts.cancelText);
+
+        this.$apply.on('click', $.proxy(api.apply, api));
+        this.$cancel.on('click', $.proxy(api.cancel, api));
+    }
+});
+```
 
 ## How to add new skin
 * add the component register file you want in your page
