@@ -17,6 +17,12 @@
         }
         return hex.length === 6 ? hex : null;
     };
+    var id = 0;
+
+    function createId(api) {
+        api.id = id;
+        id++;
+    }
 
     var hasTouch = ('ontouchstart' in window);
 
@@ -40,13 +46,24 @@
             }
         });
 
+        if ($.cookie) {
+            $.cookie.json = true;
+        }
+
+        var cookie_key = 'colorInput_' + this.id + '_input';
+        var cookie = $.cookie(cookie_key);
+
+        if (cookie) {
+            this.input.value = cookie;
+        }
+
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
         this.namespace = this.options.namespace;
         this.hasTouch = hasTouch;
 
         this.components = $.extend(true,{},this.components);
 
-        var _comps =  ColorInput.skins[this.options.skin] || '';
+        var _comps =  ColorInput.skins[this.options.skin] || 'saturation,Hhue';
         this._comps = _comps.split(',');
 
         // this._comps.splice(this._comps.indexOf('trigger'),1);
@@ -83,8 +100,10 @@
         components: {},
         init: function() {
             var self = this;
-            this.$picker = $('<div draggable=false class="' + this.namespace + ' '+ this.options.skin +' drag-disable"></div>');
+            this.$picker = $('<div draggable=false style="display:none;" class="' + this.namespace + ' '+ this.options.skin +' drag-disable"></div>');
             this.$input.addClass('colorInput-input');
+
+            createId(this);
 
             if (this.options.flat === true) {
                 this.create();
@@ -93,6 +112,7 @@
                 });
 
                 this.$picker.addClass('colorInput-flat').insertAfter(this.$input).css({
+                    display: 'block',
                     position: 'relative',
                     top: 0,
                     left: 0
@@ -121,6 +141,7 @@
                     }
                 });
             }
+
             this.$picker.trigger('colorInput::init', this);
             if ($.type(this.options.onInit) === 'function') {
                 this.options.onInit(this);
@@ -233,7 +254,6 @@
          */
 
         show: function() {
-
             if (this.enabled === false) {
                 return;
             }
@@ -423,4 +443,5 @@
 // 1, register modal: fast set different components
 // 2, event: use event to extend component
 // 3, theme: change skin to theme
+
 

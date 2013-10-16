@@ -1,4 +1,4 @@
-/*! colorInput - v0.1.0 - 2013-10-15
+/*! colorInput - v0.1.0 - 2013-10-16
 * https://github.com/amazingSurge/jquery-colorInput
 * Copyright (c) 2013 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -13,6 +13,12 @@
         }
         return hex.length === 6 ? hex : null;
     };
+    var id = 0;
+
+    function createId(api) {
+        api.id = id;
+        id++;
+    }
 
     var hasTouch = ('ontouchstart' in window);
 
@@ -79,8 +85,13 @@
         components: {},
         init: function() {
             var self = this;
-            this.$picker = $('<div draggable=false class="' + this.namespace + ' '+ this.options.skin +' drag-disable"></div>');
+            this.$picker = $('<div draggable=false style="display:none;" class="' + this.namespace + ' '+ this.options.skin +' drag-disable"></div>');
             this.$input.addClass('colorInput-input');
+
+            if ($.cookie) {
+                $.cookie.json = true;
+            }
+            createId(this);
 
             if (this.options.flat === true) {
                 this.create();
@@ -89,6 +100,7 @@
                 });
 
                 this.$picker.addClass('colorInput-flat').insertAfter(this.$input).css({
+                    display: 'block',
                     position: 'relative',
                     top: 0,
                     left: 0
@@ -117,6 +129,7 @@
                     }
                 });
             }
+
             this.$picker.trigger('colorInput::init', this);
             if ($.type(this.options.onInit) === 'function') {
                 this.options.onInit(this);
@@ -419,6 +432,7 @@
 // 1, register modal: fast set different components
 // 2, event: use event to extend component
 // 3, theme: change skin to theme
+
 
 
 // Halpha
@@ -896,7 +910,13 @@ $.colorInput.registerComponent('palettes', {
     init: function(api) {
         var list = '<ul>',
             self = this,
+            cookie_key = 'colorInput_' + api.id + '_palettes',
+            cookie = $.cookie(cookie_key),
             palettes = $.extend(true, {}, this.palettes, api.options.components.palettes);
+
+        if (cookie) {
+            palettes.colors = cookie;
+        }
 
         $.each(palettes.colors, function(index,value) {
             list += '<li style="background-color:' + value + '" data-color="' + value + '">' + value + '</li>';
@@ -926,6 +946,8 @@ $.colorInput.registerComponent('palettes', {
             } 
             palettes.colors.push(api.originalColor);
             self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
+            
+            $.cookie(cookie_key, palettes.colors);
         });
     }
 });

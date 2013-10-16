@@ -6,12 +6,19 @@ $.colorInput.registerComponent('palettes', {
     height: 150,
     palettes: {
         colors: ['#fff','#000','#000','#ccc'],
+        cookie: {expires: 7},
         max: 6
     },
     init: function(api) {
         var list = '<ul>',
             self = this,
+            cookie_key = 'colorInput_' + api.id + '_palettes',
+            cookie = $.cookie(cookie_key),
             palettes = $.extend(true, {}, this.palettes, api.options.components.palettes);
+
+        if (cookie) {
+            palettes.colors = cookie;
+        }
 
         $.each(palettes.colors, function(index,value) {
             list += '<li style="background-color:' + value + '" data-color="' + value + '">' + value + '</li>';
@@ -41,6 +48,8 @@ $.colorInput.registerComponent('palettes', {
             } 
             palettes.colors.push(api.originalColor);
             self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
+            
+            $.cookie(cookie_key, palettes.colors, palettes.cookie);
         });
     }
 });
