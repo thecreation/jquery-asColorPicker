@@ -42,13 +42,24 @@
             }
         });
 
+        if ($.cookie) {
+            $.cookie.json = true;
+        }
+
+        var cookie_key = 'colorInput_' + this.id + '_input';
+        var cookie = $.cookie(cookie_key);
+
+        if (cookie) {
+            this.input.value = cookie;
+        }
+
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
         this.namespace = this.options.namespace;
         this.hasTouch = hasTouch;
 
         this.components = $.extend(true,{},this.components);
 
-        var _comps =  ColorInput.skins[this.options.skin] || '';
+        var _comps =  ColorInput.skins[this.options.skin] || 'saturation,Hhue';
         this._comps = _comps.split(',');
 
         // this._comps.splice(this._comps.indexOf('trigger'),1);
@@ -88,9 +99,6 @@
             this.$picker = $('<div draggable=false style="display:none;" class="' + this.namespace + ' '+ this.options.skin +' drag-disable"></div>');
             this.$input.addClass('colorInput-input');
 
-            if ($.cookie) {
-                $.cookie.json = true;
-            }
             createId(this);
 
             if (this.options.flat === true) {
@@ -242,7 +250,6 @@
          */
 
         show: function() {
-
             if (this.enabled === false) {
                 return;
             }
@@ -905,6 +912,7 @@ $.colorInput.registerComponent('palettes', {
     height: 150,
     palettes: {
         colors: ['#fff','#000','#000','#ccc'],
+        cookie: {expires: 7},
         max: 6
     },
     init: function(api) {
@@ -947,7 +955,7 @@ $.colorInput.registerComponent('palettes', {
             palettes.colors.push(api.originalColor);
             self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
             
-            $.cookie(cookie_key, palettes.colors);
+            $.cookie(cookie_key, palettes.colors, palettes.cookie);
         });
     }
 });
