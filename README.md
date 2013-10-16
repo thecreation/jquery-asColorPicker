@@ -15,6 +15,7 @@ Download: <a href="https://github.com/amazingSurge/jquery-colorInput/archive/mas
 ## Dependencies
 * <a href="http://jquery.com/" target="_blank">jQuery 1.83+</a>
 * <a href="https://github.com/amazingSurge/jquery-color" target="_blank">jquery-color.js</a>
+* when you open cookie, you need load <a href="https://github.com/carhartl/jquery-cookie/blob/master/jquery.cookie.js" target="_blank">jquery.cookie.js</a>
 
 ## Usage
 
