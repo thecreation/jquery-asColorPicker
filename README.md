@@ -145,7 +145,7 @@ $(document).on('colorInput::init', function(event,instance) {
 });
 ```
 ## How to register a new component
-* you can use $.colorInput.registerComponent('name', {init: function(){}}) to register
+* you can use <code>$.colorInput.registerComponent('name', {init: function(){}})</code> to register
 * this function need two arguments, as you see above
 * init function is necessary, the function will be excuted when colorInput intantiate
 
@@ -153,7 +153,7 @@ For Example:
 ```javascript 
 $.colorInput.registerComponent('check', {
     selector: '.colorInput-check',
-    template: '&lt;div class=&quot;colorInput-check&quot;&gt;&lt;a class=&quot;colorInput-check-apply&quot;&gt;&lt;/a&gt;&lt;a class=&quot;colorInput-check-cancel&quot;&gt;&lt;/a&gt;&lt;/div&gt;',
+    template: '<div class="colorInput-check"><a class="colorInput-check-apply"></a><a class="colorInput-check-cancel"></a></div>',
     init: function(api) {
         var opts = $.extend(this.defaults, api.options.components.check),
             self = this;
