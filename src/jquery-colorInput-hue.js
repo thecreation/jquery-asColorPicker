@@ -21,9 +21,11 @@ $.colorInput.registerComponent('hue', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        api.$picker.on('colorInput::ready', function(event, api) {
             self.height = self.$hue.height();
+            self.step = self.height / 360;
             self.update(api);
+            self.keyboard(api);
         });
     },
     mousedown: function(api, e) {
@@ -69,12 +71,7 @@ $.colorInput.registerComponent('hue', {
         }
         hub = Math.max(0, Math.min(360, hub));
         this.$handle.css({
-            top: position,
-            // backgroundColor: $.colorValue.HSVtoHEX({
-            //     h: hub,
-            //     s: 1,
-            //     v: 1
-            // })
+            top: position
         });
         if (update !== false) {
             api.update({
@@ -82,9 +79,41 @@ $.colorInput.registerComponent('hue', {
             }, 'hue');
         }
     },
+    moveUp: function(api) {
+        var step=this.step, data = this.data;
+        data.top = data.top - step;
+        this.move(api, data.top);
+    },
+    moveDown: function(api) {
+        var step=this.step, data = this.data;
+        data.top = data.top + step;
+        this.move(api, data.top);
+    },
     update: function(api) {
         var position = (api.color.value.h === 0) ? 0 : this.height * (1 - api.color.value.h / 360);
         this.move(api, position, api.color.value.h, false);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$hue.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                up: function() {
+                    self.moveUp.call(self, api);
+                },
+                down: function() {
+                    self.moveDown.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
     },
     destroy: function(api) {
         $(document).off({

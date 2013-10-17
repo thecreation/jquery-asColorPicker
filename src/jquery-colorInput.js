@@ -46,9 +46,7 @@
             }
         });
 
-        createId(this);
-
-        
+        createId(this); 
 
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
         this.namespace = this.options.namespace;
@@ -102,6 +100,7 @@
 
         //save this.color  as a rgba value 
         this.originalColor = this.color.toRGBA();
+
         this.init();
     };
 
@@ -157,6 +156,11 @@
             this.$picker.trigger('colorInput::init', this);
             if ($.type(this.options.onInit) === 'function') {
                 this.options.onInit(this);
+            }
+
+            this.$picker.trigger('colorInput::ready', this);
+            if ($.type(this.options.onReady) === 'function') {
+                this.options.onReady(this);
             }
         },
         create: function() {

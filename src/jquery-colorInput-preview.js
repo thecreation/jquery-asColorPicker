@@ -21,4 +21,3 @@ $.colorInput.registerComponent('preview', {
         this.$current.css('backgroundColor', api.color.toRGBA());
     },
 });
-

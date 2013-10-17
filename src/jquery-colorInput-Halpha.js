@@ -20,9 +20,11 @@ $.colorInput.registerComponent('Halpha', {
             $.proxy(self.mousedown,self)(api,e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        $(document).on('colorInput::ready', function(event, api) {
             self.width = self.$alpha.width();
+            self.step = self.width / 100;
             self.update(api);
+            self.keyboard(api);
         });
     },
     mousedown: function(api, e) {
@@ -70,6 +72,38 @@ $.colorInput.registerComponent('Halpha', {
                 a: Math.round(alpha * 100) / 100
             }, 'h-alpha');
         }
+    },
+    moveLeft: function(api) {
+        var step=this.step, data = this.data;
+        data.left = data.left - step;
+        this.move(api, data.left);
+    },
+    moveRight: function(api) {
+        var step=this.step, data = this.data;
+        data.left = data.left + step;
+        this.move(api, data.left);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$alpha.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                left: function() {
+                    self.moveLeft.call(self, api);
+                },
+                right: function() {
+                    self.moveRight.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
     },
     update: function(api) {
         var position = this.width * (1 - api.color.value.a);

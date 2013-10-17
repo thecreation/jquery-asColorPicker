@@ -10,8 +10,6 @@ $.colorInput.registerComponent('Hhue', {
         this.$hue = $(this.template).appendTo(api.$picker);
         this.$handle = this.$hue.children('i');
 
-        this.width = this.$hue.width();
-
         //bind action
         this.$hue.on('mousedown.colorInput', function(e) {
             var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
@@ -21,9 +19,11 @@ $.colorInput.registerComponent('Hhue', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        $(document).on('colorInput::ready', function(event, api) {
             self.width = self.$hue.width();
+            self.step = self.width / 360;
             self.update(api);
+            self.keyboard(api);
         });
     },
     mousedown: function(api, e) {
@@ -77,6 +77,38 @@ $.colorInput.registerComponent('Hhue', {
                 h: hub
             }, 'h-hue');
         }
+    },
+    moveLeft: function(api) {
+        var step=this.step, data = this.data;
+        data.left = data.left - step;
+        this.move(api, data.left);
+    },
+    moveRight: function(api) {
+        var step=this.step, data = this.data;
+        data.left = data.left + step;
+        this.move(api, data.left);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$hue.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                left: function() {
+                    self.moveLeft.call(self, api);
+                },
+                right: function() {
+                    self.moveRight.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
     },
     update: function(api) {
         var position = (api.color.value.h === 0) ? 0 : this.width * (1 - api.color.value.h / 360);

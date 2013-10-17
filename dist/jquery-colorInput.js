@@ -1,4 +1,4 @@
-/*! colorInput - v0.1.0 - 2013-10-16
+/*! colorInput - v0.1.0 - 2013-10-17
 * https://github.com/amazingSurge/jquery-colorInput
 * Copyright (c) 2013 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -42,9 +42,7 @@
             }
         });
 
-        createId(this);
-
-        
+        createId(this); 
 
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
         this.namespace = this.options.namespace;
@@ -98,6 +96,7 @@
 
         //save this.color  as a rgba value 
         this.originalColor = this.color.toRGBA();
+
         this.init();
     };
 
@@ -153,6 +152,11 @@
             this.$picker.trigger('colorInput::init', this);
             if ($.type(this.options.onInit) === 'function') {
                 this.options.onInit(this);
+            }
+
+            this.$picker.trigger('colorInput::ready', this);
+            if ($.type(this.options.onReady) === 'function') {
+                this.options.onReady(this);
             }
         },
         create: function() {
@@ -464,6 +468,56 @@
 
 
 
+// keyboard
+;(function(window, document, $, undefined) {
+    var $doc = $(document);
+    var keyboard = {
+        keys: {
+            'UP': 38,
+            'DOWN': 40,
+            'LEFT': 37,
+            'RIGHT': 39,
+            'RETURN': 13,
+            'ESCAPE': 27,
+            'BACKSPACE': 8,
+            'SPACE': 32
+        },
+        map: {},
+        bound: false,
+        press: function(e) {
+            var key = e.keyCode || e.which;
+            if (key in keyboard.map && typeof keyboard.map[key] === 'function') {
+                keyboard.map[key](e);
+            }
+            return false;
+        },
+        attach: function(map) {
+            var key, up;
+            for (key in map) {
+                if (map.hasOwnProperty(key)) {
+                    up = key.toUpperCase();
+                    if (up in keyboard.keys) {
+                        keyboard.map[keyboard.keys[up]] = map[key];
+                    } else {
+                        keyboard.map[up] = map[key];
+                    }
+                }
+            }
+            if (!keyboard.bound) {
+                keyboard.bound = true;
+                $doc.bind('keydown', keyboard.press);
+            }
+        },
+        detach: function() {
+            keyboard.bound = false;
+            keyboard.map = {};
+            $doc.unbind('keydown', keyboard.press);
+        }
+    };
+    $doc.on('colorInput::init', function(event, instance) {
+        instance._keyboard = keyboard;
+    });
+})(window, document, jQuery);
 // Halpha
 
 $.colorInput.registerComponent('Halpha', {
@@ -486,9 +540,11 @@ $.colorInput.registerComponent('Halpha', {
             $.proxy(self.mousedown,self)(api,e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        $(document).on('colorInput::ready', function(event, api) {
             self.width = self.$alpha.width();
+            self.step = self.width / 100;
             self.update(api);
+            self.keyboard(api);
         });
     },
     mousedown: function(api, e) {
@@ -537,6 +593,38 @@ $.colorInput.registerComponent('Halpha', {
             }, 'h-alpha');
         }
     },
+    moveLeft: function(api) {
+        var step=this.step, data = this.data;
+        data.left = data.left - step;
+        this.move(api, data.left);
+    },
+    moveRight: function(api) {
+        var step=this.step, data = this.data;
+        data.left = data.left + step;
+        this.move(api, data.left);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$alpha.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                left: function() {
+                    self.moveLeft.call(self, api);
+                },
+                right: function() {
+                    self.moveRight.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
+    },
     update: function(api) {
         var position = this.width * (1 - api.color.value.a);
         this.$alpha.css('backgroundColor', api.color.toHEX());
@@ -563,8 +651,6 @@ $.colorInput.registerComponent('Hhue', {
         this.$hue = $(this.template).appendTo(api.$picker);
         this.$handle = this.$hue.children('i');
 
-        this.width = this.$hue.width();
-
         //bind action
         this.$hue.on('mousedown.colorInput', function(e) {
             var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
@@ -574,9 +660,11 @@ $.colorInput.registerComponent('Hhue', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        $(document).on('colorInput::ready', function(event, api) {
             self.width = self.$hue.width();
+            self.step = self.width / 360;
             self.update(api);
+            self.keyboard(api);
         });
     },
     mousedown: function(api, e) {
@@ -631,6 +719,38 @@ $.colorInput.registerComponent('Hhue', {
             }, 'h-hue');
         }
     },
+    moveLeft: function(api) {
+        var step=this.step, data = this.data;
+        data.left = data.left - step;
+        this.move(api, data.left);
+    },
+    moveRight: function(api) {
+        var step=this.step, data = this.data;
+        data.left = data.left + step;
+        this.move(api, data.left);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$hue.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                left: function() {
+                    self.moveLeft.call(self, api);
+                },
+                right: function() {
+                    self.moveRight.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
+    },
     update: function(api) {
         var position = (api.color.value.h === 0) ? 0 : this.width * (1 - api.color.value.h / 360);
         this.move(api, position, api.color.value.h, false);
@@ -668,9 +788,11 @@ $.colorInput.registerComponent('alpha', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        $(document).on('colorInput::ready', function(event, api) {
             self.height = self.$alpha.height();
+            self.step = self.height / 100;
             self.update(api);
+            self.keyboard(api);
         });
     },
     mousedown: function(api, e) {
@@ -718,6 +840,38 @@ $.colorInput.registerComponent('alpha', {
                 a: Math.round(alpha * 100) / 100
             }, 'alpha');
         }
+    },
+    moveUp: function(api) {
+        var step=this.step, data = this.data;
+        data.top = data.top - step;
+        this.move(api, data.top);
+    },
+    moveDown: function(api) {
+        var step=this.step, data = this.data;
+        data.top = data.top + step;
+        this.move(api, data.top);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$alpha.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                up: function() {
+                    self.moveUp.call(self, api);
+                },
+                down: function() {
+                    self.moveDown.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
     },
     update: function(api) {
         var position = this.height * (1 - api.color.value.a);
@@ -796,9 +950,11 @@ $.colorInput.registerComponent('hue', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        api.$picker.on('colorInput::ready', function(event, api) {
             self.height = self.$hue.height();
+            self.step = self.height / 360;
             self.update(api);
+            self.keyboard(api);
         });
     },
     mousedown: function(api, e) {
@@ -844,12 +1000,7 @@ $.colorInput.registerComponent('hue', {
         }
         hub = Math.max(0, Math.min(360, hub));
         this.$handle.css({
-            top: position,
-            // backgroundColor: $.colorValue.HSVtoHEX({
-            //     h: hub,
-            //     s: 1,
-            //     v: 1
-            // })
+            top: position
         });
         if (update !== false) {
             api.update({
@@ -857,9 +1008,41 @@ $.colorInput.registerComponent('hue', {
             }, 'hue');
         }
     },
+    moveUp: function(api) {
+        var step=this.step, data = this.data;
+        data.top = data.top - step;
+        this.move(api, data.top);
+    },
+    moveDown: function(api) {
+        var step=this.step, data = this.data;
+        data.top = data.top + step;
+        this.move(api, data.top);
+    },
     update: function(api) {
         var position = (api.color.value.h === 0) ? 0 : this.height * (1 - api.color.value.h / 360);
         this.move(api, position, api.color.value.h, false);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$hue.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                up: function() {
+                    self.moveUp.call(self, api);
+                },
+                down: function() {
+                    self.moveDown.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
     },
     destroy: function(api) {
         $(document).off({
@@ -942,6 +1125,8 @@ $.colorInput.registerComponent('palettes', {
             self = this,
             palettes = $.extend(true, {}, this.palettes, api.options.components.palettes);
 
+        this.keyboardBinded = false;
+
         if (api.options.cookie !== true) {
             var cookie_key = 'colorInput_' + api.id + '_palettes';
             var cookie = $.cookie(cookie_key);
@@ -967,7 +1152,11 @@ $.colorInput.registerComponent('palettes', {
             api.close();
         });
 
-        api.$picker.on('colorInput::apply', function(event, api) {          
+        this.$palettes.attr('tabindex', '0').on('blur', function() {
+            self.$list.find('li').removeClass('colorInput-palettes-checked');
+        });
+
+        api.$picker.on('colorInput::apply', function(event, api) {
             if (palettes.colors.indexOf(api.originalColor) !== -1) {
                 return;
             }
@@ -981,6 +1170,59 @@ $.colorInput.registerComponent('palettes', {
             if (api.options.cookie !== true) {
                 $.cookie(cookie_key, palettes.colors, palettes.cookie);
             }
+        });
+        $(document).on('colorInput::ready', function(event, api) {
+            self.keyboard(api);
+        });
+    },
+    keyboard: function(api) {
+        var keyboard, index, len, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$palettes.attr('tabindex', '0').on('blur', function(e) {
+            keyboard.detach();
+            self.keyboardBinded = false;
+        });
+
+        this.$list.find('li').on('click', function(e) {
+            if (self.keyboardBinded === true) {
+                return;
+            } 
+            var $lists = self.$list.find('li');
+            index = $lists.index($(e.target));
+            len = $lists.length;
+
+            function select(index) {
+                var color = $lists.eq(index).data('color');
+                $lists.removeClass('colorInput-palettes-checked');
+                $lists.eq(index).addClass('colorInput-palettes-checked');
+                api.set(color);
+            } 
+
+            keyboard.attach({
+                left: function() {
+                    if (index < 0) {
+                        index = len - 1;
+                    } else {
+                        index = index - 1;
+                    }
+                    select(index);
+                },
+                right: function() {
+                    if (index >= len) {
+                        index = 0;
+                    } else {
+                        index = index + 1;
+                    }
+                    select(index);
+                }
+            });
+            this.keyboardBinded = true;
+
         });
     }
 });
@@ -1009,8 +1251,6 @@ $.colorInput.registerComponent('preview', {
         this.$current.css('backgroundColor', api.color.toRGBA());
     },
 });
-
-
 // saturation
 
 $.colorInput.registerComponent('saturation', {
@@ -1032,9 +1272,7 @@ $.colorInput.registerComponent('saturation', {
         this.$saturation = $(this.template).appendTo(api.$picker);
         this.$handle = this.$saturation.children('i');
 
-        this.width = this.$saturation.width();
-        this.height = this.$saturation.height();
-        this.size = this.$handle.width() / 2;
+        this.step = {};
 
         //bind action
         this.$saturation.on('mousedown.colorInput', function(e) {
@@ -1046,11 +1284,15 @@ $.colorInput.registerComponent('saturation', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        $(document).on('colorInput::ready', function(event, api) {
             self.width = self.$saturation.width();
             self.height = self.$saturation.height();
+            self.step.left = self.width / 20;
+            self.step.top = self.height / 20;
             self.size = self.$handle.width() / 2;
+
             self.update(api);
+            self.keyboard(api);
         });
 
     },
@@ -1093,7 +1335,6 @@ $.colorInput.registerComponent('saturation', {
         return false;
     },
     move: function(api, x, y, update) {
-
         y = Math.max(0, Math.min(this.height, y));
         x = Math.max(0, Math.min(this.width, x));
 
@@ -1125,6 +1366,54 @@ $.colorInput.registerComponent('saturation', {
         var y = (1 - api.color.value.v) * this.height;
 
         this.move(api, x, y, false);
+    },
+    moveLeft: function(api) {
+        var step=this.step.left, data = this.data;
+        data.left = data.left - step;
+        this.move(api, data.left, data.top);
+    },
+    moveRight: function(api) {
+        var step=this.step.left, data = this.data;
+        data.left = data.left + step;
+        this.move(api, data.left, data.top);
+    },
+    moveUp: function(api) {
+        var step=this.step.top, data = this.data;
+        data.top = data.top - step;
+        this.move(api, data.left, data.top);
+    },
+    moveDown: function(api) {
+        var step=this.step.top, data = this.data;
+        data.top = data.top + step;
+        this.move(api, data.left, data.top);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$saturation.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                left: function() {
+                    self.moveLeft.call(self, api);
+                },
+                right: function() {
+                    self.moveRight.call(self, api);
+                },
+                up: function() {
+                    self.moveUp.call(self, api);
+                },
+                down: function() {
+                    self.moveDown.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
     },
     destroy: function(api) {
         $(document).off({

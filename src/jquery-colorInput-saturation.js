@@ -19,9 +19,7 @@ $.colorInput.registerComponent('saturation', {
         this.$saturation = $(this.template).appendTo(api.$picker);
         this.$handle = this.$saturation.children('i');
 
-        this.width = this.$saturation.width();
-        this.height = this.$saturation.height();
-        this.size = this.$handle.width() / 2;
+        this.step = {};
 
         //bind action
         this.$saturation.on('mousedown.colorInput', function(e) {
@@ -33,11 +31,15 @@ $.colorInput.registerComponent('saturation', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::init', function(event, instance) {
+        $(document).on('colorInput::ready', function(event, api) {
             self.width = self.$saturation.width();
             self.height = self.$saturation.height();
+            self.step.left = self.width / 20;
+            self.step.top = self.height / 20;
             self.size = self.$handle.width() / 2;
+
             self.update(api);
+            self.keyboard(api);
         });
 
     },
@@ -80,7 +82,6 @@ $.colorInput.registerComponent('saturation', {
         return false;
     },
     move: function(api, x, y, update) {
-
         y = Math.max(0, Math.min(this.height, y));
         x = Math.max(0, Math.min(this.width, x));
 
@@ -112,6 +113,54 @@ $.colorInput.registerComponent('saturation', {
         var y = (1 - api.color.value.v) * this.height;
 
         this.move(api, x, y, false);
+    },
+    moveLeft: function(api) {
+        var step=this.step.left, data = this.data;
+        data.left = data.left - step;
+        this.move(api, data.left, data.top);
+    },
+    moveRight: function(api) {
+        var step=this.step.left, data = this.data;
+        data.left = data.left + step;
+        this.move(api, data.left, data.top);
+    },
+    moveUp: function(api) {
+        var step=this.step.top, data = this.data;
+        data.top = data.top - step;
+        this.move(api, data.left, data.top);
+    },
+    moveDown: function(api) {
+        var step=this.step.top, data = this.data;
+        data.top = data.top + step;
+        this.move(api, data.left, data.top);
+    },
+    keyboard: function(api) {
+        var keyboard, self = this;
+        if (api._keyboard) {
+            keyboard = $.extend(true, {}, api._keyboard);
+        } else {
+            return false;
+        }
+
+        this.$saturation.attr('tabindex', '0').on('focus', function() {
+            keyboard.attach({
+                left: function() {
+                    self.moveLeft.call(self, api);
+                },
+                right: function() {
+                    self.moveRight.call(self, api);
+                },
+                up: function() {
+                    self.moveUp.call(self, api);
+                },
+                down: function() {
+                    self.moveDown.call(self, api);
+                }
+            });
+            return false;
+        }).on('blur', function(e) {
+            keyboard.detach();
+        });
     },
     destroy: function(api) {
         $(document).off({
