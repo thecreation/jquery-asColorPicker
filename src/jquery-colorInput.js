@@ -8,23 +8,19 @@
 (function(window, document, $, Color, undefined) {
     "use strict";
 
-    var expandHex = function(hex) {
-        if (!hex) {
-            return null;
-        }
-        if (hex.length === 3) {
-            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-        }
-        return hex.length === 6 ? hex : null;
-    };
-    var id = 0;
+    var id = 0,
+        IE = !!/msie/i.exec( window.navigator.userAgent );
 
     function createId(api) {
         api.id = id;
         id++;
     }
-
-    var hasTouch = ('ontouchstart' in window);
+    function noop() {
+        return;
+    }
+    if(!window.localStorage) {
+        window.localStorage = noop;
+    }
 
     // Constructor
     var ColorInput = $.colorInput = function(input, options) {
@@ -50,28 +46,23 @@
 
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
         this.namespace = this.options.namespace;
-        this.hasTouch = hasTouch;
 
         this.classes = {
-            skin: this.namespace + '_' + this.options.skin
+            skin: this.namespace + '_' + this.options.skin,
+            show: this.namespace + '_show'
         };
 
         this.components = $.extend(true,{},this.components);
 
-        if (this.options.cookie !== false) {
-            if ($.cookie) {
-                $.cookie.json = true;
-            }
-
-            var cookie_key = 'colorInput_' + this.id + '_input';
-            var cookie = $.cookie(cookie_key);
-
-            if (cookie) {
-                this.input.value = cookie;
+        if (this.options.localStorage) {
+            var key = 'input_' + this.id;
+            var value = this.getLocalItem(key);
+            if (value) {
+                this.input.value = value;
             }
         }
 
-        var _comps =  ColorInput.skins[this.options.skin] || 'saturation,Hhue';
+        var _comps =  ColorInput.skins[this.options.skin] || 'saturation,hue';
         this._comps = _comps.split(',');
 
         // this._comps.splice(this._comps.indexOf('trigger'),1);
@@ -193,7 +184,6 @@
             $(document).off('mousedown.colorInput');
             $(window).off('resize.colorInput');
         },
-
         // update all component value except trigger component
         // and set color to color object
         update: function(color,trigger) {
@@ -226,9 +216,9 @@
                 } else {
                     self.$input.val(self.color.toString());
                 }
-                if (self.options.cookie !== false) {
-                    var cookie_key = 'colorInput_' + this.id + '_input';
-                    $.cookie(cookie_key, self.$input.val(), self.options.cookie);
+                if (self.options.localStorage) {
+                    var key = 'input_' + this.id;
+                    self.setLocalItem(key, self.$input.val());
                 }
             }
         },
@@ -246,8 +236,8 @@
                 offset = hidden ? this.$trigger.offset() : this.$input.offset(),
                 height = hidden ? this.$trigger.outerHeight() : this.$input.outerHeight(),
                 width = hidden ? this.$trigger.outerWidth() : this.$input.outerWidth() + this.$trigger.outerWidth(),
-                picker_width = this.$picker.outerWidth(),
-                picker_height = this.$picker.outerHeight(),
+                picker_width = this.$picker.outerWidth(true),
+                picker_height = this.$picker.outerHeight(true),
                 top, left;
 
             if (picker_height + offset.top > $(window).height() + $(window).scrollTop()) {
@@ -267,6 +257,29 @@
                 top: top,
                 left: left
             });
+        },
+        // thanks to http://stackoverflow.com/questions/826782/css-rule-to-disable-text-selection-highlighting
+        makeUnselectable: function() {
+            $('body').addClass('unselectable');
+            if (IE) {
+                this.$picker.find("*:not(input)").attr("unselectable", "on");
+            }
+        },
+        cancelUnselectable: function() {
+            $('body').removeClass('unselectable');
+            if (IE) {
+                this.$picker.find("*:not(input)").removeAttr("unselectable");
+            }
+        },
+        setLocalItem: function(key,value) {
+            var prefixedKey = this.namespace + '_' + key,
+                jsonValue = JSON.stringify(value);
+            localStorage[prefixedKey] = jsonValue;
+        },
+        getLocalItem: function(key) {
+            var prefixedKey = this.namespace + '_' + key,
+                value = localStorage[prefixedKey];
+            return value ? JSON.parse(value) : value;
         },
 
         /*
@@ -290,6 +303,8 @@
                 this.bindEvent();
             } 
 
+            this.$picker.addClass(this.classes.show);
+
             this.opened = true;
             this.$picker.trigger('colorInput::show', this);
             if ($.type(this.options.onChange) === 'function') {
@@ -304,6 +319,8 @@
             this.unbindEvent();
             this.$picker.css({display:'none'});
             this.$input.blur();
+
+            this.$picker.removeClass(this.classes.show);
 
             this.$picker.trigger('colorInput::close', this);
             if ($.type(this.options.onChange) === 'function') {
@@ -368,23 +385,17 @@
         ColorInput.prototype.components[component] = methods;
     };
 
-    // Default options for the plugin as a simple object
+    ColorInput.localization = [];
+
     ColorInput.defaults = {
         namespace: 'colorInput',
-
         readonly: false,
         skin: null,
-
         flat: false,
-
-        //not ready
         showInput: false,
-        cookie: {
-            expires: 7
-        },
-
-        hideFireChange: false,
-
+        localStorage: true,
+        hideFireChange: true,
+        keyboard: false,
         onlyBtn: false,
         format: 'rgb',
         components: {
@@ -393,22 +404,18 @@
                 cancelText: 'cancel'
             }
         },
-        onChange: function(instance) {
-            console.log(instance);
-        },
-        onClose: function(instance) {
-            console.log('close');
-        },
-        onShow: function(instance) {
-            console.log('show');
-        }
+        // callback
+        onInit: function(instance) {},
+        onReady: function(instance) {},
+        onChange: function(instance) {},
+        onClose: function(instance) {},
+        onShow: function(instance) {},
+        onApply: function(instance) {}
     };
 
     ColorInput.skins = {
-        'skin-simple': 'palettes',
-        'skin-fansion': 'saturation,hue,alpha,hex,preview',
-        'skin-1': 'saturation,Hhue,Halpha,hex,preview,palettes,check',
-        'skin-2': 'saturation,hue,alpha,hex,preview,check'
+        'flatSpirit': 'saturation,Hhue,Halpha,hex,preview,palettes,check',
+        'realWorld': 'saturation,hue,alpha,hex,preview,check'
     };
 
     ColorInput.registerComponent('trigger', {
@@ -463,11 +470,5 @@
     }
 }())));
 
-
-// todo list
-// 
-// 1, register modal: fast set different components
-// 2, event: use event to extend component
-// 3, theme: change skin to theme
 
 

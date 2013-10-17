@@ -21,7 +21,7 @@ $.colorInput.registerComponent('hue', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        api.$picker.on('colorInput::ready', function(event, api) {
+        api.$picker.on('colorInput::ready', function(event, instance) {
             self.height = self.$hue.height();
             self.step = self.height / 360;
             self.update(api);
@@ -33,27 +33,23 @@ $.colorInput.registerComponent('hue', {
 
         this.data.startY = e.pageY;
         this.data.top = e.pageY - offset.top;
-
         this.move(api, this.data.top);
 
+        api.makeUnselectable();
+
         this.mousemove = function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-
             var position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
-
             this.move(api, position);
             return false;
         };
 
         this.mouseup = function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-
             $(document).off({
                 mousemove: this.mousemove,
                 mouseup: this.mouseup
             });
+            this.data.top = this.data.cach;
+            api.cancelUnselectable();
             return false;
         };
 
@@ -66,6 +62,7 @@ $.colorInput.registerComponent('hue', {
     },
     move: function(api, position, hub, update) {
         position = Math.max(0, Math.min(this.height, position));
+        this.data.cach = position;
         if (typeof hub === 'undefined') {
             hub = (1 - position / this.height) * 360;
         }
@@ -82,11 +79,15 @@ $.colorInput.registerComponent('hue', {
     moveUp: function(api) {
         var step=this.step, data = this.data;
         data.top = data.top - step;
+        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
+        data.top = Math.max(0, Math.min(this.width, data.top));
         this.move(api, data.top);
     },
     moveDown: function(api) {
         var step=this.step, data = this.data;
         data.top = data.top + step;
+        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
+        data.top = Math.max(0, Math.min(this.width, data.top));
         this.move(api, data.top);
     },
     update: function(api) {

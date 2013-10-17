@@ -45,6 +45,8 @@
         }
     };
     $doc.on('colorInput::init', function(event, instance) {
-        instance._keyboard = keyboard;
+        if (instance.options.keyboard === true) {
+            instance._keyboard = keyboard;
+        }   
     });
 })(window, document, jQuery);

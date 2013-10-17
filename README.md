@@ -8,21 +8,21 @@ Download: <a href="https://github.com/amazingSurge/jquery-colorInput/archive/mas
 ## Features
 
 * **beautiful skin** — we provide some beautiful skins, it also support custom skin.
-* **support all color format** — hex rgb raba hsl hsla 
-* **UX optimize** — we do a lot work to improve UX
-* **Lightweight size** — 1 kb gzipped
+* **support all color format** — hex rgb raba hsl hsla. 
+* **UX optimize** — we do a lot work to improve UX.
+* **keyboard support** — we have carefully designed for keyboard support.
+* **localstorage support** — record whatever you do on the plugin.
 
 ## Dependencies
 * <a href="http://jquery.com/" target="_blank">jQuery 1.83+</a>
 * <a href="https://github.com/amazingSurge/jquery-color" target="_blank">jquery-color.js</a>
-* when you open cookie, you need load <a href="https://github.com/carhartl/jquery-cookie/blob/master/jquery.cookie.js" target="_blank">jquery.cookie.js</a>
 
 ## Usage
 
 Import this libraries:
 * jQuery
 * jquery-color.js
-* jquery-popup.min.js
+* jquery-colorInput.min.js
 
 And CSS:
 * colorInput.css 
@@ -70,7 +70,10 @@ $(".colorInput").colorInput({
     format: 'hex',
 
     //Optional property, object, config jquery.cookie options 
-    cookie: {}
+    cookie: {},
+
+    //Optional property, if true, open keyboard function, note you need load jquery-colorInput-keyboard.js file first 
+    keyboard: false,
 
     //Optional property, config every registered component using component name 
     components: {
@@ -90,6 +93,9 @@ $(".colorInput").colorInput({
 
     //Optional property, trigger when init
     onInit: function() {},
+
+    //Optional property, trigger when init, it will trigger after init event
+    onReady: function() {},
 
     //Optional property, trigger when a color is applied
     onApply: function() {},
@@ -135,6 +141,7 @@ $("colorInput").colorInput("destroy");
 * <code>colorInput::close</code>: trigger when close colorInput pancel, flat type will never trigger this event
 * <code>colorInput::apply</code>: trigger when a color is applied
 * <code>colorInput::init</code>: trigger when init
+* <code>colorInput::ready</code>: trigger after init event
 * <code>colorInput::change</code>: trigger when color change
 
 how to use event:
@@ -182,14 +189,8 @@ jquery-popup is verified to work in Internet Explorer 7+, Firefox 2+, Opera 9+, 
 
 | Version | Notes                                                            |
 |---------|------------------------------------------------------------------|
-|   0.3.x | ([compare][compare-1.3]) add thumbnails function                    |
-|   0.2.x | ([compare][compare-1.2]) add autoside function                    |
-|   0.1.x | ([compare][compare-1.1]) add keyboard function                   |
-|     ... | ...                                                              |
-
-[compare-1.3]: https://github.com/amazingSurge/jquery-colorInput/compare/v1.3.0...v1.4.0
-[compare-1.2]: https://github.com/amazingSurge/jquery-colorInput/compare/v1.2.0...v1.3.0
-[compare-1.1]: https://github.com/amazingSurge/jquery-colorInput/compare/v1.1.0...v1.2.0
+|   0.1.2 | cancel text select when mousedown                                |
+|   0.1.1 | add keyboard support                                             |
 
 ## Author
 [amazingSurge](http://amazingSurge.com)

@@ -92,9 +92,9 @@ module.exports = function(grunt) {
                 options: {
                     compile: true
                 },
-                files: {
-                    'demo/css/colorInput.css': ['less/jquery-colorInput.less']
-                }
+                // files: {
+                //     'demo/css/colorInput.css': ['less/jquery-colorInput.less']
+                // }
             }
         },
         replace: {

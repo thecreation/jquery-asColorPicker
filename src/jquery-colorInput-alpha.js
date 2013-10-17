@@ -22,7 +22,7 @@ $.colorInput.registerComponent('alpha', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::ready', function(event, api) {
+        $(document).on('colorInput::ready', function(event, instance) {
             self.height = self.$alpha.height();
             self.step = self.height / 100;
             self.update(api);
@@ -34,23 +34,23 @@ $.colorInput.registerComponent('alpha', {
 
         this.data.startY = e.pageY;
         this.data.top = e.pageY - offset.top;
-
         this.move(api, this.data.top);
 
+        api.makeUnselectable();
+
         this.mousemove = function(e) {
-
             var position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
-
             this.move(api, position);
             return false;
         };
 
         this.mouseup = function(e) {
-
             $(document).off({
                 mousemove: this.mousemove,
                 mouseup: this.mouseup
             });
+            this.data.top = this.data.cach;
+            api.cancelUnselectable();
             return false;
         };
 
@@ -62,6 +62,7 @@ $.colorInput.registerComponent('alpha', {
     },
     move: function(api, position, alpha, update) {
         position = Math.max(0, Math.min(this.height, position));
+        this.data.cach = position;
         if (typeof alpha === 'undefined') {
             alpha = 1 - (position / this.height);
         }
@@ -78,11 +79,15 @@ $.colorInput.registerComponent('alpha', {
     moveUp: function(api) {
         var step=this.step, data = this.data;
         data.top = data.top - step;
+        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
+        data.top = Math.max(0, Math.min(this.width, data.top));
         this.move(api, data.top);
     },
     moveDown: function(api) {
         var step=this.step, data = this.data;
         data.top = data.top + step;
+        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
+        data.top = Math.max(0, Math.min(this.width, data.top));
         this.move(api, data.top);
     },
     keyboard: function(api) {

@@ -31,7 +31,7 @@ $.colorInput.registerComponent('saturation', {
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::ready', function(event, api) {
+        $(document).on('colorInput::ready', function(event, instance) {
             self.width = self.$saturation.width();
             self.height = self.$saturation.height();
             self.step.left = self.width / 20;
@@ -50,25 +50,26 @@ $.colorInput.registerComponent('saturation', {
         this.data.startX = e.pageX;
         this.data.top = e.pageY - offset.top;
         this.data.left = e.pageX - offset.left;
+        this.data.cach = {};
 
         this.move(api, this.data.left, this.data.top);
+        api.makeUnselectable();
 
         this.mousemove = function(e) {
-
             var x = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
             var y = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
-
             this.move(api, x, y);
-
             return false;
         };
 
         this.mouseup = function(e) {
-
             $(document).off({
                 mousemove: this.mousemove,
                 mouseup: this.mouseup
             });
+            this.data.left = this.data.cach.left;
+            this.data.top = this.data.cach.top;
+            api.cancelUnselectable();
             return false;
         };
 
@@ -85,13 +86,18 @@ $.colorInput.registerComponent('saturation', {
         y = Math.max(0, Math.min(this.height, y));
         x = Math.max(0, Math.min(this.width, x));
 
+        if (this.data.cach === undefined) {
+            this.data.cach = {};
+        }
+        this.data.cach.left = x;
+        this.data.cach.top = y;
+
         this.$handle.css({
             top: y - this.size,
             left: x - this.size
         });
 
         if (update !== false) {
-
             api.update({
                 s: x / this.width,
                 v: 1 - (y / this.height)
@@ -117,21 +123,29 @@ $.colorInput.registerComponent('saturation', {
     moveLeft: function(api) {
         var step=this.step.left, data = this.data;
         data.left = data.left - step;
+        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
+        data.left = Math.max(0, Math.min(this.width, data.left));
         this.move(api, data.left, data.top);
     },
     moveRight: function(api) {
         var step=this.step.left, data = this.data;
         data.left = data.left + step;
+        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
+        data.left = Math.max(0, Math.min(this.width, data.left));
         this.move(api, data.left, data.top);
     },
     moveUp: function(api) {
         var step=this.step.top, data = this.data;
         data.top = data.top - step;
+        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
+        data.top = Math.max(0, Math.min(this.width, data.top));
         this.move(api, data.left, data.top);
     },
     moveDown: function(api) {
         var step=this.step.top, data = this.data;
         data.top = data.top + step;
+        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
+        data.top = Math.max(0, Math.min(this.width, data.top));
         this.move(api, data.left, data.top);
     },
     keyboard: function(api) {

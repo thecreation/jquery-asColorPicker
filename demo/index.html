@@ -33,7 +33,7 @@
 <div id="wrapper">
     <section>
         <h2>Modes</h2>
-        <section>
+        <!-- <section>
             <h3>type=color</h3>
             <pre class="has-example"><code class="language-javascript">
 &lt;input type='color' name='color' /&gt;
@@ -43,7 +43,7 @@
                 
             </div>
         </section>
-        <section>
+        <section> -->
             <h3>Custom</h3>
             <pre class="has-example"><code class="language-javascript">
 $(".custom").colorInput({
@@ -58,7 +58,7 @@ $(".custom").colorInput({
                     $(document).ready(function() {
                         $(".custom").colorInput({
                             color: '#f00',
-                            skin: 'skin-1'
+                            skin: 'flatSpirit'
                         });                           
                     });
                 </script>
@@ -79,7 +79,32 @@ $(".flat").colorInput({
                     $(document).ready(function() {
                         $(".flat").colorInput({
                             flat: true,
-                            skin: 'skin-1'
+                            skin: 'flatSpirit'
+                        });                           
+                    });
+                </script>
+            </div>
+        </section>
+
+        <section>
+            <h3>Keyboard</h3>
+            <pre class="has-example"><code class="language-javascript">
+$(".keyboard").colorInput({
+    flat: true,
+    keyboard: true,
+    skin: 'flatSpirit'
+});
+            </code></pre>
+            <div class="example">
+                <input type='text' class="keyboard" />
+                
+                <script>
+                    
+                    $(document).ready(function() {
+                        $(".keyboard").colorInput({
+                            flat: true,
+                            keyboard: true,
+                            skin: 'flatSpirit'
                         });                           
                     });
                 </script>
@@ -90,10 +115,10 @@ $(".flat").colorInput({
     <section>
         <h2>Skin</h2>
         <section>
-            <h3>skin-2</h3>
+            <h3>realWorld</h3>
             <pre class="example"><code class="language-javascript">
 $(".simple").colorInput({
-    skin: 'skin-2'
+    skin: 'realWorld'
 });
             </code></pre>
             <div class="example">
@@ -103,7 +128,7 @@ $(".simple").colorInput({
                 <script>
                     $(document).ready(function() {
                         $(".simple").colorInput({
-                            skin: 'skin-2'
+                            skin: 'realWorld'
                         });                          
                     });
                 </script>
@@ -112,19 +137,19 @@ $(".simple").colorInput({
         <section>
             <h3>skin-3</h3>
             <pre class="example"><code class="language-javascript">
-$(".skin-2").colorInput({
+$(".realWorld").colorInput({
     showInput: true,
-    skin: 'skin-2'
+    skin: 'realWorld'
 });
             </code></pre>
             <div class="example">
-                <input type='text' class="style-skin-2" />
+                <input type='text' class="style-realWorld" />
                 
                 <script>
                     $(document).ready(function() {
-                        $(".style-skin-2").colorInput({
+                        $(".style-realWorld").colorInput({
                             showInput: true,
-                            skin: 'skin-2'
+                            skin: 'realWorld'
                         });                          
                     });
                 </script>

@@ -5,8 +5,8 @@ $.colorInput.registerComponent('palettes', {
     template: '<div class="colorInput-palettes"></div>',
     height: 150,
     palettes: {
+        defines: [''],
         colors: ['#fff','#000','#000','#ccc'],
-        cookie: {expires: 7},
         max: 6
     },
     init: function(api) {
@@ -16,11 +16,11 @@ $.colorInput.registerComponent('palettes', {
 
         this.keyboardBinded = false;
 
-        if (api.options.cookie !== true) {
-            var cookie_key = 'colorInput_' + api.id + '_palettes';
-            var cookie = $.cookie(cookie_key);
-            if (cookie) {
-                palettes.colors = cookie;
+        if (api.options.localStorage) {
+            var storeKey = 'palettes_' + api.id;
+            var storeValue = api.getLocalItem(storeKey);
+            if (storeValue) {
+                palettes.colors = storeValue;
             }
         }
 
@@ -54,14 +54,15 @@ $.colorInput.registerComponent('palettes', {
                 self.$list.find('li').eq(0).remove();
             } 
             palettes.colors.push(api.originalColor);
-            self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>')            
+            self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>');          
                
-            if (api.options.cookie !== true) {
-                $.cookie(cookie_key, palettes.colors, palettes.cookie);
+            if (api.options.localStorage) {
+                api.setLocalItem(storeKey, palettes.colors);
             }
         });
-        $(document).on('colorInput::ready', function(event, api) {
+        $(document).on('colorInput::ready', function() {
             self.keyboard(api);
+            return false;
         });
     },
     keyboard: function(api) {
@@ -77,41 +78,58 @@ $.colorInput.registerComponent('palettes', {
             self.keyboardBinded = false;
         });
 
-        this.$list.find('li').on('click', function(e) {
+        this.$palettes.attr('tabindex', '0').on('focus', function(e) {
             if (self.keyboardBinded === true) {
                 return;
             } 
             var $lists = self.$list.find('li');
-            index = $lists.index($(e.target));
+            index = -1;
             len = $lists.length;
 
             function select(index) {
-                var color = $lists.eq(index).data('color');
                 $lists.removeClass('colorInput-palettes-checked');
                 $lists.eq(index).addClass('colorInput-palettes-checked');
-                api.set(color);
             } 
+            function getIndex() {
+                return $lists.index(self.$palettes.find('.colorInput-palettes-checked'));
+            }
 
             keyboard.attach({
                 left: function() {
+                    var hasIndex = getIndex();
+                    if (hasIndex === -1) {
+                        index = index - 1;
+                    } else {
+                        index = hasIndex - 1;
+                    }
                     if (index < 0) {
                         index = len - 1;
-                    } else {
-                        index = index - 1;
-                    }
+                    } 
                     select(index);
                 },
                 right: function() {
+                    var hasIndex = getIndex();
+                    if (hasIndex === -1) {
+                        index = index + 1;
+                    } else {
+                        index = hasIndex +1;
+                    }
                     if (index >= len) {
                         index = 0;
-                    } else {
-                        index = index + 1;
-                    }
+                    } 
                     select(index);
+                },
+                RETURN: function() {
+                    if(index < 0) {
+                        return;
+                    }
+                    var color = $lists.eq(index).data('color');
+                    api.set(color);
+                    api.close();
                 }
             });
-            this.keyboardBinded = true;
 
+            self.keyboardBinded = true;
         });
     }
 });
