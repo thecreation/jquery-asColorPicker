@@ -307,7 +307,7 @@
 
             this.opened = true;
             this.$picker.trigger('colorInput::show', this);
-            if ($.type(this.options.onChange) === 'function') {
+            if ($.type(this.options.onShow) === 'function') {
                 this.options.onShow(this);
             }
             this.isFirstOpen = false;
@@ -323,7 +323,7 @@
             this.$picker.removeClass(this.classes.show);
 
             this.$picker.trigger('colorInput::close', this);
-            if ($.type(this.options.onChange) === 'function') {
+            if ($.type(this.options.onClose) === 'function') {
                 this.options.onClose(this);
             }
         },
