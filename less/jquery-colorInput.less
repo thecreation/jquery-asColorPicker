@@ -6,13 +6,50 @@
   -ms-user-select: none;
   user-select: none;
 }
-.colorInput .drag-disable {
-  -webkit-user-select: none;
-     -moz-user-select: -moz-none;
-       -o-user-select: none;
-          user-select: none;
+
+.colorInput-input {
+  display: none;
+}
+.colorInput {
+  display: none;
+  position: absolute;
+  z-index: 9999;
+}
+.colorInput.colorInput_show {
+  display: block;
+}
+.colorInput.colorInput_flat {
+  display: block;
+  position: relative;
+  top: 0;
+  left: 0;
+  z-index: auto;
+}
+.colorInput.colorInput_flat.colorInput_show {
+  display: block;
+}
+.colorInput-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9998;
+}
+.colorInput-trigger {
+  position: relative;
 }
 
+.colorInput .colorInput-alpha, 
+.colorInput .colorInput-check, 
+.colorInput .colorInput-hue, 
+.colorInput .colorInput-hex, 
+.colorInput .colorInput-info, 
+.colorInput .colorInput-palettes, 
+.colorInput .colorInput-preview, 
+.colorInput .colorInput-saturation {
+  position: absolute;
+}
 
 /* skin css*/
 .colorInput-trigger.colorInput_flatSpirit {
@@ -56,17 +93,12 @@
   content: '';
 }
 
-.colorInput.colorInput-flat {
-  position: relative;
-}
 
 .colorInput.colorInput_flatSpirit {
-  position: absolute;
   width: 278px;
   height: 327px;
   padding: 0;
   margin: 0;
-  overflow: hidden;
   background-color: #434343;
   border: 1px solid #000;
 }
@@ -103,7 +135,6 @@
 
 .colorInput.colorInput_flatSpirit .colorInput-alpha,
 .colorInput.colorInput_flatSpirit .colorInput-hue {
-  position: absolute;
   width: 256px;
   height: 27px;
   padding: 0;
@@ -144,7 +175,6 @@
 }
 
 .colorInput.colorInput_flatSpirit .colorInput-saturation {
-  position: absolute;
   top: 143px;
   left: 10px;
   width: 173px;
@@ -179,7 +209,6 @@
 }
 
 .colorInput.colorInput_flatSpirit .colorInput-preview {
-  position: absolute;
   top: 144px;
   right: 10px;
   width: 73px;
@@ -209,7 +238,6 @@
 }
 
 .colorInput.colorInput_flatSpirit .colorInput-hex {
-  position: absolute;
   top: 199px;
   right: 10px;
   width: 73px;
@@ -224,7 +252,6 @@
 }
 
 .colorInput.colorInput_flatSpirit .colorInput-check {
-  position: absolute;
   right: 10px;
   bottom: 10px;
   padding: 0;
@@ -306,17 +333,12 @@
   content: '';
 }
 
-.colorInput.colorInput-flat {
-  position: relative;
-}
 
 .colorInput.colorInput_realWorld {
-  position: absolute;
   width: 297px;
   height: 230px;
   padding: 0;
   margin: 2px 0;
-  overflow: hidden;
   background-color: #434343;
   border: 1px solid #000;
   -webkit-border-radius: 5px 5px 5px 5px;
@@ -328,7 +350,6 @@
 }
 
 .colorInput.colorInput_realWorld .colorInput-saturation {
-  position: absolute;
   top: 11px;
   left: 11px;
   width: 173px;
@@ -377,7 +398,6 @@
 
 .colorInput.colorInput_realWorld .colorInput-alpha,
 .colorInput.colorInput_realWorld .colorInput-hue {
-  position: absolute;
   width: 19px;
   height: 168px;
   padding: 0;
@@ -427,7 +447,6 @@
 }
 
 .colorInput.colorInput_realWorld .colorInput-hex {
-  position: absolute;
   bottom: -7px;
   left: 12px;
   width: 85px;
@@ -443,7 +462,6 @@
 }
 
 .colorInput.colorInput_realWorld .colorInput-check {
-  position: absolute;
   right: 15px;
   bottom: 6px;
 }

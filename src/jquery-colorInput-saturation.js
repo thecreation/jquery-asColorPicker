@@ -9,7 +9,6 @@ $.colorInput.registerComponent('saturation', {
     size: 6,
     data: {},
     init: function(api) {
-
         var opts = $.extend(this.defaults, api.options.components.saturation),
             self = this;
 
@@ -23,15 +22,14 @@ $.colorInput.registerComponent('saturation', {
 
         //bind action
         this.$saturation.on('mousedown.colorInput', function(e) {
-            var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
+            var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
             if (rightclick) {
                 return false;
             }
-
             $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::ready', function(event, instance) {
+        api.$element.on('colorInput::ready', function() {
             self.width = self.$saturation.width();
             self.height = self.$saturation.height();
             self.step.left = self.width / 20;
@@ -41,7 +39,6 @@ $.colorInput.registerComponent('saturation', {
             self.update(api);
             self.keyboard(api);
         });
-
     },
     mousedown: function(api, e) {
         var offset = this.$saturation.offset();
@@ -121,30 +118,31 @@ $.colorInput.registerComponent('saturation', {
         this.move(api, x, y, false);
     },
     moveLeft: function(api) {
-        var step=this.step.left, data = this.data;
+        var step = this.step.left,
+            data = this.data;
         data.left = data.left - step;
         // see https://github.com/amazingSurge/jquery-colorInput/issues/8
         data.left = Math.max(0, Math.min(this.width, data.left));
         this.move(api, data.left, data.top);
     },
     moveRight: function(api) {
-        var step=this.step.left, data = this.data;
+        var step = this.step.left,
+            data = this.data;
         data.left = data.left + step;
-        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
         data.left = Math.max(0, Math.min(this.width, data.left));
         this.move(api, data.left, data.top);
     },
     moveUp: function(api) {
-        var step=this.step.top, data = this.data;
+        var step = this.step.top,
+            data = this.data;
         data.top = data.top - step;
-        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
         data.top = Math.max(0, Math.min(this.width, data.top));
         this.move(api, data.left, data.top);
     },
     moveDown: function(api) {
-        var step=this.step.top, data = this.data;
+        var step = this.step.top,
+            data = this.data;
         data.top = data.top + step;
-        // see https://github.com/amazingSurge/jquery-colorInput/issues/8
         data.top = Math.max(0, Math.min(this.width, data.top));
         this.move(api, data.left, data.top);
     },
@@ -183,4 +181,3 @@ $.colorInput.registerComponent('saturation', {
         });
     }
 });
-

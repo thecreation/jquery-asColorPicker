@@ -1,36 +1,35 @@
-// Halpha
+// hHue
 
-$.colorInput.registerComponent('Halpha', {
-    selector: '.colorInput-alpha',
-    template: '<div class="colorInput-alpha drag-disable"><i class="drag-disable"></i></div>',
+$.colorInput.registerComponent('hHue', {
+    selector: '.colorInput-picker-hue',
+    template: '<div class="colorInput-hue drag-disable"><i class="drag-disable"></i></div>',
     width: 150,
     data: {},
     init: function(api) {
         var self = this;
-
-        this.$alpha = $(this.template).appendTo(api.$picker);
-        this.$handle = this.$alpha.children('i');
+        this.$hue = $(this.template).appendTo(api.$picker);
+        this.$handle = this.$hue.children('i');
 
         //bind action
-        this.$alpha.on('mousedown.colorinput',function(e) {  
+        this.$hue.on('mousedown.colorInput', function(e) {
             var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
             if (rightclick) {
                 return false;
-            }             
-            $.proxy(self.mousedown,self)(api,e);
+            }
+            $.proxy(self.mousedown, self)(api, e);
         });
 
-        $(document).on('colorInput::ready', function(event, instance) {
-            self.width = self.$alpha.width();
-            self.step = self.width / 100;
+        api.$element.on('colorInput::ready', function(event, instance) {
+            self.width = self.$hue.width();
+            self.step = self.width / 360;
             self.update(api);
             self.keyboard(api);
         });
     },
     mousedown: function(api, e) {
-        var offset = this.$alpha.offset();
+        var offset = this.$hue.offset();
 
-        this.data.startX= e.pageX;
+        this.data.startX = e.pageX;
         this.data.left = e.pageX - offset.left;
         this.move(api, this.data.left);
 
@@ -58,31 +57,39 @@ $.colorInput.registerComponent('Halpha', {
         });
         return false;
     },
-    move: function(api, position, alpha, update) {
+    move: function(api, position, hub, update) {
         position = Math.max(0, Math.min(this.width, position));
-        this.data.cach = position;       
-        if (typeof alpha === 'undefined') {
-            alpha = 1 - (position / this.width);
+        this.data.cach = position;
+        if (typeof hub === 'undefined') {
+            hub = (1 - position / this.width) * 360;
         }
-        alpha = Math.max(0, Math.min(1, alpha));
+
+        hub = Math.max(0, Math.min(360, hub));
         this.$handle.css({
-            left: position
+            left: position,
+            background: $.colorValue.HSVtoHEX({
+                h: hub,
+                s: 1,
+                v: 1
+            })
         });
         if (update !== false) {
             api.update({
-                a: Math.round(alpha * 100) / 100
-            }, 'Halpha');
+                h: hub
+            }, 'hHue');
         }
     },
     moveLeft: function(api) {
-        var step=this.step, data = this.data;
+        var step = this.step,
+            data = this.data;
         data.left = data.left - step;
         // see https://github.com/amazingSurge/jquery-colorInput/issues/8
         data.left = Math.max(0, Math.min(this.width, data.left));
         this.move(api, data.left);
     },
     moveRight: function(api) {
-        var step=this.step, data = this.data;
+        var step = this.step,
+            data = this.data;
         data.left = data.left + step;
         // see https://github.com/amazingSurge/jquery-colorInput/issues/8
         data.left = Math.max(0, Math.min(this.width, data.left));
@@ -96,7 +103,7 @@ $.colorInput.registerComponent('Halpha', {
             return false;
         }
 
-        this.$alpha.attr('tabindex', '0').on('focus', function() {
+        this.$hue.attr('tabindex', '0').on('focus', function() {
             keyboard.attach({
                 left: function() {
                     self.moveLeft.call(self, api);
@@ -111,10 +118,8 @@ $.colorInput.registerComponent('Halpha', {
         });
     },
     update: function(api) {
-        var position = this.width * (1 - api.color.value.a);
-        this.$alpha.css('backgroundColor', api.color.toHEX());
-
-        this.move(api, position, api.color.value.a, false);
+        var position = (api.color.value.h === 0) ? 0 : this.width * (1 - api.color.value.h / 360);
+        this.move(api, position, api.color.value.h, false);
     },
     destroy: function(api) {
         $(document).off({

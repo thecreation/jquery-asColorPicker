@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 stripBanners: true
             },
             dist: {
-                src: ['src/jquery-colorInput.js','src/jquery-colorInput-keyboard.js','src/jquery-colorInput-Halpha.js','src/jquery-colorInput-Hhue.js','src/jquery-colorInput-alpha.js','src/jquery-colorInput-check.js','src/jquery-colorInput-hex.js','src/jquery-colorInput-hue.js','src/jquery-colorInput-info.js','src/jquery-colorInput-palettes.js','src/jquery-colorInput-preview.js','src/jquery-colorInput-saturation.js'],
+                src: ['src/jquery-colorInput-core.js','src/jquery-colorInput-keyboard.js','src/jquery-colorInput-hAlpha.js','src/jquery-colorInput-hHue.js','src/jquery-colorInput-alpha.js','src/jquery-colorInput-check.js','src/jquery-colorInput-hex.js','src/jquery-colorInput-hue.js','src/jquery-colorInput-info.js','src/jquery-colorInput-palettes.js','src/jquery-colorInput-preview.js','src/jquery-colorInput-saturation.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
             
@@ -30,6 +30,50 @@ module.exports = function(grunt) {
                 src: '<%= concat.dist.dest %>',
                 dest: 'dist/<%= pkg.name %>.min.js'
             },
+            keyboard: {
+                src: 'src/jquery-colorInput-keyboard.js',
+                dest: 'dist/jquery-colorInput-keyboard.min.js'
+            },
+            hAlpha: {
+                src: 'src/jquery-colorInput-hAlpha.js',
+                dest: 'dist/jquery-colorInput-hAlpha.min.js'
+            },
+            hHue: {
+                src: 'src/jquery-colorInput-hHue.js',
+                dest: 'dist/jquery-colorInput-hHue.min.js'
+            },
+            alpha: {
+                src: 'src/jquery-colorInput-alpha.js',
+                dest: 'dist/jquery-colorInput-alpha.min.js'
+            },
+            check: {
+                src: 'src/jquery-colorInput-check.js',
+                dest: 'dist/jquery-colorInput-check.min.js'
+            },
+            hex: {
+                src: 'src/jquery-colorInput-hex.js',
+                dest: 'dist/jquery-colorInput-hex.min.js'
+            },
+            hue: {
+                src: 'src/jquery-colorInput-hue.js',
+                dest: 'dist/jquery-colorInput-hue.min.js'
+            },
+            info: {
+                src: 'src/jquery-colorInput-info.js',
+                dest: 'dist/jquery-colorInput-info.min.js'
+            },
+            palettes: {
+                src: 'src/jquery-colorInput-palettes.js',
+                dest: 'dist/jquery-colorInput-palettes.min.js'
+            },
+            preview: {
+                src: 'src/jquery-colorInput-preview.js',
+                dest: 'dist/jquery-colorInput-preview.min.js'
+            },
+            saturation: {
+                src: 'src/jquery-colorInput-saturation.js',
+                dest: 'dist/jquery-colorInput-saturation.min.js'
+            }
         },
 
         jshint: {
@@ -107,7 +151,7 @@ module.exports = function(grunt) {
                 }]
             },
             jquery: {
-                src: ['tabs.jquery.json'],
+                src: ['colorInput.jquery.json'],
                 overwrite: true, // overwrite matched source files
                 replacements: [{
                     from: /("version": ")([0-9\.]+)(")/g,

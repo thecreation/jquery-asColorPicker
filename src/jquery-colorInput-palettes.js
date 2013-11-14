@@ -6,7 +6,7 @@ $.colorInput.registerComponent('palettes', {
     height: 150,
     palettes: {
         defines: [''],
-        colors: ['#fff','#000','#000','#ccc'],
+        colors: ['#fff', '#000', '#000', '#ccc'],
         max: 6
     },
     init: function(api) {
@@ -24,7 +24,7 @@ $.colorInput.registerComponent('palettes', {
             }
         }
 
-        $.each(palettes.colors, function(index,value) {
+        $.each(palettes.colors, function(index, value) {
             list += '<li style="background-color:' + value + '" data-color="' + value + '">' + value + '</li>';
         });
 
@@ -45,22 +45,22 @@ $.colorInput.registerComponent('palettes', {
             self.$list.find('li').removeClass('colorInput-palettes-checked');
         });
 
-        api.$picker.on('colorInput::apply', function(event, api) {
+        api.$element.on('colorInput::apply', function(event, api) {
             if (palettes.colors.indexOf(api.originalColor) !== -1) {
                 return;
             }
             if (palettes.colors.length >= palettes.max) {
                 palettes.colors.shift();
                 self.$list.find('li').eq(0).remove();
-            } 
+            }
             palettes.colors.push(api.originalColor);
-            self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>');          
-               
+            self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>');
+
             if (api.options.localStorage) {
                 api.setLocalItem(storeKey, palettes.colors);
             }
         });
-        $(document).on('colorInput::ready', function() {
+        api.$element.on('colorInput::ready', function() {
             self.keyboard(api);
             return false;
         });
@@ -81,7 +81,7 @@ $.colorInput.registerComponent('palettes', {
         this.$palettes.attr('tabindex', '0').on('focus', function(e) {
             if (self.keyboardBinded === true) {
                 return;
-            } 
+            }
             var $lists = self.$list.find('li');
             index = -1;
             len = $lists.length;
@@ -89,7 +89,8 @@ $.colorInput.registerComponent('palettes', {
             function select(index) {
                 $lists.removeClass('colorInput-palettes-checked');
                 $lists.eq(index).addClass('colorInput-palettes-checked');
-            } 
+            }
+
             function getIndex() {
                 return $lists.index(self.$palettes.find('.colorInput-palettes-checked'));
             }
@@ -104,7 +105,7 @@ $.colorInput.registerComponent('palettes', {
                     }
                     if (index < 0) {
                         index = len - 1;
-                    } 
+                    }
                     select(index);
                 },
                 right: function() {
@@ -112,15 +113,15 @@ $.colorInput.registerComponent('palettes', {
                     if (hasIndex === -1) {
                         index = index + 1;
                     } else {
-                        index = hasIndex +1;
+                        index = hasIndex + 1;
                     }
                     if (index >= len) {
                         index = 0;
-                    } 
+                    }
                     select(index);
                 },
                 RETURN: function() {
-                    if(index < 0) {
+                    if (index < 0) {
                         return;
                     }
                     var color = $lists.eq(index).data('color');
@@ -133,4 +134,3 @@ $.colorInput.registerComponent('palettes', {
         });
     }
 });
-

@@ -9,66 +9,71 @@
     "use strict";
 
     var id = 0,
-        IE = !!/msie/i.exec( window.navigator.userAgent );
+        IE = !! /msie/i.exec(window.navigator.userAgent);
 
     function createId(api) {
         api.id = id;
         id++;
     }
+
     function noop() {
         return;
     }
-    if(!window.localStorage) {
+    if (!window.localStorage) {
         window.localStorage = noop;
     }
 
     // Constructor
-    var ColorInput = $.colorInput = function(input, options) {
-
-        this.input = input;
-        this.$input = $(input);
+    var ColorInput = $.colorInput = function(element, options) {
+        this.element = element;
+        this.$element = $(element);
 
         //flag
         this.opened = false;
-        this.enabled = true;
+        this.disabled = false;
         this.isFirstOpen = true;
 
         // options
         var meta_data = [];
-        $.each(this.$input.data(), function(k, v) {
+        $.each(this.$element.data(), function(k, v) {
             var re = new RegExp("^color", "i");
             if (re.test(k)) {
                 meta_data[k.toLowerCase().replace(re, '')] = v;
             }
         });
 
-        createId(this); 
+        createId(this);
 
         this.options = $.extend(true, {}, ColorInput.defaults, options, meta_data);
         this.namespace = this.options.namespace;
 
         this.classes = {
+            input: this.namespace + '-input',
             skin: this.namespace + '_' + this.options.skin,
-            show: this.namespace + '_show'
+            show: this.namespace + '_show',
+            mask: this.namespace + '-mask',
+            flat: this.namespace + '_flat',
+            showInput: this.namespace + '_showInput',
+            disabled: this.namespace + '_disabled'
         };
 
-        this.components = $.extend(true,{},this.components);
+        this.components = $.extend(true, {}, this.components);
 
         if (this.options.localStorage) {
             var key = 'input_' + this.id;
             var value = this.getLocalItem(key);
             if (value) {
-                this.input.value = value;
+                this.element.value = value;
             }
         }
 
-        var _comps =  ColorInput.skins[this.options.skin] || 'saturation,hue';
+        var _comps = ColorInput.skins[this.options.skin] || 'saturation,hue';
         this._comps = _comps.split(',');
 
         // this._comps.splice(this._comps.indexOf('trigger'),1);
 
         // color value and format
-        if (this.input.value === '') {
+        if (this.element.value === '') {
             this.color = new Color({
                 r: 255,
                 g: 255,
@@ -76,22 +81,23 @@
                 a: 1
             }, this.options.format);
         } else {
-            this.color = new Color(this.input.value, this.options.format);
+            this.color = new Color(this.element.value, this.options.format);
         }
 
-        if (this.options.showInput === false) {
-            this.$input.css({display: 'none'});
+        if (this.options.showInput) {
+            this.$element.addClass(this.classes.showInput);
         } else {
             if (this.options.format) {
-                this.$input.val(this.get(this.options.format));
+                this.$element.val(this.get(this.options.format));
             } else {
-                this.$input.val(this.color.toString());
+                this.$element.val(this.color.toString());
             }
         }
 
         //save this.color  as a rgba value 
         this.originalColor = this.color.toRGBA();
 
+        this._trigger('init');
         this.init();
     };
 
@@ -100,31 +106,21 @@
         components: {},
         init: function() {
             var self = this;
-            this.$picker = $('<div draggable=false style="display:none;" class="' + this.namespace + ' drag-disable"></div>');
-            this.$input.addClass('colorInput-input');
+            this.$picker = $('<div draggable=false class="' + this.namespace + ' drag-disable"></div>');
+            this.$element.addClass(this.classes.input);
 
             if (this.options.skin) {
                 this.$picker.addClass(this.classes.skin);
             }
 
-            if (this.options.flat === true) {
-                this.create();
-                this.$input.addClass('colorInput-flat').css({
-                    display: 'none'
-                });
-
-                this.$picker.addClass('colorInput-flat').insertAfter(this.$input).css({
-                    display: 'block',
-                    position: 'relative',
-                    top: 0,
-                    left: 0
-                });
+            this.create();
+            if (this.options.flat) {
+                this.$element.addClass(this.classes.flat);
+                this.$picker.addClass(this.classes.flat).insertAfter(this.$element);
                 this.show();
             } else {
-                this.components.trigger.init(this);
-                this.create();
                 this.$picker.appendTo('body');
-                this.$input.on({
+                this.$element.on({
                     'focus.colorInput': function() {
                         self.show();
                     },
@@ -132,61 +128,76 @@
                         if (e.keyCode === 9) {
                             self.hide();
                         } else if (e.keyCode === 13) {
-                            self.color.from(self.$input.val());
+                            self.color.from(self.$element.val());
                             self.update({}, 'input');
                             self.hide();
                         }
                     },
                     'keyup.colorInput': function() {
-                        self.color.from(self.$input.val());
+                        self.color.from(self.$element.val());
                         self.update({}, 'input');
                     }
                 });
             }
 
-            this.$picker.trigger('colorInput::init', this);
-            if ($.type(this.options.onInit) === 'function') {
-                this.options.onInit(this);
-            }
-
-            this.$picker.trigger('colorInput::ready', this);
-            if ($.type(this.options.onReady) === 'function') {
-                this.options.onReady(this);
-            }
+            this._trigger('ready');
         },
         create: function() {
             var self = this;
-            $.each(this._comps,function(i,v) {
+            if (!this.options.flat) {
+                this.components.trigger.init(this);
+            }
+            $.each(this._comps, function(i, v) {
                 self.components[v] && self.components[v].init(self);
             });
             this.$picker.trigger('colorInput::create');
         },
-        bindEvent: function() {
+        _generateMask: function() {
             var self = this;
-            
-            $(document).on('mousedown.colorInput', function(e) {
-                if ($(e.target).is(self.$input)) {
-                    return;
-                }
+            if (this.options.flat) {
+                return;
+            }
+            this.$mask = $('<div></div>').addClass(this.classes.mask).appendTo('body');
+            this.$mask.on('click.colorInput', function() {
                 if (self.options.hideFireChange === false) {
                     self.cancel();
                 } else {
                     self.apply();
                 }
-
                 return false;
             });
-
-            // bind resize action
+        },
+        _clearMask: function() {
+            if (this.options.flat) {
+                return;
+            }
+            this.$mask.off('click.colorInput');
+            this.$mask.remove();
+            this.$mask = null;
+        },
+        bindEvent: function() {
             $(window).on('resize.colorInput', $.proxy(this.position, this));
         },
         unbindEvent: function() {
-            $(document).off('mousedown.colorInput');
             $(window).off('resize.colorInput');
+        },
+        _trigger: function(eventType) {
+            // event
+            this.$element.trigger('colorInput::' + eventType, this);
+
+            // callback
+            eventType = eventType.replace(/\b\w+\b/g, function(word) {
+                return word.substring(0, 1).toUpperCase() + word.substring(1);
+            });
+            var onFunction = 'on' + eventType;
+            var method_arguments = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1) : undefined;
+            if (typeof this.options[onFunction] === 'function') {
+                this.options[onFunction].apply(this, method_arguments);
+            }
         },
         // update all component value except trigger component
         // and set color to color object
-        update: function(color,trigger) {
+        update: function(color, trigger) {
             var self = this;
 
             //set chosen color to color object
@@ -194,31 +205,28 @@
                 self.color.set(color);
             }
 
-            this.$picker.trigger('colorInput::change', this);
-            if ($.type(this.options.onChange) === 'function') {
-                this.options.onChange(this);
-            }
+            this._trigger('change', color);
 
             // update all components 
-            $.each(this._comps,function(i,v) {
+            $.each(this._comps, function(i, v) {
                 if (trigger !== v) {
                     self.components[v] && self.components[v].update && self.components[v].update(self);
                 }
             });
 
-            if (this.options.flat !== true) {
+            if (!this.options.flat) {
                 this.components.trigger.update(this);
             }
 
             if (trigger !== 'input') {
                 if (self.options.format) {
-                    self.$input.val(self.get(self.options.format));
+                    self.$element.val(self.get(self.options.format));
                 } else {
-                    self.$input.val(self.color.toString());
+                    self.$element.val(self.color.toString());
                 }
                 if (self.options.localStorage) {
                     var key = 'input_' + this.id;
-                    self.setLocalItem(key, self.$input.val());
+                    self.setLocalItem(key, self.$element.val());
                 }
             }
         },
@@ -232,10 +240,10 @@
             }
         },
         position: function() {
-            var hidden = !this.$input.is(':visible'),
-                offset = hidden ? this.$trigger.offset() : this.$input.offset(),
-                height = hidden ? this.$trigger.outerHeight() : this.$input.outerHeight(),
-                width = hidden ? this.$trigger.outerWidth() : this.$input.outerWidth() + this.$trigger.outerWidth(),
+            var hidden = !this.$element.is(':visible'),
+                offset = hidden ? this.$trigger.offset() : this.$element.offset(),
+                height = hidden ? this.$trigger.outerHeight() : this.$element.outerHeight(),
+                width = hidden ? this.$trigger.outerWidth() : this.$element.outerWidth() + this.$trigger.outerWidth(),
                 picker_width = this.$picker.outerWidth(true),
                 picker_height = this.$picker.outerHeight(true),
                 top, left;
@@ -271,7 +279,7 @@
                 this.$picker.find("*:not(input)").removeAttr("unselectable");
             }
         },
-        setLocalItem: function(key,value) {
+        setLocalItem: function(key, value) {
             var prefixedKey = this.namespace + '_' + key,
                 jsonValue = JSON.stringify(value);
             localStorage[prefixedKey] = jsonValue;
@@ -287,45 +295,37 @@
          */
 
         show: function() {
-            if (this.enabled === false) {
+            if (this.disabled) {
                 return;
             }
 
-            this.$picker.on('mousedown',function(e) {
+            this.$picker.on('mousedown', function(e) {
                 e.stopPropagation();
             });
 
-            if (this.options.flat === false) {             
+            this._generateMask();
+
+            if (this.options.flat === false) {
                 this.position();
-                this.$picker.css({
-                    display: 'block'
-                });
                 this.bindEvent();
-            } 
+            }
 
             this.$picker.addClass(this.classes.show);
 
             this.opened = true;
-            this.$picker.trigger('colorInput::show', this);
-            if ($.type(this.options.onShow) === 'function') {
-                this.options.onShow(this);
-            }
             this.isFirstOpen = false;
+            this._trigger('show');
         },
         close: function() {
             if (this.options.flat === true) {
                 return;
             }
             this.unbindEvent();
-            this.$picker.css({display:'none'});
-            this.$input.blur();
+            this._clearMask();
+            this.$element.blur();
 
             this.$picker.removeClass(this.classes.show);
-
-            this.$picker.trigger('colorInput::close', this);
-            if ($.type(this.options.onClose) === 'function') {
-                this.options.onClose(this);
-            }
+            this._trigger('close');
         },
         cancel: function() {
             this.color.from(this.originalColor);
@@ -335,11 +335,7 @@
         apply: function() {
             this.originalColor = this.color.toRGBA();
             this.close();
-
-            this.$picker.trigger('colorInput::apply', this);
-            if ($.type(this.options.onApply) === 'function') {
-                this.options.onApply(this);
-            }
+            this._trigger('apply');
         },
         set: function(value) {
             this.color.from(value);
@@ -365,15 +361,15 @@
             if (type === 'hex') {
                 return this.color.toHEX();
             }
-        }, 
+        },
         enable: function() {
-            this.enabled = true;
-            this.$parent.addClass(this.namespace + 'enabled');
+            this.disabled = false;
+            this.$parent.addClass(this.classes.disabled);
             return this;
         },
         disable: function() {
-            this.enabled = false;
-            this.$parent.removeClass(this.namespace + 'enabled');
+            this.disabled = true;
+            this.$parent.removeClass(this.classes.disabled);
             return this;
         },
         destroy: function() {
@@ -381,7 +377,7 @@
         }
     };
 
-    ColorInput.registerComponent = function (component, methods) {
+    ColorInput.registerComponent = function(component, methods) {
         ColorInput.prototype.components[component] = methods;
     };
 
@@ -403,9 +399,8 @@
                 applyText: 'apply',
                 cancelText: 'cancel'
             }
-        },
-        // callback
-        onInit: function(instance) {},
+        }, // callback onInit:
+        function(instance) {},
         onReady: function(instance) {},
         onChange: function(instance) {},
         onClose: function(instance) {},
@@ -414,7 +409,7 @@
     };
 
     ColorInput.skins = {
-        'flatSpirit': 'saturation,Hhue,Halpha,hex,preview,palettes,check',
+        'flatSpirit': 'saturation,hHue,hAlpha,hex,preview,palettes,check,gradient',
         'realWorld': 'saturation,hue,alpha,hex,preview,check'
     };
 
@@ -429,8 +424,8 @@
                 api.$trigger.addClass(api.classes.skin);
             }
 
-            api.$trigger.insertAfter(api.$input);
-            api.$trigger.on('click',$.proxy(api.show, api));
+            api.$trigger.insertAfter(api.$element);
+            api.$trigger.on('click', $.proxy(api.show, api));
             this.update(api);
         },
         update: function(api) {
@@ -463,12 +458,9 @@
     };
 }(window, document, jQuery, (function() {
     if ($.colorValue === undefined) {
-        //console.info('lost dependency lib of $.colorValue , please load it first !');
+        console.info('lost dependency lib of $.colorValue , please load it first !');
         return false;
     } else {
         return $.colorValue;
     }
 }())));
-
-
-
