@@ -1,5 +1,5 @@
 // keyboard
-;(function(window, document, $, undefined) {
+(function(window, document, $, undefined) {
     var $doc = $(document);
     var keyboard = {
         keys: {
@@ -47,6 +47,6 @@
     $doc.on('colorInput::init', function(event, instance) {
         if (instance.options.keyboard === true) {
             instance._keyboard = keyboard;
-        }   
+        }
     });
 })(window, document, jQuery);

@@ -17,10 +17,10 @@ module.exports = function(grunt) {
                 stripBanners: true
             },
             dist: {
-                src: ['src/jquery-colorInput-core.js','src/jquery-colorInput-keyboard.js','src/jquery-colorInput-hAlpha.js','src/jquery-colorInput-hHue.js','src/jquery-colorInput-alpha.js','src/jquery-colorInput-check.js','src/jquery-colorInput-hex.js','src/jquery-colorInput-hue.js','src/jquery-colorInput-info.js','src/jquery-colorInput-palettes.js','src/jquery-colorInput-preview.js','src/jquery-colorInput-saturation.js'],
+                src: ['src/jquery-colorInput-core.js', 'src/jquery-colorInput-keyboard.js', 'src/jquery-colorInput-hAlpha.js', 'src/jquery-colorInput-hHue.js', 'src/jquery-colorInput-alpha.js', 'src/jquery-colorInput-check.js', 'src/jquery-colorInput-hex.js', 'src/jquery-colorInput-hue.js', 'src/jquery-colorInput-info.js', 'src/jquery-colorInput-palettes.js', 'src/jquery-colorInput-preview.js', 'src/jquery-colorInput-saturation.js', 'src/jquery-colorInput-gradient.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
-            
+
         },
         uglify: {
             options: {
@@ -73,7 +73,12 @@ module.exports = function(grunt) {
             saturation: {
                 src: 'src/jquery-colorInput-saturation.js',
                 dest: 'dist/jquery-colorInput-saturation.min.js'
+            },
+            gradient: {
+                src: 'src/jquery-colorInput-gradient.js',
+                dest: 'dist/jquery-colorInput-gradient.min.js'
             }
+
         },
 
         jshint: {

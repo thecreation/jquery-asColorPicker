@@ -400,7 +400,7 @@
                 cancelText: 'cancel'
             }
         }, // callback onInit:
-        function(instance) {},
+        onInit: function(instance) {},
         onReady: function(instance) {},
         onChange: function(instance) {},
         onClose: function(instance) {},
@@ -410,7 +410,8 @@
 
     ColorInput.skins = {
         'flatSpirit': 'saturation,hHue,hAlpha,hex,preview,palettes,check,gradient',
-        'realWorld': 'saturation,hue,alpha,hex,preview,check'
+        'realWorld': 'saturation,hue,alpha,hex,preview,check',
+        'fullStack': 'saturation,hue,alpha,hex,preview,palettes,gradient'
     };
 
     ColorInput.registerComponent('trigger', {

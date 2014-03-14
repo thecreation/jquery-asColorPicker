@@ -1,17 +1,16 @@
-$.colorInput.registerComponent('check', {
-    selector: '.colorInput-check',
-    template: '<div class="colorInput-check drag-disable"><a class="colorInput-check-apply drag-disable"></a><a class="colorInput-check-cancel drag-disable"></a></div>',
-    init: function(api) {
-        var opts = $.extend(this.defaults, api.options.components.check),
-            self = this;
+// check
 
-        this.$check = $(this.template).appendTo(api.$picker);
-        this.$apply = this.$check.find('.colorInput-check-apply').text(opts.applyText);
-        this.$cancel = this.$check.find('.colorInput-check-cancel').text(opts.cancelText);
+(function($) {
+    $.colorInput.registerComponent('check', {
+        init: function(api) {
+            var opts = $.extend(this.defaults, api.options.components.check);
+            var template = '<div class="' + api.namespace + '-check drag-disable"><a class="' + api.namespace + '-check-apply drag-disable"></a><a class="' + api.namespace + '-check-cancel drag-disable"></a></div>';
+            this.$check = $(template).appendTo(api.$picker);
+            this.$apply = this.$check.find('.' + api.namespace + '-check-apply').text(opts.applyText);
+            this.$cancel = this.$check.find('.' + api.namespace + '-check-cancel').text(opts.cancelText);
 
-        this.$apply.on('click', $.proxy(api.apply, api));
-        this.$cancel.on('click', $.proxy(api.cancel, api));
-    }
-});
-
-
+            this.$apply.on('click', $.proxy(api.apply, api));
+            this.$cancel.on('click', $.proxy(api.cancel, api));
+        }
+    });
+})(jQuery);
