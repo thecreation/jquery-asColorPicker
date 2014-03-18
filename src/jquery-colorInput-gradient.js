@@ -29,7 +29,8 @@
             this.$template = $(template).appendTo(api.$picker);
             this.$trigger = this.$template.eq(0);
             this.$gradient = this.$template.eq(1);
-            this.$panel = this.$gradient.find('.' + api.namespace + '-gradient-markers');
+            this.$panel = this.$gradient.find('.' + api.namespace + '-gradient-panel');
+            this.$markers = this.$gradient.find('.' + api.namespace + '-gradient-markers');
             this.$wheel = this.$gradient.find('.' + api.namespace + '-gradient-wheel');
             this.$pointer = this.$wheel.find('i');
             this.$degree = this.$gradient.find('.' + api.namespace + '-gradient-degree');
@@ -47,23 +48,33 @@
             });
 
             // create new marker
-            this.$panel.on('mousedown.colorinput', function(e) {
-                var position = e.pageX - self.$panel.offset().left;
+            this.$markers.on('mousedown.colorinput', function(e) {
+                var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                if (rightclick) {
+                    return false;
+                }
+                var position = e.pageX - self.$markers.offset().left;
                 var percent = Math.round((position / self.width) * 100);
                 self.makeMarker('#fff', percent);
+                self.makeGradient();
                 return false;
             });
             this.$wheel.on('mousedown.colorInput', function(e) {
+                var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                if (rightclick) {
+                    return false;
+                }
                 self.wheelMousedown(e);
                 return false;
             });
 
             api.$element.on('colorInput::ready', function() {
-                self.width = self.$panel.width();
+                self.width = self.$markers.width();
             });
             api.$element.on('colorInput::change', function(event, instance) {
                 if (self.current) {
                     self.current.setColor(instance.color.toRGBA());
+                    self.makeGradient();
                 }
             });
             this.$degree.on('blur.colorInput', function() {
@@ -120,9 +131,6 @@
             return false;
         },
         move: function(marker, position) {
-            var api = this.api;
-            var $element = marker.$element;
-
             position = Math.max(0, Math.min(this.width, position));
             var percent = Math.round((position / this.width) * 100);
 
@@ -132,13 +140,12 @@
         makeMarker: function(color, percent) {
             var self = this;
             var $doc = this.$doc;
-            var api = this.api;
             var Marker = function() {
                 this.color = color;
                 this.percent = percent;
                 this._id = ++self.count;
                 this.$element = $('<span class="' + self.classes.marker + '"><i></i></span>').attr('tabindex', 0).data('id', this._id);
-                this.$element.appendTo(self.$panel);
+                this.$element.appendTo(self.$markers);
                 this.$element.on('mousedown.colorInput', function(e) {
                     var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                     if (rightclick) {
@@ -166,17 +173,21 @@
             marker.setColor(color);
             this.markers.push(marker);
             this.current = marker;
-
-            // init and set color
+            marker.hasBinded = false;
             marker.$element.on('focus', function() {
-                $doc.on('keydown.' + marker._id, function(e) {
-                    var key = e.keyCode || e.which;
-                    if (key === 46) {
-                        self.del(marker);
-                    }
-                });
+                if (!marker.hasBinded) {
+                    $doc.on('keydown.' + marker._id, function(e) {
+                        var key = e.keyCode || e.which;
+                        if (key === 46) {
+                            self.del(marker);
+                        }
+                    });
+                    marker.hasBinded = true;
+                }
+
             }).on('blur', function() {
                 $doc.off('keydown.' + marker._id);
+                marker.hasBinded = false;
             });
 
             return marker;
@@ -184,21 +195,34 @@
         makeGradient: function() {
             var markers = this.markers,
                 api = this.api,
-                gradient = 'gradient(' + this.degree + 'deg,';
+                self = this,
+                gradient = 'gradient(' + this.degree + 'deg,',
+                f1 = '',
+                f2 = '';
             // sort array by percent 
             markers.sort(function(a, b) {
                 return a.percent > b.percent;
             });
-            $.each(markers, function(key, marker) {
+            markers.map(function(marker, key, markers) {
                 gradient += marker.color + ' ' + marker.percent + '%,';
+                if (key === (markers.length - 1)) {
+                    f1 += 'color-stop(' + marker.percent / 100 + ',' + marker.color + ')';
+                    f2 += marker.color + ' ' + marker.percent + '%';
+                } else {
+                    f1 += 'color-stop(' + marker.percent / 100 + ',' + marker.color + '),';
+                    f2 += marker.color + ' ' + marker.percent + '%,';
+                }
             });
             gradient = gradient.substring(0, gradient.length - 1);
             gradient += ')';
             api.gradient = gradient;
             api._trigger('gradientChange', gradient);
+            var gradientArray = ['-moz-linear-gradient(left, ' + f2 + ')', '-webkit-gradient(linear, left top, right top, ' + f1 + ')', '-webkit-linear-gradient(left, ' + f2 + ')', '-o-linear-gradient(left, ' + f2 + ')'];
+            $.each(gradientArray, function(key, value) {
+                self.$panel[0].style.backgroundImage = value;
+            });
             return gradient;
         },
-
         // wheel method
         getPosition: function(a, b) {
             var r = this.r;
@@ -233,7 +257,6 @@
             if (this.degree === deg) {
                 return false;
             }
-
             var r = this.r || this.$wheel.width() / 2;
             var pos = this.calPointer(deg, r);
             this.$pointer.css({
@@ -271,7 +294,7 @@
                     top: pos.y
                 });
             };
-            this.wheelMouseup = function(e) {
+            this.wheelMouseup = function() {
                 $doc.off({
                     mousemove: this.wheelMove,
                     mouseup: this.wheelMouseup
@@ -287,8 +310,10 @@
             this.wheelMove(e);
         },
         del: function(marker) {
+            this.$doc.off('keydown.' + marker._id);
             marker.$element.remove();
-            this.markers.splice($.inArray(marker, this.markers), 1);
+            this.markers.splice(this.markers.indexOf(marker), 1);
+            this.makeGradient();
         },
         destory: function() {
             this.$element.off('click');
