@@ -327,6 +327,11 @@
             this.$picker.removeClass(this.classes.show);
             this._trigger('close');
         },
+        clear: function() {
+            this.color.from('#fff');
+            this.update({});
+            this.close();
+        },
         cancel: function() {
             this.color.from(this.originalColor);
             this.update({});
@@ -396,6 +401,7 @@
         format: 'rgb',
         components: {
             check: {
+                disabled: 'apply',
                 applyText: 'apply',
                 cancelText: 'cancel'
             }
@@ -411,7 +417,8 @@
     ColorInput.skins = {
         'flatSpirit': 'saturation,hHue,hAlpha,hex,preview,palettes,check,gradient',
         'realWorld': 'saturation,hue,alpha,hex,preview,check',
-        'fullStack': 'saturation,hue,alpha,hex,preview,palettes,gradient'
+        'fullStack': 'saturation,hue,alpha,hex,preview,palettes,gradient',
+        'basicStyle': 'saturation,hue,hex,preview,palettes,check,gradient'
     };
 
     ColorInput.registerComponent('trigger', {

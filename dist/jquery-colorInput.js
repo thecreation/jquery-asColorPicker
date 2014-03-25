@@ -1,4 +1,4 @@
-/*! colorInput - v0.1.3 - 2014-03-19
+/*! colorInput - v0.1.3 - 2014-03-25
 * https://github.com/amazingSurge/jquery-colorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -323,6 +323,11 @@
             this.$picker.removeClass(this.classes.show);
             this._trigger('close');
         },
+        clear: function() {
+            this.color.from('#fff');
+            this.update({});
+            this.close();
+        },
         cancel: function() {
             this.color.from(this.originalColor);
             this.update({});
@@ -392,6 +397,7 @@
         format: 'rgb',
         components: {
             check: {
+                disabled: 'apply',
                 applyText: 'apply',
                 cancelText: 'cancel'
             }
@@ -407,7 +413,8 @@
     ColorInput.skins = {
         'flatSpirit': 'saturation,hHue,hAlpha,hex,preview,palettes,check,gradient',
         'realWorld': 'saturation,hue,alpha,hex,preview,check',
-        'fullStack': 'saturation,hue,alpha,hex,preview,palettes,gradient'
+        'fullStack': 'saturation,hue,alpha,hex,preview,palettes,gradient',
+        'basicStyle': 'saturation,hue,hex,preview,palettes,check,gradient'
     };
 
     ColorInput.registerComponent('trigger', {
@@ -911,6 +918,17 @@
             this.$apply = this.$check.find('.' + api.namespace + '-check-apply').text(opts.applyText);
             this.$cancel = this.$check.find('.' + api.namespace + '-check-cancel').text(opts.cancelText);
 
+            if (opts.disabled === 'cancel') {
+                this.$cancel.css({
+                    display: 'none'
+                });
+            }
+            if (opts.disabled === 'apply') {
+                this.$apply.css({
+                    display: 'none'
+                });
+            }
+
             this.$apply.on('click', $.proxy(api.apply, api));
             this.$cancel.on('click', $.proxy(api.cancel, api));
         }
@@ -1269,13 +1287,13 @@
             // init $previous color
             self.$previous.css('backgroundColor', api.color.toRGBA());
 
-            api.$picker.on('colorInput::apply', function(event, api) {
+            api.$element.on('colorInput::apply', function(event, api) {
                 self.$previous.css('backgroundColor', api.color.toRGBA());
             });
         },
         update: function(api) {
             this.$current.css('backgroundColor', api.color.toRGBA());
-        },
+        }
     });
 })(jQuery);
 // saturation
@@ -1485,7 +1503,8 @@
             this.api = api;
             this.classes = {
                 show: api.namespace + '-gradient' + '_show',
-                marker: api.namespace + '-gradient-marker'
+                marker: api.namespace + '-gradient-marker',
+                active: api.namespace + '-gradient-marker_active'
             };
             this.isOpened = false;
             this.$doc = $(document);
@@ -1621,7 +1640,7 @@
             };
             Marker.prototype.setColor = function(color) {
                 this.color = color;
-                this.$element.css({
+                this.$element.find('i').css({
                     background: color
                 });
             };
@@ -1646,11 +1665,13 @@
                             self.del(marker);
                         }
                     });
+                    marker.$element.addClass(self.classes.active);
                     marker.hasBinded = true;
                 }
 
             }).on('blur', function() {
                 $doc.off('keydown.' + marker._id);
+                marker.removeClass(self.classes.active);
                 marker.hasBinded = false;
             });
 

@@ -13,12 +13,12 @@
             // init $previous color
             self.$previous.css('backgroundColor', api.color.toRGBA());
 
-            api.$picker.on('colorInput::apply', function(event, api) {
+            api.$element.on('colorInput::apply', function(event, api) {
                 self.$previous.css('backgroundColor', api.color.toRGBA());
             });
         },
         update: function(api) {
             this.$current.css('backgroundColor', api.color.toRGBA());
-        },
+        }
     });
 })(jQuery);

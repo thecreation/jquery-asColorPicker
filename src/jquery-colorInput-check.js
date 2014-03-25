@@ -9,6 +9,17 @@
             this.$apply = this.$check.find('.' + api.namespace + '-check-apply').text(opts.applyText);
             this.$cancel = this.$check.find('.' + api.namespace + '-check-cancel').text(opts.cancelText);
 
+            if (opts.disabled === 'cancel') {
+                this.$cancel.css({
+                    display: 'none'
+                });
+            }
+            if (opts.disabled === 'apply') {
+                this.$apply.css({
+                    display: 'none'
+                });
+            }
+
             this.$apply.on('click', $.proxy(api.apply, api));
             this.$cancel.on('click', $.proxy(api.cancel, api));
         }

@@ -21,7 +21,8 @@
             this.api = api;
             this.classes = {
                 show: api.namespace + '-gradient' + '_show',
-                marker: api.namespace + '-gradient-marker'
+                marker: api.namespace + '-gradient-marker',
+                active: api.namespace + '-gradient-marker_active'
             };
             this.isOpened = false;
             this.$doc = $(document);
@@ -157,7 +158,7 @@
             };
             Marker.prototype.setColor = function(color) {
                 this.color = color;
-                this.$element.css({
+                this.$element.find('i').css({
                     background: color
                 });
             };
@@ -182,11 +183,13 @@
                             self.del(marker);
                         }
                     });
+                    marker.$element.addClass(self.classes.active);
                     marker.hasBinded = true;
                 }
 
             }).on('blur', function() {
                 $doc.off('keydown.' + marker._id);
+                marker.removeClass(self.classes.active);
                 marker.hasBinded = false;
             });
 
