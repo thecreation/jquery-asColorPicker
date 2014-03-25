@@ -1,7 +1,7 @@
-# jQuery ColorInput
+# jQuery asColorInput
 
-The powerful jQuery plugin that for color picker. <a href="http://amazingsurge.github.io/jquery-colorInput/">Project page and demos</a><br />
-Download: <a href="https://github.com/amazingSurge/jquery-colorInput/archive/master.zip">jquery-colorInput-master.zip</a>
+The powerful jQuery plugin that for color picker. <a href="http://amazingsurge.github.io/jquery-asColorInput/">Project page and demos</a><br />
+Download: <a href="https://github.com/amazingSurge/jquery-asColorInput/archive/master.zip">jquery-asColorInput-master.zip</a>
 
 ***
 
@@ -22,28 +22,28 @@ Download: <a href="https://github.com/amazingSurge/jquery-colorInput/archive/mas
 Import this libraries:
 * jQuery
 * jquery-color.js
-* jquery-colorInput.min.js
+* jquery-asColorInput.min.js
 
 And CSS:
-* colorInput.css 
+* asColorInput.css 
 
 Still don't forget include: image file
 
 Create base html element:
 ```html
     <div class="example">
-        <input type="text" class="colorInput" /> 
+        <input type="text" class="asColorInput" /> 
     </div>
 ```
 
 Initialize tabs:
 ```javascript
-$(".colorInput").colorInput();
+$(".asColorInput").asColorInput();
 ```
 
 Or initialize tabs with custom settings:
 ```javascript
-$(".colorInput").colorInput({
+$(".asColorInput").asColorInput({
 	showInput: true,
 	skin: 'simple'
 });
@@ -55,7 +55,7 @@ $(".colorInput").colorInput({
 {   
 
     // Optional property, Set a namespace for css class
-    namespace: 'colorInput',
+    namespace: 'asColorInput',
     
     //Optional property, choose the loaded skin
     skin: null,
@@ -72,7 +72,7 @@ $(".colorInput").colorInput({
     //Optional property, object, config jquery.cookie options 
     cookie: {},
 
-    //Optional property, if true, open keyboard function, note you need load jquery-colorInput-keyboard.js file first 
+    //Optional property, if true, open keyboard function, note you need load jquery-asColorInput-keyboard.js file first 
     keyboard: false,
 
     //Optional property, config every registered component using component name 
@@ -85,10 +85,10 @@ $(".colorInput").colorInput({
     //Optional property, trigger when color change 
     onChange: function() {},
 
-    //Optional property, trigger when open colorInput pancel, flat type will never trigger this event
+    //Optional property, trigger when open asColorInput pancel, flat type will never trigger this event
     onShow: function() {},
 
-    //Optional property, trigger when close colorInput pancel, flat type will never trigger this event
+    //Optional property, trigger when close asColorInput pancel, flat type will never trigger this event
     onClose: function() {},
 
     //Optional property, trigger when init
@@ -104,70 +104,70 @@ $(".colorInput").colorInput({
 
 ## Public methods
 
-jquery colorInput has different methods , we can use it as below :
+jquery asColorInput has different methods , we can use it as below :
 ```javascript
-// show colorInput panel
-$(".colorInput").colorInput("show");
+// show asColorInput panel
+$(".asColorInput").asColorInput("show");
 
-// close colorInput panel
-$(".colorInput").colorInput("close");
+// close asColorInput panel
+$(".asColorInput").asColorInput("close");
 
 // apply selected color
-$(".colorInput").colorInput("apply");
+$(".asColorInput").asColorInput("apply");
 
 // cancel selceted color
-$(".colorInput").colorInput("cancel");
+$(".asColorInput").asColorInput("cancel");
 
-// set colorInput to specified color
-$(".colorInput").colorInput("set");
+// set asColorInput to specified color
+$(".asColorInput").asColorInput("set");
 
 // get selected color
-$("colorInput").colorInput("get");
+$("asColorInput").asColorInput("get");
 
-// enable colorInput
-$("colorInput").colorInput("enable");
+// enable asColorInput
+$("asColorInput").asColorInput("enable");
 
-// disable colorInput
-$("colorInput").colorInput("disable");
+// disable asColorInput
+$("asColorInput").asColorInput("disable");
 
-// destroy colorInput
-$("colorInput").colorInput("destroy");
+// destroy asColorInput
+$("asColorInput").asColorInput("destroy");
 
 ```
 
 ## Event
 
-* <code>colorInput::show</code>: trigger when show colorInput pancel, flat type will never trigger this event
-* <code>colorInput::close</code>: trigger when close colorInput pancel, flat type will never trigger this event
-* <code>colorInput::apply</code>: trigger when a color is applied
-* <code>colorInput::init</code>: trigger when init
-* <code>colorInput::ready</code>: trigger after init event
-* <code>colorInput::change</code>: trigger when color change
+* <code>asColorInput::show</code>: trigger when show asColorInput pancel, flat type will never trigger this event
+* <code>asColorInput::close</code>: trigger when close asColorInput pancel, flat type will never trigger this event
+* <code>asColorInput::apply</code>: trigger when a color is applied
+* <code>asColorInput::init</code>: trigger when init
+* <code>asColorInput::ready</code>: trigger after init event
+* <code>asColorInput::change</code>: trigger when color change
 
 how to use event:
 ```javascript
-$(document).on('colorInput::init', function(event,instance) {
-    // instance means current colorInput instance 
+$(document).on('asColorInput::init', function(event,instance) {
+    // instance means current asColorInput instance 
     // some stuff
 });
 ```
 ## How to register a new component
-* you can use <code>$.colorInput.registerComponent('name', {init: function(){}})</code> to register
+* you can use <code>$.asColorInput.registerComponent('name', {init: function(){}})</code> to register
 * this function need two arguments, as you see above
-* init function is necessary, the function will be excuted when colorInput intantiate
+* init function is necessary, the function will be excuted when asColorInput intantiate
 
 For Example: 
 ```javascript 
-$.colorInput.registerComponent('check', {
-    selector: '.colorInput-check',
-    template: '<div class="colorInput-check"><a class="colorInput-check-apply"></a><a class="colorInput-check-cancel"></a></div>',
+$.asColorInput.registerComponent('check', {
+    selector: '.asColorInput-check',
+    template: '<div class="asColorInput-check"><a class="asColorInput-check-apply"></a><a class="asColorInput-check-cancel"></a></div>',
     init: function(api) {
         var opts = $.extend(this.defaults, api.options.components.check),
             self = this;
 
         this.$check = $(this.template).appendTo(api.$picker);
-        this.$apply = this.$check.find('.colorInput-check-apply').text(opts.applyText);
-        this.$cancel = this.$check.find('.colorInput-check-cancel').text(opts.cancelText);
+        this.$apply = this.$check.find('.asColorInput-check-apply').text(opts.applyText);
+        this.$cancel = this.$check.find('.asColorInput-check-cancel').text(opts.cancelText);
 
         this.$apply.on('click', $.proxy(api.apply, api));
         this.$cancel.on('click', $.proxy(api.cancel, api));
@@ -178,8 +178,8 @@ $.colorInput.registerComponent('check', {
 ## How to add new skin
 * add the component register file you want in your page
 * add new skin css files in your page
-* config your skin using <code>$.colorInput.skins['newSkinName'] = ['component1','component2', ...]</code>
-* instantiate colorInput with skin option <code>$('.colorInput').colorInput({skin:'your new skin'})</code>
+* config your skin using <code>$.asColorInput.skins['newSkinName'] = ['component1','component2', ...]</code>
+* instantiate asColorInput with skin option <code>$('.asColorInput').asColorInput({skin:'your new skin'})</code>
 
 
 ## Browser support
@@ -196,6 +196,6 @@ jquery-popup is verified to work in Internet Explorer 7+, Firefox 2+, Opera 9+, 
 [amazingSurge](http://amazingSurge.com)
 
 ## License
-jQuery-popup plugin is released under the <a href="https://github.com/amazingSurge/jquery-colorInput/blob/master/LICENCE.GPL" target="_blank">GPL licence</a>.
+jQuery-popup plugin is released under the <a href="https://github.com/amazingSurge/jquery-asColorInput/blob/master/LICENCE.GPL" target="_blank">GPL licence</a>.
 
 

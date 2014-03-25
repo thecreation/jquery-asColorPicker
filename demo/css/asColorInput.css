@@ -1,58 +1,66 @@
 /* core.css*/
+
 .unselectable {
-  -moz-user-select: none;
-  -khtml-user-select: none;
   -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+   -khtml-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
 
 .asColorInput-input {
   display: none;
 }
+
 .asColorInput-input.asColorInput_showInput {
   display: block;
 }
+
 .asColorInput {
-  display: none;
   position: absolute;
   z-index: 9999;
+  display: none;
 }
+
 .asColorInput.asColorInput_show {
   display: block;
 }
+
 .asColorInput.asColorInput_flat {
-  display: block;
   position: relative;
   top: 0;
   left: 0;
   z-index: auto;
+  display: block;
 }
+
 .asColorInput-mask {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 9998;
   width: 100%;
   height: 100%;
-  z-index: 9998;
-}
-.asColorInput-trigger {
-  display: block;
-  position: relative;
 }
 
-.asColorInput .asColorInput-alpha, 
-.asColorInput .asColorInput-check, 
-.asColorInput .asColorInput-hue, 
-.asColorInput .asColorInput-hex, 
-.asColorInput .asColorInput-info, 
-.asColorInput .asColorInput-palettes, 
-.asColorInput .asColorInput-preview, 
+.asColorInput-trigger {
+  position: relative;
+  display: block;
+}
+
+.asColorInput .asColorInput-alpha,
+.asColorInput .asColorInput-check,
+.asColorInput .asColorInput-hue,
+.asColorInput .asColorInput-hex,
+.asColorInput .asColorInput-info,
+.asColorInput .asColorInput-palettes,
+.asColorInput .asColorInput-preview,
 .asColorInput .asColorInput-saturation {
   position: absolute;
 }
 
 /* skin css*/
+
 .asColorInput-trigger.asColorInput_flatSpirit {
   width: 25px;
   height: 25px;
@@ -94,7 +102,6 @@
   content: '';
 }
 
-
 .asColorInput.asColorInput_flatSpirit {
   width: 278px;
   height: 327px;
@@ -126,6 +133,7 @@
   background-color: #ff0000;
   border: 1px solid #363636;
 }
+
 .asColorInput.asColorInput_flatSpirit .asColorInput-palettes .asColorInput-palettes-checked {
   border-color: #888;
 }
@@ -334,7 +342,6 @@
   content: '';
 }
 
-
 .asColorInput.asColorInput_realWorld {
   width: 297px;
   height: 230px;
@@ -523,7 +530,6 @@
   text-decoration: underline;
 }
 
-
 /*
     gradinet css
  */
@@ -535,69 +541,77 @@
   display: block;
   width: 58px;
   height: 31px;
-  margin: 0;
   padding: 0;
+  margin: 0;
   font-size: 14px;
   line-height: 31px;
   color: #777;
   text-decoration: none;
 }
+
 .asColorInput-gradient-trigger:hover {
   color: #444;
   text-decoration: none;
 }
+
 .asColorInput-gradient-trigger:active,
 .asColorInput-gradient-trigger:focus {
   outline: none !important;
 }
+
 .asColorInput-gradient {
-  display: none;
   position: absolute;
   top: 324px;
   left: 0;
-  height: 70px;
+  display: none;
   width: 100%;
+  height: 70px;
   padding: 23px 15px 20px;
-  border-top: 2px solid #e5e5e5;
   background-color: #fafafa;
+  border-top: 2px solid #e5e5e5;
   -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -ms-box-sizing: border-box;
-  -o-box-sizing: border-box;
-  box-sizing: border-box;
+     -moz-box-sizing: border-box;
+      -ms-box-sizing: border-box;
+       -o-box-sizing: border-box;
+          box-sizing: border-box;
 }
+
 .asColorInput-gradient:after {
-  content: "";
   position: absolute;
   top: -7px;
   right: 38px;
   z-index: 1;
   width: 10px;
   height: 10px;
+  background-color: #fafafa;
   border: 2px solid #e5e5e5;
   border-right-color: transparent;
   border-bottom-color: transparent;
-  background-color: #fafafa;
+  content: "";
   -webkit-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
-  transform: rotate(45deg);
+     -moz-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+       -o-transform: rotate(45deg);
+          transform: rotate(45deg);
 }
+
 .asColorInput-gradient.asColorInput-gradient_show {
   display: block;
 }
+
 .asColorInput-gradient-panel {
   float: left;
   width: 175px;
   height: 21px;
   border: 2px solid #e5e5e5;
 }
+
 .asColorInput-gradient-background {
   width: 175px;
   height: 21px;
   border: 2px solid #e5e5e5;
 }
+
 .asColorInput-gradient-markers {
   position: absolute;
   top: 10px;
@@ -605,6 +619,7 @@
   width: 187px;
   height: 15px;
 }
+
 .asColorInput-gradient-marker {
   position: absolute;
   top: 0;
@@ -612,27 +627,29 @@
   width: 10px;
   height: 10px;
   line-height: 1;
-  border: 1px solid #e5e5e5;
   background-color: #fff;
+  border: 1px solid #e5e5e5;
 }
+
 .asColorInput-gradient-maker:after {
-  content: "";
   position: absolute;
   bottom: -3px;
   left: 3px;
   z-index: 1;
   width: 3px;
   height: 3px;
+  background-color: #fff;
   border: 1px solid #e5e5e5;
   border-top-color: transparent;
   border-left-color: transparent;
-  background-color: #fff;
+  content: "";
   -webkit-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
-  transform: rotate(45deg);
+     -moz-transform: rotate(45deg);
+      -ms-transform: rotate(45deg);
+       -o-transform: rotate(45deg);
+          transform: rotate(45deg);
 }
+
 .asColorInput-gradient-maker i {
   position: relative;
   z-index: 2;
@@ -643,6 +660,7 @@
   line-height: 1;
   border: 1px solid #e5e5e5;
 }
+
 .asColorInput-gradient-wheel {
   position: relative;
   float: left;
@@ -651,9 +669,10 @@
   margin-left: 8px;
   border: 2px solid #e5e5e5;
   -webkit-border-radius: 100%;
-  -moz-border-radius: 100%;
-  border-radius: 100%;
+     -moz-border-radius: 100%;
+          border-radius: 100%;
 }
+
 .asColorInput-gradient-wheel i {
   position: absolute;
   top: 10px;
@@ -662,9 +681,10 @@
   height: 3px;
   background-color: #444;
   -webkit-border-radius: 100%;
-  -moz-border-radius: 100%;
-  border-radius: 100%;
+     -moz-border-radius: 100%;
+          border-radius: 100%;
 }
+
 input.asColorInput-gradient-degree[type="text"] {
   float: left;
   width: 35px;
@@ -673,27 +693,29 @@ input.asColorInput-gradient-degree[type="text"] {
   margin: 0 0 0 5px;
   font-size: 12px;
   line-height: 1;
-  color: #aaa;
-  border: 2px solid #e5e5e5;
-  background: #fff;
   letter-spacing: normal;
+  color: #aaa;
+  background: #fff;
+  border: 2px solid #e5e5e5;
+  -webkit-border-radius: 0;
+     -moz-border-radius: 0;
+          border-radius: 0;
   outline: none;
   -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -ms-box-sizing: border-box;
-  -o-box-sizing: border-box;
-  box-sizing: border-box;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
+     -moz-box-sizing: border-box;
+      -ms-box-sizing: border-box;
+       -o-box-sizing: border-box;
+          box-sizing: border-box;
 }
+
 input.asColorInput-gradient-degree[type="text"]:hover {
   border-color: #d9d9d9;
 }
+
 input.asColorInput-gradient-degree[type="text"]:focus {
-  border-color: #5cafda;
   color: #444;
+  border-color: #5cafda;
   -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
 }

@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 stripBanners: true
             },
             dist: {
-                src: ['src/jquery-colorInput-core.js', 'src/jquery-colorInput-keyboard.js', 'src/jquery-colorInput-hAlpha.js', 'src/jquery-colorInput-hHue.js', 'src/jquery-colorInput-alpha.js', 'src/jquery-colorInput-check.js', 'src/jquery-colorInput-hex.js', 'src/jquery-colorInput-hue.js', 'src/jquery-colorInput-info.js', 'src/jquery-colorInput-palettes.js', 'src/jquery-colorInput-preview.js', 'src/jquery-colorInput-saturation.js', 'src/jquery-colorInput-gradient.js'],
+                src: ['src/jquery-asColorInput-core.js', 'src/jquery-asColorInput-keyboard.js', 'src/jquery-asColorInput-hAlpha.js', 'src/jquery-asColorInput-hHue.js', 'src/jquery-asColorInput-alpha.js', 'src/jquery-asColorInput-check.js', 'src/jquery-asColorInput-hex.js', 'src/jquery-asColorInput-hue.js', 'src/jquery-asColorInput-info.js', 'src/jquery-asColorInput-palettes.js', 'src/jquery-asColorInput-preview.js', 'src/jquery-asColorInput-saturation.js', 'src/jquery-asColorInput-gradient.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
 
@@ -31,52 +31,52 @@ module.exports = function(grunt) {
                 dest: 'dist/<%= pkg.name %>.min.js'
             },
             keyboard: {
-                src: 'src/jquery-colorInput-keyboard.js',
-                dest: 'dist/jquery-colorInput-keyboard.min.js'
+                src: 'src/jquery-asColorInput-keyboard.js',
+                dest: 'dist/jquery-asColorInput-keyboard.min.js'
             },
             hAlpha: {
-                src: 'src/jquery-colorInput-hAlpha.js',
-                dest: 'dist/jquery-colorInput-hAlpha.min.js'
+                src: 'src/jquery-asColorInput-hAlpha.js',
+                dest: 'dist/jquery-asColorInput-hAlpha.min.js'
             },
             hHue: {
-                src: 'src/jquery-colorInput-hHue.js',
-                dest: 'dist/jquery-colorInput-hHue.min.js'
+                src: 'src/jquery-asColorInput-hHue.js',
+                dest: 'dist/jquery-asColorInput-hHue.min.js'
             },
             alpha: {
-                src: 'src/jquery-colorInput-alpha.js',
-                dest: 'dist/jquery-colorInput-alpha.min.js'
+                src: 'src/jquery-asColorInput-alpha.js',
+                dest: 'dist/jquery-asColorInput-alpha.min.js'
             },
             check: {
-                src: 'src/jquery-colorInput-check.js',
-                dest: 'dist/jquery-colorInput-check.min.js'
+                src: 'src/jquery-asColorInput-check.js',
+                dest: 'dist/jquery-asColorInput-check.min.js'
             },
             hex: {
-                src: 'src/jquery-colorInput-hex.js',
-                dest: 'dist/jquery-colorInput-hex.min.js'
+                src: 'src/jquery-asColorInput-hex.js',
+                dest: 'dist/jquery-asColorInput-hex.min.js'
             },
             hue: {
-                src: 'src/jquery-colorInput-hue.js',
-                dest: 'dist/jquery-colorInput-hue.min.js'
+                src: 'src/jquery-asColorInput-hue.js',
+                dest: 'dist/jquery-asColorInput-hue.min.js'
             },
             info: {
-                src: 'src/jquery-colorInput-info.js',
-                dest: 'dist/jquery-colorInput-info.min.js'
+                src: 'src/jquery-asColorInput-info.js',
+                dest: 'dist/jquery-asColorInput-info.min.js'
             },
             palettes: {
-                src: 'src/jquery-colorInput-palettes.js',
-                dest: 'dist/jquery-colorInput-palettes.min.js'
+                src: 'src/jquery-asColorInput-palettes.js',
+                dest: 'dist/jquery-asColorInput-palettes.min.js'
             },
             preview: {
-                src: 'src/jquery-colorInput-preview.js',
-                dest: 'dist/jquery-colorInput-preview.min.js'
+                src: 'src/jquery-asColorInput-preview.js',
+                dest: 'dist/jquery-asColorInput-preview.min.js'
             },
             saturation: {
-                src: 'src/jquery-colorInput-saturation.js',
-                dest: 'dist/jquery-colorInput-saturation.min.js'
+                src: 'src/jquery-asColorInput-saturation.js',
+                dest: 'dist/jquery-asColorInput-saturation.min.js'
             },
             gradient: {
-                src: 'src/jquery-colorInput-gradient.js',
-                dest: 'dist/jquery-colorInput-gradient.min.js'
+                src: 'src/jquery-asColorInput-gradient.js',
+                dest: 'dist/jquery-asColorInput-gradient.min.js'
             }
 
         },
@@ -141,9 +141,9 @@ module.exports = function(grunt) {
                 options: {
                     compile: true
                 },
-                // files: {
-                //     'demo/css/colorInput.css': ['less/jquery-colorInput.less']
-                // }
+                files: {
+                    'demo/css/asColorInput.css': ['less/jquery-asColorInput.less']
+                }
             }
         },
         replace: {
@@ -156,7 +156,7 @@ module.exports = function(grunt) {
                 }]
             },
             jquery: {
-                src: ['colorInput.jquery.json'],
+                src: ['asColorInput.jquery.json'],
                 overwrite: true, // overwrite matched source files
                 replacements: [{
                     from: /("version": ")([0-9\.]+)(")/g,
@@ -171,7 +171,7 @@ module.exports = function(grunt) {
                     flatten: true,
                     cwd: 'bower_components/',
                     src: [
-                        'jquery-color/dist/*.js',
+                        'jquery-asColor/dist/*.js',
                     ],
                     dest: 'demo/js/'
                 }]
