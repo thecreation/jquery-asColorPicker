@@ -33,6 +33,12 @@
         this.disabled = false;
         this.isFirstOpen = true;
 
+        if (this.$element.attr('name')) {
+            this.name = this.$element.attr('name');
+        } else {
+            this.name = options.name;
+        }
+
         // options
         var meta_data = [];
         $.each(this.$element.data(), function(k, v) {
@@ -401,6 +407,7 @@
         keyboard: false,
         onlyBtn: false,
         format: 'rgb',
+        name: null,
         components: {
             check: {
                 disabled: 'apply',

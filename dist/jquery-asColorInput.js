@@ -1,4 +1,4 @@
-/*! asColorInput - v0.1.3 - 2014-04-15
+/*! asColorInput - v0.1.3 - 2014-05-09
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -28,6 +28,12 @@
         this.opened = false;
         this.disabled = false;
         this.isFirstOpen = true;
+
+        if (this.$element.attr('name')) {
+            this.name = this.$element.attr('name');
+        } else {
+            this.name = options.name;
+        }
 
         // options
         var meta_data = [];
@@ -397,6 +403,7 @@
         keyboard: false,
         onlyBtn: false,
         format: 'rgb',
+        name: null,
         components: {
             check: {
                 disabled: 'apply',
