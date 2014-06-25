@@ -5,12 +5,11 @@
         color: ['white', 'black', 'transparent'],
         init: function(api) {
             var template = '<ul class="' + api.namespace + '-info">' + '<li><label>R:<input type="text" data-type="r"/></label></li>' + '<li><label>G:<input type="text" data-type="g"/></label></li>' + '<li><label>B:<input type="text" data-type="b"/></label></li>' + '<li><label>A:<input type="text" data-type="a"/></label></li>' + '</ul>';
-            this.$info = $(template).appendTo(api.$picker);
+            this.$info = $(template).appendTo(api.$dropdown);
             this.$r = this.$info.find('[data-type="r"]');
             this.$g = this.$info.find('[data-type="g"]');
             this.$b = this.$info.find('[data-type="b"]');
             this.$a = this.$info.find('[data-type="a"]');
-
 
             this.$info.delegate('input', 'keyup update change', function(e) {
                 var val;

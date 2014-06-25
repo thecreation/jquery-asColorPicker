@@ -2,19 +2,26 @@
 
 (function($) {
     $.asColorInput.registerComponent('preview', {
-        height: 150,
         init: function(api) {
             var self = this;
-            var template = '<div class="' + api.namespace + '-preview"><span class="' + api.namespace + '-preview-previous drag-disable"></span><span class="' + api.namespace + '-preview-current"></span></div>';
-            this.$preview = $(template).appendTo(api.$picker);
-            this.$current = this.$preview.find('.' + api.namespace + '-preview-current');
-            this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous');
-            this.update(api);
-            // init $previous color
-            self.$previous.css('backgroundColor', api.color.toRGBA());
+            var template = '<ul class="' + api.namespace + '-preview"><li class="' + api.namespace + '-preview-current"><div /></li><li class="' + api.namespace + '-preview-previous"><div /></li></ul>';
+            this.$preview = $(template).appendTo(api.$dropdown);
+            this.$current = this.$preview.find('.' + api.namespace + '-preview-current div');
+            this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous div');
 
-            api.$element.on('asColorInput::apply', function(event, api) {
+            api.$element.on('asColorInput::firstOpen', function() {
+                self.update(api);
                 self.$previous.css('backgroundColor', api.color.toRGBA());
+
+                api.$element.on('asColorInput::apply', function(event, api) {
+                    self.$previous.css('backgroundColor', api.color.toRGBA());
+                });
+
+                self.$previous.on('click', function(){
+                    api.set(api.originalColor);
+
+                    return false;
+                }); 
             });
         },
         update: function(api) {

@@ -4,7 +4,7 @@
     $.asColorInput.registerComponent('hex', {
         init: function(api) {
             var template = '<input type="text" class="' + api.namespace + '-hex" />';
-            this.$hex = $(template).appendTo(api.$picker);
+            this.$hex = $(template).appendTo(api.$dropdown);
 
             this.$hex.on('change', function() {
                 api.set(this.value);

@@ -1,22 +1,15 @@
-/*! asColorInput - v0.1.3 - 2014-05-09
+/*! asColorInput - v0.1.3 - 2014-06-25
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
     "use strict";
 
     var id = 0,
-        IE = !! /msie/i.exec(window.navigator.userAgent);
+        IE = !!/msie/i.exec(window.navigator.userAgent);
 
     function createId(api) {
         api.id = id;
         id++;
-    }
-
-    function noop() {
-        return;
-    }
-    if (!window.localStorage) {
-        window.localStorage = noop;
     }
 
     // Constructor
@@ -26,55 +19,34 @@
 
         //flag
         this.opened = false;
+        this.firstOpen = true;
         this.disabled = false;
-        this.isFirstOpen = true;
-
-        if (this.$element.attr('name')) {
-            this.name = this.$element.attr('name');
-        } else {
-            this.name = options.name;
-        }
-
-        // options
-        var meta_data = [];
-        $.each(this.$element.data(), function(k, v) {
-            var re = new RegExp("^asColorInput", "i");
-            if (re.test(k)) {
-                meta_data[k.toLowerCase().replace(re, '')] = v;
-            }
-        });
+        this.clear = false;
 
         createId(this);
 
-        this.options = $.extend(true, {}, AsColorInput.defaults, options, meta_data);
+        this.options = $.extend(true, {}, AsColorInput.defaults, options, this.$element.data());
         this.namespace = this.options.namespace;
 
         this.classes = {
+            wrap: this.namespace + '-wrap',
+            dropdown: this.namespace + '-dropdown',
             input: this.namespace + '-input',
+            clear: this.namespace + '-clear',
             skin: this.namespace + '_' + this.options.skin,
-            show: this.namespace + '_show',
+            open: this.namespace + '_open',
             mask: this.namespace + '-mask',
-            flat: this.namespace + '_flat',
-            showInput: this.namespace + '_showInput',
-            disabled: this.namespace + '_disabled'
+            hideInput: this.namespace + '_hideInput',
+            disabled: this.namespace + '_disabled',
+            mode: this.namespace + '-mode_' + this.options.mode
         };
 
         this.components = $.extend(true, {}, this.components);
 
-        if (this.options.localStorage) {
-            var key = 'input_' + this.id;
-            var value = this.getLocalItem(key);
-            if (value) {
-                this.element.value = value;
-            }
-        }
-
-        var _comps = AsColorInput.skins[this.options.skin] || 'saturation,hue';
-        this._comps = _comps.split(',');
+        this._comps = AsColorInput.modes[this.options.mode];
 
         // color value and format
         // here get init value from input elemnt
-        // fix: how about setting it on options ?
         if (this.element.value === '') {
             this.color = new Color({
                 r: 255,
@@ -83,18 +55,18 @@
                 a: 1
             }, this.options.format);
         } else {
+            if (this.options.mode === 'gradient') {
+                this.gradient = this.element.value;
+            }
             this.color = new Color(this.element.value, this.options.format);
         }
 
-        if (this.options.showInput) {
-            this.$element.addClass(this.classes.showInput);
-        } else {
-            if (this.options.format) {
-                this.$element.val(this.get(this.options.format));
-            } else {
-                this.$element.val(this.color.toString());
-            }
+        if (this.options.hideInput) {
+            this.$element.addClass(this.classes.hideInput);
         }
+
+
+        this.updateInput();
 
         //save this.color  as a rgba value 
         this.originalColor = this.color.toRGBA();
@@ -108,72 +80,84 @@
         components: {},
         init: function() {
             var self = this;
-            this.$picker = $('<div draggable=false class="' + this.namespace + ' drag-disable"></div>');
-            this.$element.wrap('<div class="' + this.namespace + '-wrap"></div>').addClass(this.classes.input);
+            this.$dropdown = $('<div class="' + this.classes.dropdown + '" data-mode="'+this.options.mode+'"></div>');
+            this.$element.wrap('<div class="' + this.classes.wrap + '"></div>').addClass(this.classes.input);
+            this.$clear = $('<a href="#" class="' + this.classes.clear + '">x</a>').insertAfter(this.$element);
             this.$wrap = this.$element.parent();
+            this.$body = $('body');
+
+            this.$dropdown.data('asColorInput', this);
 
             if (this.options.skin) {
-                this.$picker.addClass(this.classes.skin);
+                this.$dropdown.addClass(this.classes.skin);
                 this.$element.parent().addClass(this.classes.skin);
             }
 
             this.create();
-            if (this.options.flat) {
-                this.$element.addClass(this.classes.flat);
-                this.$picker.addClass(this.classes.flat).insertAfter(this.$element);
-                this.show();
-            } else {
-                this.$picker.appendTo('body');
-                this.$element.on({
-                    'click.asColorInput': function() {
-                        if (!self.opened) {
-                            self.show();
-                        }
-                        return false;
-                    },
-                    'keydown.asColorInput': function(e) {
-                        if (e.keyCode === 9) {
-                            self.close();
-                        } else if (e.keyCode === 13) {
-                            self.color.from(self.$element.val());
-                            self.update({}, 'input');
-                            self.close();
-                        }
-                    },
-                    'keyup.asColorInput': function() {
+
+            if(this.options.readonly){
+                this.$element.prop('readonly', true);
+            }
+            
+            this.$element.on({
+                'click.asColorInput': function() {
+                    if (!self.opened) {
+                        self.open();
+                    }
+                    return false;
+                },
+                'keydown.asColorInput': function(e) {
+                    if (self.isGradient) {
+                        return;
+                    }
+                    if (e.keyCode === 9) {
+                        self.close();
+                    } else if (e.keyCode === 13) {
                         self.color.from(self.$element.val());
                         self.update({}, 'input');
+                        self.close();
                     }
-                });
-            }
+                },
+                'keyup.asColorInput': function() {
+                    if (self.isGradient) {
+                        return;
+                    }
+                    self.color.from(self.$element.val());
+                    self.update({}, 'input');
+                }
+            });
+            this.$clear.on('click', function() {
+                self.clear = true;
+                self.color.from('transparent');
+                self.update({});
+                self.$element.val('');
+                self.clear = false;
+                return false;
+            })
 
             this._trigger('ready');
         },
         create: function() {
             var self = this;
-            if (!this.options.flat) {
-                this.components.trigger.init(this);
-            }
-            $.each(this._comps, function(i, v) {
-                self.components[v] && self.components[v].init(self);
+            
+            this.components.trigger.init(this);
+            
+            $.each(this._comps, function(key, options) {
+                if (options === true) {
+                    options = {};
+                }
+                if (self.options.components[key] !== undefined) {
+                    options = $.extend(options, self.options.components[key]);
+                }
+                self.components[key] && self.components[key].init(self, options);
             });
+
             this._trigger('create');
-        },
-        bindEvent: function() {
-            $(window).on('resize.asColorInput', $.proxy(this.position, this));
-            this.$picker.on('click.asColorInput', function() {
-                return false;
-            });
-            this.$wrap.on('click.asColorInput', function() {
-                return false;
-            });
-        },
-        unbindEvent: function() {
-            $(window).off('resize.asColorInput');
         },
         _trigger: function(eventType) {
             // event
             this.$element.trigger('asColorInput::' + eventType, this);
+            this.$element.trigger(eventType + '.asColorInput', this);
 
             // callback
             eventType = eventType.replace(/\b\w+\b/g, function(word) {
@@ -198,28 +182,37 @@
             this._trigger('change', color);
 
             // update all components 
-            $.each(this._comps, function(i, v) {
-                if (trigger !== v) {
-                    self.components[v] && self.components[v].update && self.components[v].update(self);
+            $.each(this._comps, function(key, options) {
+                if (trigger !== key) {
+                    self.components[key] && self.components[key].update && self.components[key].update(self);
                 }
             });
 
-            if (!this.options.flat) {
-                this.components.trigger.update(this);
-            }
+            this.components.trigger.update(this);
 
             if (trigger !== 'input') {
                 if (!this.isGradient) {
-                    if (self.options.format) {
-                        self.$element.val(self.get(self.options.format));
-                    } else {
-                        self.$element.val(self.color.toString());
+                    this.updateInput();
+                }
+            }
+        },
+        updateInput: function(){
+            var format = this.options.format;
+
+            if (format) {
+                if(this.options.reduceAlpha && this.color.value.a === 1){
+                    switch(format){
+                        case 'rgba':
+                            format = 'rgb';
+                            break;
+                        case 'hsla':
+                            format = 'hsl';
+                            break;
                     }
                 }
-                if (self.options.localStorage) {
-                    var key = 'input_' + this.id;
-                    self.setLocalItem(key, self.$element.val());
-                }
+                this.$element.val(this.get(format));
+            } else {
+                this.$element.val(this.color.toString());
             }
         },
         opacity: function(data) {
@@ -236,8 +229,8 @@
                 offset = hidden ? this.$trigger.offset() : this.$element.offset(),
                 height = hidden ? this.$trigger.outerHeight() : this.$element.outerHeight(),
                 width = hidden ? this.$trigger.outerWidth() : this.$element.outerWidth() + this.$trigger.outerWidth(),
-                picker_width = this.$picker.outerWidth(true),
-                picker_height = this.$picker.outerHeight(true),
+                picker_width = this.$dropdown.outerWidth(true),
+                picker_height = this.$dropdown.outerHeight(true),
                 top, left;
 
             if (picker_height + offset.top > $(window).height() + $(window).scrollTop()) {
@@ -252,83 +245,92 @@
                 left = offset.left;
             }
 
-            this.$picker.css({
+            this.$dropdown.css({
                 position: 'absolute',
                 top: top,
                 left: left
             });
         },
-        // thanks to http://stackoverflow.com/questions/826782/css-rule-to-disable-text-selection-highlighting
-        makeUnselectable: function() {
-            $('body').addClass('unselectable');
-            if (IE) {
-                this.$picker.find("*:not(input)").attr("unselectable", "on");
-            }
-        },
-        cancelUnselectable: function() {
-            $('body').removeClass('unselectable');
-            if (IE) {
-                this.$picker.find("*:not(input)").removeAttr("unselectable");
-            }
-        },
-        setLocalItem: function(key, value) {
-            var prefixedKey = this.namespace + '_' + key,
-                jsonValue = JSON.stringify(value);
-            localStorage[prefixedKey] = jsonValue;
-        },
-        getLocalItem: function(key) {
-            var prefixedKey = this.namespace + '_' + key,
-                value = localStorage[prefixedKey];
-            return value ? JSON.parse(value) : value;
-        },
 
         /*
-            Public Method
+         *  Public Method
          */
-
-        show: function() {
+        open: function() {
             if (this.disabled) {
                 return;
             }
 
             var self = this;
 
-            this.$picker.on('mousedown', function(e) {
-                e.stopPropagation();
-            });
-
-            $(document).on('click.asColorInput', function() {
-                if (self.opened) {
-                    if (self.options.hideFireChange) {
-                        self.apply();
-                    } else {
-                        self.close();
-                    }
-                }
-            });
-
-            if (this.options.flat === false) {
-                this.position();
-                this.bindEvent();
+            if(this.$dropdown[0] !== this.$body.children().last()[0]) {
+                this.$dropdown.detach().appendTo(this.$body);
             }
 
-            this.$picker.addClass(this.classes.show);
+            this.$mask = $('.'+self.classes.mask);
+            if (this.$mask.length == 0) {
+                this.createMask();
+            }
+
+            // ensure the mask is always right before the dropdown
+            if(this.$dropdown.prev()[0] !== this.$mask[0]){
+                this.$dropdown.before(this.$mask);
+            }
+
+            $("#asColorInput-dropdown").removeAttr("id");
+            this.$dropdown.attr("id", "asColorInput-dropdown");
+
+            // show the mask
+            this.$mask.show();
+
+            this.position();
+
+            $(window).on('resize.asColorInput', $.proxy(this.position, this));
+
+            this.$dropdown.addClass(this.classes.open);
 
             this.opened = true;
-            this.isFirstOpen = false;
-            this._trigger('show');
+
+            if(this.firstOpen){
+                this.firstOpen = false;
+
+                this._trigger('firstOpen');
+            }
+            this._trigger('open');
+        },
+        createMask: function(){
+            this.$mask = $(document.createElement("div"));
+            this.$mask.attr("class",this.classes.mask);
+            this.$mask.hide();
+            this.$mask.appendTo(this.$body);
+
+            var self = this;
+
+            this.$mask.on("mousedown touchstart click", function (e) {
+                var $dropdown = $("#asColorInput-dropdown"), self;
+                if ($dropdown.length > 0) {
+                    self = $dropdown.data("asColorInput");
+                    if (self.opened) {
+                        if (self.options.hideFireChange) {
+                            self.apply();
+                        } else {
+                            self.cancel();
+                        }
+                    }
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
         },
         close: function() {
-            if (this.options.flat === true) {
-                return;
-            }
-            $(document).off('click.asColorInput');
-            this.unbindEvent();
-
             this.opened = false;
             this.$element.blur();
+            this.$mask.hide();
 
-            this.$picker.removeClass(this.classes.show);
+            this.$dropdown.removeClass(this.classes.open);
+
+            $(window).off('resize.asColorInput');
+
             this._trigger('close');
         },
         clear: function() {
@@ -340,11 +342,15 @@
             this.color.from(this.originalColor);
             this.update({});
             this.close();
+
+            return false;
         },
         apply: function() {
             this.originalColor = this.color.toRGBA();
             this.close();
             this._trigger('apply');
+
+            return false;
         },
         set: function(value) {
             this.color.from(value);
@@ -382,7 +388,7 @@
             return this;
         },
         destroy: function() {
-            // need to fix
+
         }
     };
 
@@ -396,34 +402,50 @@
         namespace: 'asColorInput',
         readonly: false,
         skin: null,
-        flat: false,
-        showInput: false,
-        localStorage: true,
+        hideInput: false,
         hideFireChange: true,
         keyboard: false,
-        onlyBtn: false,
-        format: 'rgb',
-        name: null,
+        format: 'rgba',
+        reduceAlpha: true,
+        mode: 'simple',
         components: {
-            check: {
-                disabled: 'apply',
-                applyText: 'apply',
-                cancelText: 'cancel'
-            }
-        }, // callback onInit:
+            
+        },
         onInit: null,
         onReady: null,
         onChange: null,
         onClose: null,
-        onShow: null,
+        onOpen: null,
         onApply: null
     };
 
-    AsColorInput.skins = {
-        'flatSpirit': 'saturation,hHue,hAlpha,hex,preview,palettes,check,gradient',
-        'realWorld': 'saturation,hue,alpha,hex,preview,check',
-        'fullStack': 'saturation,hue,alpha,hex,preview,palettes,gradient',
-        'basicStyle': 'saturation,hue,hex,preview,palettes,check,gradient'
+    AsColorInput.modes = {
+        'simple': {
+            saturation: true,
+            hue: true,
+            alpha: true
+        },
+        'palettes': {
+            palettes: true
+        },
+        'complex': {
+            preview: true,
+            palettes: true,
+            saturation: true,
+            hue: true,
+            alpha: true,
+            hex: true,
+            buttons: true
+        },
+        'gradient': {
+            preview: true,
+            palettes: true,
+            saturation: true,
+            hue: true,
+            alpha: true,
+            hex: true,
+            gradient: true
+        }
     };
 
     AsColorInput.registerComponent('trigger', {
@@ -436,17 +458,22 @@
             api.$trigger.insertAfter(api.$element);
             api.$trigger.on('click', function() {
                 if (!api.opened) {
-                    api.show();
+                    api.open();
                 } else {
                     api.close();
                 }
-                api.opened = !api.opened;
                 return false;
             });
             this.update(api);
         },
         update: function(api) {
-            this.$trigger_inner.css('backgroundColor', api.color.toRGBA());
+            if (api.isGradient) {
+                this.$trigger_inner.css('backgroundColor', 'transparent');
+                this.$trigger_inner[0].style.backgroundImage = api.gradient;
+            }else {
+                this.$trigger_inner[0].style.backgroundImage = '';
+                this.$trigger_inner.css('backgroundColor', api.color.toRGBA());
+            }
         },
         destroy: function(api) {
             api.$trigger.remove();
@@ -473,14 +500,15 @@
             });
         }
     };
-}(window, document, jQuery, (function() {
+}(window, document, jQuery, (function($) {
     if ($.asColor === undefined) {
         // console.info('lost dependency lib of $.asColor , please load it first !');
         return false;
     } else {
         return $.asColor;
     }
-}())));
+}(jQuery))));
+
 // keyboard
 (function(window, document, $, undefined) {
     var $doc = $(document);
@@ -533,279 +561,44 @@
         }
     });
 })(window, document, jQuery);
-// hAlpha
 
-(function($) {
-    $.asColorInput.registerComponent('hAlpha', {
-        width: 150,
-        data: {},
-        init: function(api) {
-            var self = this;
-            var template = '<div class="' + api.namespace + '-alpha drag-disable"><i class="drag-disable"></i></div>';
-            this.$alpha = $(template).appendTo(api.$picker);
-            this.$handle = this.$alpha.children('i');
-
-            //bind action
-            this.$alpha.on('mousedown.asColorInput', function(e) {
-                var rightclick = (e.which) ? (e.which == 3) : (e.button == 2);
-                if (rightclick) {
-                    return false;
-                }
-                $.proxy(self.mousedown, self)(api, e);
-            });
-
-            api.$element.on('asColorInput::ready', function(event, instance) {
-                self.width = self.$alpha.width();
-                self.step = self.width / 100;
-                self.update(api);
-                self.keyboard(api);
-            });
-        },
-        mousedown: function(api, e) {
-            var offset = this.$alpha.offset();
-
-            this.data.startX = e.pageX;
-            this.data.left = e.pageX - offset.left;
-            this.move(api, this.data.left);
-
-            api.makeUnselectable();
-
-            this.mousemove = function(e) {
-                var position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
-                this.move(api, position);
-                return false;
-            };
-
-            this.mouseup = function(e) {
-                $(document).off({
-                    mousemove: this.mousemove,
-                    mouseup: this.mouseup
-                });
-                this.data.left = this.data.cach;
-                api.cancelUnselectable();
-                return false;
-            };
-
-            $(document).on({
-                mousemove: $.proxy(this.mousemove, this),
-                mouseup: $.proxy(this.mouseup, this)
-            });
-            return false;
-        },
-        move: function(api, position, alpha, update) {
-            position = Math.max(0, Math.min(this.width, position));
-            this.data.cach = position;
-            if (typeof alpha === 'undefined') {
-                alpha = 1 - (position / this.width);
-            }
-            alpha = Math.max(0, Math.min(1, alpha));
-            this.$handle.css({
-                left: position
-            });
-            if (update !== false) {
-                api.update({
-                    a: Math.round(alpha * 100) / 100
-                }, 'hAlpha');
-            }
-        },
-        moveLeft: function(api) {
-            var step = this.step,
-                data = this.data;
-            data.left = data.left - step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.left = Math.max(0, Math.min(this.width, data.left));
-            this.move(api, data.left);
-        },
-        moveRight: function(api) {
-            var step = this.step,
-                data = this.data;
-            data.left = data.left + step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.left = Math.max(0, Math.min(this.width, data.left));
-            this.move(api, data.left);
-        },
-        keyboard: function(api) {
-            var keyboard, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
-            } else {
-                return false;
-            }
-
-            this.$alpha.attr('tabindex', '0').on('focus', function() {
-                keyboard.attach({
-                    left: function() {
-                        self.moveLeft.call(self, api);
-                    },
-                    right: function() {
-                        self.moveRight.call(self, api);
-                    }
-                });
-                return false;
-            }).on('blur', function(e) {
-                keyboard.detach();
-            });
-        },
-        update: function(api) {
-            var position = this.width * (1 - api.color.value.a);
-            this.$alpha.css('backgroundColor', api.color.toHEX());
-
-            this.move(api, position, api.color.value.a, false);
-        },
-        destroy: function(api) {
-            $(document).off({
-                mousemove: this.mousemove,
-                mouseup: this.mouseup
-            });
-        }
-    });
-})(jQuery);
-// hHue
-
-(function($) {
-    $.asColorInput.registerComponent('hHue', {
-        width: 150,
-        data: {},
-        init: function(api) {
-            var self = this;
-            var template = '<div class="' + api.namespace + '-hue drag-disable"><i class="drag-disable"></i></div>';
-            this.$hue = $(template).appendTo(api.$picker);
-            this.$handle = this.$hue.children('i');
-
-            //bind action
-            this.$hue.on('mousedown.asColorInput', function(e) {
-                var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                if (rightclick) {
-                    return false;
-                }
-                $.proxy(self.mousedown, self)(api, e);
-            });
-
-            api.$element.on('asColorInput::ready', function() {
-                self.width = self.$hue.width();
-                self.step = self.width / 360;
-                self.update(api);
-                self.keyboard(api);
-            });
-        },
-        mousedown: function(api, e) {
-            var offset = this.$hue.offset();
-
-            this.data.startX = e.pageX;
-            this.data.left = e.pageX - offset.left;
-            this.move(api, this.data.left);
-
-            api.makeUnselectable();
-
-            this.mousemove = function(e) {
-                var position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
-                this.move(api, position);
-                return false;
-            };
-
-            this.mouseup = function() {
-                $(document).off({
-                    mousemove: this.mousemove,
-                    mouseup: this.mouseup
-                });
-                this.data.left = this.data.cach;
-                api.cancelUnselectable();
-                return false;
-            };
-
-            $(document).on({
-                mousemove: $.proxy(this.mousemove, this),
-                mouseup: $.proxy(this.mouseup, this)
-            });
-            return false;
-        },
-        move: function(api, position, hub, update) {
-            position = Math.max(0, Math.min(this.width, position));
-            this.data.cach = position;
-            if (typeof hub === 'undefined') {
-                hub = (1 - position / this.width) * 360;
-            }
-
-            hub = Math.max(0, Math.min(360, hub));
-            this.$handle.css({
-                left: position,
-                background: $.asColor.HSVtoHEX({
-                    h: hub,
-                    s: 1,
-                    v: 1
-                })
-            });
-            if (update !== false) {
-                api.update({
-                    h: hub
-                }, 'hHue');
-            }
-        },
-        moveLeft: function(api) {
-            var step = this.step,
-                data = this.data;
-            data.left = data.left - step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.left = Math.max(0, Math.min(this.width, data.left));
-            this.move(api, data.left);
-        },
-        moveRight: function(api) {
-            var step = this.step,
-                data = this.data;
-            data.left = data.left + step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.left = Math.max(0, Math.min(this.width, data.left));
-            this.move(api, data.left);
-        },
-        keyboard: function(api) {
-            var keyboard, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
-            } else {
-                return false;
-            }
-
-            this.$hue.attr('tabindex', '0').on('focus', function() {
-                keyboard.attach({
-                    left: function() {
-                        self.moveLeft.call(self, api);
-                    },
-                    right: function() {
-                        self.moveRight.call(self, api);
-                    }
-                });
-                return false;
-            }).on('blur', function() {
-                keyboard.detach();
-            });
-        },
-        update: function(api) {
-            var position = (api.color.value.h === 0) ? 0 : this.width * (1 - api.color.value.h / 360);
-            this.move(api, position, api.color.value.h, false);
-        },
-        destroy: function() {
-            $(document).off({
-                mousemove: this.mousemove,
-                mouseup: this.mouseup
-            });
-        }
-    });
-})(jQuery);
 // alpha
 
 (function($) {
     $.asColorInput.registerComponent('alpha', {
-        height: 150,
+        size: 150,
+        defaults: {
+            direction: 'vertical', // horizontal
+        },
         data: {},
-        init: function(api) {
+        init: function(api, options) {
             var self = this;
 
-            this.$alpha = $('<div class="' + api.namespace + '-alpha drag-disable"><i class="drag-disable"></i></div>').appendTo(api.$picker);
+            this.options = $.extend(this.defaults, options);
+            self.direction = this.options.direction;
+
+            this.$alpha = $('<div class="' + api.namespace + '-alpha ' + api.namespace + '-alpha-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
             this.$handle = this.$alpha.children('i');
 
-            this.height = this.$alpha.height();
+            api.$element.on('asColorInput::firstOpen', function() {
+                // init variable
+                if (self.direction === 'vertical') {
+                    self.size = self.$alpha.height();
+                } else {
+                    self.size = self.$alpha.width();
+                }
+                self.step = self.size / 360;
 
-            //bind action
+                // update
+                self.update(api);
+
+                // bind events
+                self.bindEvents(api);
+                self.keyboard(api);
+            });
+        },
+        bindEvents: function(api){
+            var self = this;
             this.$alpha.on('mousedown.asColorInput', function(e) {
                 var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                 if (rightclick) {
@@ -813,25 +606,27 @@
                 }
                 $.proxy(self.mousedown, self)(api, e);
             });
-
-            api.$element.on('asColorInput::ready', function() {
-                self.height = self.$alpha.height();
-                self.step = self.height / 100;
-                self.update(api);
-                self.keyboard(api);
-            });
         },
         mousedown: function(api, e) {
             var offset = this.$alpha.offset();
-
-            this.data.startY = e.pageY;
-            this.data.top = e.pageY - offset.top;
-            this.move(api, this.data.top);
-
-            api.makeUnselectable();
+            if (this.direction === 'vertical') {
+                this.data.startY = e.pageY;
+                this.data.top = e.pageY - offset.top;
+                this.move(api, this.data.top);
+            } else {
+                this.data.startX = e.pageX;
+                this.data.left = e.pageX - offset.left;
+                this.move(api, this.data.left);
+            }
 
             this.mousemove = function(e) {
-                var position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
+                var position;
+                if (this.direction === 'vertical') {
+                    position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
+                } else {
+                    position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
+                }
+
                 this.move(api, position);
                 return false;
             };
@@ -841,8 +636,12 @@
                     mousemove: this.mousemove,
                     mouseup: this.mouseup
                 });
-                this.data.top = this.data.cach;
-                api.cancelUnselectable();
+                if (this.direction === 'vertical') {
+                    this.data.top = this.data.cach;
+                } else {
+                    this.data.left = this.data.cach;
+                }
+
                 return false;
             };
 
@@ -853,35 +652,50 @@
             return false;
         },
         move: function(api, position, alpha, update) {
-            position = Math.max(0, Math.min(this.height, position));
+            position = Math.max(0, Math.min(this.size, position));
             this.data.cach = position;
             if (typeof alpha === 'undefined') {
-                alpha = 1 - (position / this.height);
+                alpha = 1 - (position / this.size);
             }
             alpha = Math.max(0, Math.min(1, alpha));
-            this.$handle.css({
-                top: position
-            });
+            if (this.direction === 'vertical') {
+                this.$handle.css({
+                    top: position
+                });
+            } else {
+                this.$handle.css({
+                    left: position
+                });
+            }
+
             if (update !== false) {
                 api.update({
                     a: Math.round(alpha * 100) / 100
                 }, 'alpha');
             }
         },
+        moveLeft: function(api) {
+            var step = this.step,
+                data = this.data;
+            data.left = Math.max(0, Math.min(this.width, data.left - step));
+            this.move(api, data.left);
+        },
+        moveRight: function(api) {
+            var step = this.step,
+                data = this.data;
+            data.left = Math.max(0, Math.min(this.width, data.left + step));
+            this.move(api, data.left);
+        },
         moveUp: function(api) {
             var step = this.step,
                 data = this.data;
-            data.top = data.top - step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.top = Math.max(0, Math.min(this.width, data.top));
+            data.top = Math.max(0, Math.min(this.width, data.top - step));
             this.move(api, data.top);
         },
         moveDown: function(api) {
             var step = this.step,
                 data = this.data;
-            data.top = data.top + step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.top = Math.max(0, Math.min(this.width, data.top));
+            data.top = Math.max(0, Math.min(this.width, data.top + step));
             this.move(api, data.top);
         },
         keyboard: function(api) {
@@ -893,21 +707,32 @@
             }
 
             this.$alpha.attr('tabindex', '0').on('focus', function() {
-                keyboard.attach({
-                    up: function() {
-                        self.moveUp.call(self, api);
-                    },
-                    down: function() {
-                        self.moveDown.call(self, api);
-                    }
-                });
+                if (this.direction === 'vertical') {
+                    keyboard.attach({
+                        up: function() {
+                            self.moveUp.call(self, api);
+                        },
+                        down: function() {
+                            self.moveDown.call(self, api);
+                        }
+                    });
+                } else {
+                    keyboard.attach({
+                        left: function() {
+                            self.moveLeft.call(self, api);
+                        },
+                        right: function() {
+                            self.moveRight.call(self, api);
+                        }
+                    });
+                }
                 return false;
             }).on('blur', function() {
                 keyboard.detach();
             });
         },
         update: function(api) {
-            var position = this.height * (1 - api.color.value.a);
+            var position = this.size * (1 - api.color.value.a);
             this.$alpha.css('backgroundColor', api.color.toHEX());
 
             this.move(api, position, api.color.value.a, false);
@@ -920,40 +745,43 @@
         }
     });
 })(jQuery);
-// check
+
+// buttons
 
 (function($) {
-    $.asColorInput.registerComponent('check', {
-        init: function(api) {
-            var opts = $.extend(this.defaults, api.options.components.check);
-            var template = '<div class="' + api.namespace + '-check drag-disable"><a class="' + api.namespace + '-check-apply drag-disable"></a><a class="' + api.namespace + '-check-cancel drag-disable"></a></div>';
-            this.$check = $(template).appendTo(api.$picker);
-            this.$apply = this.$check.find('.' + api.namespace + '-check-apply').text(opts.applyText);
-            this.$cancel = this.$check.find('.' + api.namespace + '-check-cancel').text(opts.cancelText);
+    $.asColorInput.registerComponent('buttons', {
+        defaults: {
+            apply: false,
+            cancel: true,
+            applyText: 'apply',
+            cancelText: 'cancel'
+        },
+        init: function(api, options) {
+            var self = this;
 
-            if (opts.disabled === 'cancel') {
-                this.$cancel.css({
-                    display: 'none'
-                });
-            }
-            if (opts.disabled === 'apply') {
-                this.$apply.css({
-                    display: 'none'
-                });
-            }
+            this.options = $.extend(this.defaults, options);
+            this.$buttons = $('<div class="' + api.namespace + '-buttons"></div>').appendTo(api.$dropdown);
 
-            this.$apply.on('click', $.proxy(api.apply, api));
-            this.$cancel.on('click', $.proxy(api.cancel, api));
+            api.$element.on('asColorInput::firstOpen', function() {
+                if (self.options.apply) {
+                    self.$apply = $('<a href="#" alt="'+self.options.applyText+'" class="' + api.namespace + '-buttons-apply"></a>').text(self.options.applyText).appendTo(self.$buttons).on('click', $.proxy(api.apply, api));
+                }
+
+                if (self.options.cancel) {
+                    self.$cancel = $('<a href="#" alt="'+self.options.cancelText+'" class="' + api.namespace + '-buttons-cancel"></a>').text(self.options.cancelText).appendTo(self.$buttons).on('click', $.proxy(api.cancel, api));
+                }
+            });
         }
     });
 })(jQuery);
+
 // hex
 
 (function($) {
     $.asColorInput.registerComponent('hex', {
         init: function(api) {
             var template = '<input type="text" class="' + api.namespace + '-hex" />';
-            this.$hex = $(template).appendTo(api.$picker);
+            this.$hex = $(template).appendTo(api.$dropdown);
 
             this.$hex.on('change', function() {
                 api.set(this.value);
@@ -966,21 +794,44 @@
         },
     });
 })(jQuery);
+
 // hue
 
 (function($) {
     $.asColorInput.registerComponent('hue', {
-        height: 150,
+        size: 150,
+        defaults: {
+            direction: 'vertical', // horizontal
+        },
         data: {},
-        init: function(api) {
+        init: function(api, options) {
             var self = this;
-            var template = '<div class="' + api.namespace + '-hue drag-disable"><i clsss="drag-disable"></i></div>';
-            this.$hue = $(template).appendTo(api.$picker);
+
+            this.options = $.extend(this.defaults, options);
+            this.direction = this.options.direction;
+
+            this.$hue = $('<div class="' + api.namespace + '-hue ' + api.namespace + '-hue-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
             this.$handle = this.$hue.children('i');
 
-            this.height = this.$hue.height();
+            api.$element.on('asColorInput::firstOpen', function() {
+                // init variable
+                if (self.direction === 'vertical') {
+                    self.size = self.$hue.height();
+                } else {
+                    self.size = self.$hue.width();
+                }
+                self.step = self.size / 360;
 
-            //bind action
+                // update
+                self.update(api);
+
+                // bind events
+                self.bindEvents(api);
+                self.keyboard(api);
+            });
+        },
+        bindEvents: function(api){
+            var self = this;
             this.$hue.on('mousedown.asColorInput', function(e) {
                 var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                 if (rightclick) {
@@ -988,25 +839,27 @@
                 }
                 $.proxy(self.mousedown, self)(api, e);
             });
-
-            api.$element.on('asColorInput::ready', function() {
-                self.height = self.$hue.height();
-                self.step = self.height / 360;
-                self.update(api);
-                self.keyboard(api);
-            });
         },
         mousedown: function(api, e) {
             var offset = this.$hue.offset();
-
-            this.data.startY = e.pageY;
-            this.data.top = e.pageY - offset.top;
-            this.move(api, this.data.top);
-
-            api.makeUnselectable();
+            if (this.direction === 'vertical') {
+                this.data.startY = e.pageY;
+                this.data.top = e.pageY - offset.top;
+                this.move(api, this.data.top);
+            } else {
+                this.data.startX = e.pageX;
+                this.data.left = e.pageX - offset.left;
+                this.move(api, this.data.left);
+            }
 
             this.mousemove = function(e) {
-                var position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
+                var position;
+                if (this.direction === 'vertical') {
+                    position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
+                } else {
+                    position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
+                }
+
                 this.move(api, position);
                 return false;
             };
@@ -1016,8 +869,12 @@
                     mousemove: this.mousemove,
                     mouseup: this.mouseup
                 });
-                this.data.top = this.data.cach;
-                api.cancelUnselectable();
+                if (this.direction === 'vertical') {
+                    this.data.top = this.data.cach;
+                } else {
+                    this.data.left = this.data.cach;
+                }
+
                 return false;
             };
 
@@ -1029,40 +886,50 @@
             return false;
         },
         move: function(api, position, hub, update) {
-            position = Math.max(0, Math.min(this.height, position));
+            position = Math.max(0, Math.min(this.size, position));
             this.data.cach = position;
             if (typeof hub === 'undefined') {
-                hub = (1 - position / this.height) * 360;
+                hub = (1 - position / this.size) * 360;
             }
             hub = Math.max(0, Math.min(360, hub));
-            this.$handle.css({
-                top: position
-            });
+            if (this.direction === 'vertical') {
+                this.$handle.css({
+                    top: position
+                });
+            } else {
+                this.$handle.css({
+                    left: position
+                });
+            }
             if (update !== false) {
                 api.update({
                     h: hub
                 }, 'hue');
             }
         },
+        moveLeft: function(api) {
+            var step = this.step,
+                data = this.data;
+            data.left = Math.max(0, Math.min(this.width, data.left - step));
+            this.move(api, data.left);
+        },
+        moveRight: function(api) {
+            var step = this.step,
+                data = this.data;
+            data.left = Math.max(0, Math.min(this.width, data.left + step));
+            this.move(api, data.left);
+        },
         moveUp: function(api) {
             var step = this.step,
                 data = this.data;
-            data.top = data.top - step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.top = Math.max(0, Math.min(this.width, data.top));
+            data.top = Math.max(0, Math.min(this.width, data.top - step));
             this.move(api, data.top);
         },
         moveDown: function(api) {
             var step = this.step,
                 data = this.data;
-            data.top = data.top + step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.top = Math.max(0, Math.min(this.width, data.top));
+            data.top = Math.max(0, Math.min(this.width, data.top + step));
             this.move(api, data.top);
-        },
-        update: function(api) {
-            var position = (api.color.value.h === 0) ? 0 : this.height * (1 - api.color.value.h / 360);
-            this.move(api, position, api.color.value.h, false);
         },
         keyboard: function(api) {
             var keyboard, self = this;
@@ -1073,18 +940,33 @@
             }
 
             this.$hue.attr('tabindex', '0').on('focus', function() {
-                keyboard.attach({
-                    up: function() {
-                        self.moveUp.call(self, api);
-                    },
-                    down: function() {
-                        self.moveDown.call(self, api);
-                    }
-                });
+                if (this.direction === 'vertical') {
+                    keyboard.attach({
+                        up: function() {
+                            self.moveUp.call(self, api);
+                        },
+                        down: function() {
+                            self.moveDown.call(self, api);
+                        }
+                    });
+                } else {
+                    keyboard.attach({
+                        left: function() {
+                            self.moveLeft.call(self, api);
+                        },
+                        right: function() {
+                            self.moveRight.call(self, api);
+                        }
+                    });
+                }
                 return false;
             }).on('blur', function() {
                 keyboard.detach();
             });
+        },
+        update: function(api) {
+            var position = (api.color.value.h === 0) ? 0 : this.size * (1 - api.color.value.h / 360);
+            this.move(api, position, api.color.value.h, false);
         },
         destroy: function() {
             $(document).off({
@@ -1094,6 +976,7 @@
         }
     });
 })(jQuery);
+
 // info
 
 (function($) {
@@ -1101,12 +984,11 @@
         color: ['white', 'black', 'transparent'],
         init: function(api) {
             var template = '<ul class="' + api.namespace + '-info">' + '<li><label>R:<input type="text" data-type="r"/></label></li>' + '<li><label>G:<input type="text" data-type="g"/></label></li>' + '<li><label>B:<input type="text" data-type="b"/></label></li>' + '<li><label>A:<input type="text" data-type="a"/></label></li>' + '</ul>';
-            this.$info = $(template).appendTo(api.$picker);
+            this.$info = $(template).appendTo(api.$dropdown);
             this.$r = this.$info.find('[data-type="r"]');
             this.$g = this.$info.find('[data-type="g"]');
             this.$b = this.$info.find('[data-type="b"]');
             this.$a = this.$info.find('[data-type="a"]');
-
 
             this.$info.delegate('input', 'keyup update change', function(e) {
                 var val;
@@ -1149,160 +1031,109 @@
         },
     });
 })(jQuery);
+
 // palettes
 
 (function($) {
+    function noop() {
+        return;
+    }
+    if (!window.localStorage) {
+        window.localStorage = noop;
+    }
+
     $.asColorInput.registerComponent('palettes', {
-        height: 150,
-        palettes: {
-            defines: [''],
-            colors: ['#fff', '#000', '#000', '#ccc'],
-            max: 6
+        defaults: {
+            colors: ['#fff', '#ffff00', '#f00', '#0f0', '#0ff', '#000'],
+            max: 10,
+            localStorage: true
         },
-        init: function(api) {
-            var list = '<ul>',
-                self = this,
-                palettes = $.extend(true, {}, this.palettes, api.options.components.palettes);
+        init: function(api, options) {
+            var self = this;
 
-            this.keyboardBinded = false;
+            this.options = $.extend(true, {}, this.defaults, options);
 
-            if (api.options.localStorage) {
-                var storeKey = 'palettes_' + api.id;
-                var storeValue = api.getLocalItem(storeKey);
+            // load colors from local storage
+            if (this.options.localStorage) {
+                var storeKey = api.namespace + '_palettes_' + api.id;
+                var storeValue = this.getLocalItem(storeKey);
                 if (storeValue) {
-                    palettes.colors = storeValue;
+                    this.options.colors = storeValue;
                 }
             }
 
-            $.each(palettes.colors, function(index, value) {
-                list += '<li style="background-color:' + value + '" data-color="' + value + '">' + value + '</li>';
+            var list = '';
+            $.each(this.options.colors, function(index, value) {
+                list += self.getItem(value);
             });
 
-            list += '</ul>';
-
-            this.$list = $(list);
-            this.$palettes = $('<div class="' + api.namespace + '-palettes"></div>').append(this.$list).appendTo(api.$picker);
+            this.$palettes = $('<ul class="' + api.namespace + '-palettes"></ul>').html(list).appendTo(api.$dropdown);
 
             this.$palettes.delegate('li', 'click', function(e) {
-                var color = $(e.target).data('color');
-                self.$list.find('li').removeClass('' + api.namespace + '-palettes-checked');
-                $(e.target).addClass('' + api.namespace + '-palettes-checked');
-                api.set(color);
-                // fix: does here need close ?
-                // api.close();
-            });
+                var color = $(this).data('color');
 
-            this.$palettes.attr('tabindex', '0').on('blur', function() {
-                self.$list.find('li').removeClass('' + api.namespace + '-palettes-checked');
+                api.set(color);
+
+                e.preventDefault();
+                e.stopPropagation();
             });
 
             api.$element.on('asColorInput::apply', function(event, api) {
-                if (palettes.colors.indexOf(api.originalColor) !== -1) {
+                if (self.options.colors.indexOf(api.originalColor) !== -1) {
                     return;
                 }
-                if (palettes.colors.length >= palettes.max) {
-                    palettes.colors.shift();
-                    self.$list.find('li').eq(0).remove();
+                if (self.options.colors.length >= self.options.max) {
+                    self.options.colors.shift();
+                    self.$palettes.find('li').eq(0).remove();
                 }
-                palettes.colors.push(api.originalColor);
-                self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>');
+                self.options.colors.push(api.originalColor);
+                self.$palettes.append(self.getItem(api.originalColor));
 
-                if (api.options.localStorage) {
-                    api.setLocalItem(storeKey, palettes.colors);
+                if (self.options.localStorage) {
+                    self.setLocalItem(storeKey, self.options.colors);
                 }
-            });
-            api.$element.on('asColorInput::ready', function() {
-                self.keyboard(api);
-                return false;
             });
         },
-        keyboard: function(api) {
-            var keyboard, index, len, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
-            } else {
-                return false;
-            }
+        getItem: function(color){
+            return '<li data-color="' + color + '"><div style="background-color:' + color + '" /></li>';
+        },
+        setLocalItem: function(key, value) {
+            var jsonValue = JSON.stringify(value);
 
-            this.$palettes.attr('tabindex', '0').on('blur', function() {
-                keyboard.detach();
-                self.keyboardBinded = false;
-            });
+            localStorage[key] = jsonValue;
+        },
+        getLocalItem: function(key) {
+            var value = localStorage[key];
 
-            this.$palettes.attr('tabindex', '0').on('focus', function() {
-                if (self.keyboardBinded === true) {
-                    return;
-                }
-                var $lists = self.$list.find('li');
-                index = -1;
-                len = $lists.length;
-
-                function select(index) {
-                    $lists.removeClass(api.namespace + '-palettes-checked');
-                    $lists.eq(index).addClass(api.namespace + '-palettes-checked');
-                }
-
-                function getIndex() {
-                    return $lists.index(self.$palettes.find('.' + api.namespace + '-palettes-checked'));
-                }
-
-                keyboard.attach({
-                    left: function() {
-                        var hasIndex = getIndex();
-                        if (hasIndex === -1) {
-                            index = index - 1;
-                        } else {
-                            index = hasIndex - 1;
-                        }
-                        if (index < 0) {
-                            index = len - 1;
-                        }
-                        select(index);
-                    },
-                    right: function() {
-                        var hasIndex = getIndex();
-                        if (hasIndex === -1) {
-                            index = index + 1;
-                        } else {
-                            index = hasIndex + 1;
-                        }
-                        if (index >= len) {
-                            index = 0;
-                        }
-                        select(index);
-                    },
-                    RETURN: function() {
-                        if (index < 0) {
-                            return;
-                        }
-                        var color = $lists.eq(index).data('color');
-                        api.set(color);
-                        api.close();
-                    }
-                });
-
-                self.keyboardBinded = true;
-            });
+            return value ? JSON.parse(value) : value;
         }
     });
 })(jQuery);
+
 // preview
 
 (function($) {
     $.asColorInput.registerComponent('preview', {
-        height: 150,
         init: function(api) {
             var self = this;
-            var template = '<div class="' + api.namespace + '-preview"><span class="' + api.namespace + '-preview-previous drag-disable"></span><span class="' + api.namespace + '-preview-current"></span></div>';
-            this.$preview = $(template).appendTo(api.$picker);
-            this.$current = this.$preview.find('.' + api.namespace + '-preview-current');
-            this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous');
-            this.update(api);
-            // init $previous color
-            self.$previous.css('backgroundColor', api.color.toRGBA());
+            var template = '<ul class="' + api.namespace + '-preview"><li class="' + api.namespace + '-preview-current"><div /></li><li class="' + api.namespace + '-preview-previous"><div /></li></ul>';
+            this.$preview = $(template).appendTo(api.$dropdown);
+            this.$current = this.$preview.find('.' + api.namespace + '-preview-current div');
+            this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous div');
 
-            api.$element.on('asColorInput::apply', function(event, api) {
+            api.$element.on('asColorInput::firstOpen', function() {
+                self.update(api);
                 self.$previous.css('backgroundColor', api.color.toRGBA());
+
+                api.$element.on('asColorInput::apply', function(event, api) {
+                    self.$previous.css('backgroundColor', api.color.toRGBA());
+                });
+
+                self.$previous.on('click', function(){
+                    api.set(api.originalColor);
+
+                    return false;
+                }); 
             });
         },
         update: function(api) {
@@ -1315,41 +1146,46 @@
 (function($) {
     $.asColorInput.registerComponent('saturation', {
         defaults: {},
-        options: {},
         width: 0,
         height: 0,
         size: 6,
         data: {},
-        init: function(api) {
-            var opts = $.extend(this.defaults, api.options.components.saturation),
-                self = this;
-            var template = '<div class="' + api.namespace + '-saturation drag-disable"><i class="drag-disable"><b class="drag-disable"></b></i></div>';
-            this.options = opts;
+        init: function(api, options) {
+            var self = this;
+            var template = '<div class="' + api.namespace + '-saturation"><i><b></b></i></div>';
+            this.options = $.extend(this.defaults, options),
 
             //build element and add component to picker
-            this.$saturation = $(template).appendTo(api.$picker);
+            this.$saturation = $(template).appendTo(api.$dropdown);
             this.$handle = this.$saturation.children('i');
 
-            this.step = {};
+            api.$element.on('asColorInput::firstOpen', function() {
+                // init variable
+                self.width = self.$saturation.width();
+                self.height = self.$saturation.height();
+                self.step = {
+                    left: self.width / 20,
+                    top: self.height / 20
+                };
+                self.size = self.$handle.width() / 2;
 
-            //bind action
+                // update
+                self.update(api);
+                
+                // bind events
+                self.bindEvents(api);
+                self.keyboard(api);
+            });
+        },
+        bindEvents: function(api) {
+            var self = this;
+
             this.$saturation.on('mousedown.asColorInput', function(e) {
                 var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                 if (rightclick) {
                     return false;
                 }
                 $.proxy(self.mousedown, self)(api, e);
-            });
-
-            api.$element.on('asColorInput::ready', function() {
-                self.width = self.$saturation.width();
-                self.height = self.$saturation.height();
-                self.step.left = self.width / 20;
-                self.step.top = self.height / 20;
-                self.size = self.$handle.width() / 2;
-
-                self.update(api);
-                self.keyboard(api);
             });
         },
         mousedown: function(api, e) {
@@ -1362,7 +1198,6 @@
             this.data.cach = {};
 
             this.move(api, this.data.left, this.data.top);
-            api.makeUnselectable();
 
             this.mousemove = function(e) {
                 var x = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
@@ -1378,12 +1213,10 @@
                 });
                 this.data.left = this.data.cach.left;
                 this.data.top = this.data.cach.top;
-                api.cancelUnselectable();
+
                 return false;
             };
 
-            // when mousedown ,bind the mousemove event to document
-            // when mouseup unbind the event
             $(document).on({
                 mousemove: $.proxy(this.mousemove, this),
                 mouseup: $.proxy(this.mouseup, this)
@@ -1414,7 +1247,6 @@
             }
         },
         update: function(api) {
-
             if (api.color.value.h === undefined) {
                 api.color.value.h = 0;
             }
@@ -1432,30 +1264,25 @@
         moveLeft: function(api) {
             var step = this.step.left,
                 data = this.data;
-            data.left = data.left - step;
-            // see https://github.com/amazingSurge/jquery-asColorInput/issues/8
-            data.left = Math.max(0, Math.min(this.width, data.left));
+            data.left = Math.max(0, Math.min(this.width, data.left - step));
             this.move(api, data.left, data.top);
         },
         moveRight: function(api) {
             var step = this.step.left,
                 data = this.data;
-            data.left = data.left + step;
-            data.left = Math.max(0, Math.min(this.width, data.left));
+            data.left = Math.max(0, Math.min(this.width, data.left + step));
             this.move(api, data.left, data.top);
         },
         moveUp: function(api) {
             var step = this.step.top,
                 data = this.data;
-            data.top = data.top - step;
-            data.top = Math.max(0, Math.min(this.width, data.top));
+            data.top = Math.max(0, Math.min(this.width, data.top - step));
             this.move(api, data.left, data.top);
         },
         moveDown: function(api) {
             var step = this.step.top,
                 data = this.data;
-            data.top = data.top + step;
-            data.top = Math.max(0, Math.min(this.width, data.top));
+            data.top = Math.max(0, Math.min(this.width, data.top + step));
             this.move(api, data.left, data.top);
         },
         keyboard: function(api) {
@@ -1494,6 +1321,7 @@
         }
     });
 })(jQuery);
+
 // gradient
 
 (function($) {
@@ -1502,24 +1330,31 @@
         count: 0,
         markers: [],
         current: null,
-        init: function(api) {
+        defaults: {
+            gradientText: 'Gradient',
+            cancelText: 'Cancel',
+            keepMode: false,
+        },
+        init: function(api, options) {
             var self = this;
+            this.options = $.extend(this.defaults, options);
+
             var template = '<div class="' + api.namespace + '-gradient-controll">' +
-                '<a href="#" class="' + api.namespace + '-gradient-trigger">Gradient</a>' +
-                '<a href="#" class="' + api.namespace + '-gradient-cancel">Cancel</a>' +
+                    '<a href="#" class="' + api.namespace + '-gradient-trigger">'+this.options.gradientText+'</a>' +
+                    '<a href="#" class="' + api.namespace + '-gradient-cancel">'+this.options.cancelText+'</a>' +
                 '</div>' +
                 '<div class="' + api.namespace + '-gradient">' +
-                '<div class="' + api.namespace + '-gradient-panel">' +
-                '<div class="' + api.namespace + '-gradient-markers"></div>' +
-                '</div>' +
-                '<div class="' + api.namespace + '-gradient-wheel">' +
-                '<i></i>' +
-                '</div>' +
-                '<input class="' + api.namespace + '-gradient-degree" type="text" value="360" size="3" />' +
+                    '<div class="' + api.namespace + '-gradient-panel">' +
+                        '<div class="' + api.namespace + '-gradient-markers"></div>' +
+                    '</div>' +
+                    '<div class="' + api.namespace + '-gradient-wheel">' +
+                         '<i></i>' +
+                    '</div>' +
+                    '<input class="' + api.namespace + '-gradient-degree" type="text" value="360" size="3" />' +
                 '</div>';
             this.api = api;
             this.classes = {
-                show: api.namespace + '-gradient' + '_show',
+                enable: api.namespace + '-gradient' + '_enable',
                 marker: api.namespace + '-gradient-marker',
                 active: api.namespace + '-gradient-marker_active'
             };
@@ -1527,8 +1362,8 @@
             this.initialized = false;
             this.$doc = $(document);
 
-            this.$template = $(template).appendTo(api.$picker);
-            this.$controll = this.$template.eq(0);
+            this.$template = $(template).appendTo(api.$dropdown);
+            this.$controll = self.$template.eq(0);
             this.$trigger = this.$controll.find('.' + api.namespace + '-gradient-trigger');
             this.$cancel = this.$controll.find('.' + api.namespace + '-gradient-cancel');
             this.$gradient = this.$template.eq(1);
@@ -1538,349 +1373,495 @@
             this.$pointer = this.$wheel.find('i');
             this.$degree = this.$gradient.find('.' + api.namespace + '-gradient-degree');
 
-            this.$trigger.on('click', function() {
-                if (self.isOpened) {
-                    self.$gradient.removeClass(self.classes.show);
-                    self.setGradient();
-                    api.isGradient = false;
-                    api.set(api.originalColor);
-                } else {
-                    self.$gradient.addClass(self.classes.show);
-                    api.isGradient = true;
-                    self.makeGradient();
-                }
-                self.isOpened = !self.isOpened;
-                return false;
-            });
-            this.$cancel.on('click', function() {
-                api.color.from(api.originalColor);
-                api.update({});
-                self.retrieve();
-                return false;
-            });
+            this.g_input.init(this);
+            this.g_controll.init(this);
+            this.g_panel.init(this);
+            this.g_wheel.init(this);
+            this.g_degree.init(this);
 
-            // create new marker
-            this.$markers.on('mousedown.asColorInput', function(e) {
-                var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                if (rightclick) {
-                    return false;
+            api.$element.on('asColorInput::ready', function(event, instance) {
+                if (instance.options.mode !== 'gradient') {
+                    return;
                 }
-                var position = e.pageX - self.$markers.offset().left;
-                var percent = Math.round((position / self.width) * 100);
-                self.makeMarker('#fff', percent);
-                self.makeGradient();
-                return false;
-            });
-            this.$wheel.on('mousedown.asColorInput', function(e) {
-                var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                if (rightclick) {
-                    return false;
+                if ((matched = self.g_input.gradient.match.exec(self.api.gradient)) != null) {
+                    self.keepGradient(self);
+                    self.g_input.gradient.parse(matched, self);
                 }
-                self.wheelMousedown(e);
-                return false;
-            });
 
-            api.$element.on('asColorInput::ready', function() {
-                self.width = self.$markers.width();
-            });
-            api.$element.on('asColorInput::change', function(event, instance) {
-                if (self.current && api.isGradient) {
-                    self.current.setColor(instance.color.toRGBA());
-                    self.makeGradient();
+                if (self.options.keepMode) {
+                    self.keepGradient(self);
                 }
             });
-            api.$element.on('asColorInput::close', function() {
-                if (api.isGradient) {
-                    self.setGradient();
-                }
-                return false;
-            });
-            this.$degree.on('blur.asColorInput', function() {
-                var deg = parseInt(this.value, 10);
-                self.setDegree(deg);
-                return false;
-            }).on('keydown.asColorInput', function(e) {
-                var key = e.keyCode || e.which;
-                if (key === 13) {
-                    $(this).blur();
-                    return false;
-                }
-            });
-
-            this.makeMarker('#fff', 0);
-            this.makeMarker('#000', 100);
-            setTimeout(function() {
-                self.setDegree(0);
-                self.initialized = true;
-            }, 0);
         },
-        mousedown: function(e, dom) {
-            // get current marker
-            var id = $(dom).data('id');
-            var instance;
-            $.each(this.markers, function(key, marker) {
-                if (marker._id === id) {
-                    instance = marker;
-                }
-            });
-            this.current = instance;
+        keepGradient: function(self) {
+            self.width = self.$markers.width();
+            self.isOpened = true;
+            self.$gradient.addClass(self.classes.enable);
+            self.api.isGradient = true;
+            self.g_controll.makeGradient(self);
+            self.api.position();
+        },
+        g_input: {
+            init: function(self) {
+                this.bind(self);
+            },
+            bind: function(self) {
+                var itself = this;
+                self.api.$element.on('keyup', function(e) {
+                    if (!self.api.isGradient) {
+                        return;
+                    }
 
-            // get marker current position
-            var begining = $(dom).position().left,
-                start = e.pageX,
-                api = this.api,
-                end;
-
-            api.makeUnselectable();
-            api.set(instance.color);
-
-            this.mousemove = function(e) {
-                end = e.pageX || start;
-                var position = begining + end - start;
-                this.move(instance, position);
-                return false;
-            };
-
-            this.mouseup = function() {
-                $(document).off({
-                    mousemove: this.mousemove,
-                    mouseup: this.mouseup
+                    if (e.keyCode === 27) {
+                        self.api.close();
+                    }else if (e.keyCode === 13) {
+                        if ((matched = itself.gradient.match.exec(self.api.$element.val())) != null) {
+                            itself.gradient.parse(matched, self);
+                            self.api.update({}, 'input');
+                            self.api.$element.focus();
+                        }
+                    }
                 });
-                api.cancelUnselectable();
-                return false;
-            };
+            },
+            gradient: {
+                match: /gradient\(\s*(\d{1,3})deg\s*,((\s*\S*)+)\)/,
+                parse: function(result, self) {
+                    var markers_re = /(#([^\s]+)|rgb\([^\)]+\)|rgba\([^\)]+\))\s*(\d{1,3}%)/g,
+                        degree = result[1],
+                        markers = result[2].match(markers_re),
+                        percent;
 
-            $(document).on({
-                mousemove: $.proxy(this.mousemove, this),
-                mouseup: $.proxy(this.mouseup, this)
-            });
-            $(dom).focus();
-            return false;
+                    self.$markers.children().remove();
+                    self.markers = [];
+                    self.count = 0;
+                    self.g_wheel.setDegree(degree, self);
+                    for (var i in markers) {
+                        self.api.color.from(markers[i]);
+                        percent = parseInt(markers[i].match(/[^\,\(]\)*\s+(\d{1,3})%/)[1]);
+                        self.g_panel.makeMarker(self.api.color, percent, self);
+                        self.api.set(self.api.color);
+                    }
+                },
+            },
         },
-        move: function(marker, position) {
-            position = Math.max(0, Math.min(this.width, position));
-            var percent = Math.round((position / this.width) * 100);
+        g_controll: {
+            init: function(self) {
+                var itself = this;
+                this.bind(self);
 
-            marker.setPercent(percent);
-            this.makeGradient();
+                self.api.$element.on('asColorInput::close', function() {
+                    if (self.api.isGradient) {
+                        itself.setGradient(self);
+                    }
+                    return false;
+                });
+            },
+            bind: function(self) {
+                var itself = this,
+                    api = self.api;
+                self.$trigger.on('click', function() {
+                    if (self.options.keepMode) {
+                        return false;
+                    }
+                    if (self.isOpened) {
+                        self.$gradient.removeClass(self.classes.enable);
+                        itself.setGradient(self);
+                        api.isGradient = false;
+                        api.set(api.originalColor);
+                    } else {
+                        self.width = self.$markers.width();
+                        self.$gradient.addClass(self.classes.enable);
+                        api.isGradient = true;
+                        itself.makeGradient(self);
+                        api.$element.focus();
+                    }
+                    api.position();
+                    self.isOpened = !self.isOpened;
+                    return false;
+                });
+
+                self.$cancel.on('click', function() {
+                    api.color.from('#000');
+                    api.update({});
+                    self.count = 0;
+                    itself.retrieve(self);
+                    return false;
+                });
+            },
+            setGradient: function(self) {
+                var itself = this;
+                // copy array with object element
+                this.origin = {};
+                this.origin.markers = [];
+                self.markers.map(function(marker) {
+                    var copy = {
+                        color: marker.color,
+                        percent: marker.percent
+                    };
+                    itself.origin.markers.push(copy);
+                });
+                this.origin.degree = self.degree;
+            },
+            makeGradient: function(self) {
+                var markers = self.markers,
+                    api = self.api,
+                    gradient = 'gradient(' + (self.degree ? self.degree : 0) + 'deg,',
+                    f1 = '',
+                    f2 = '',
+                    prefix = this.getPrefix();
+                // sort array by percent 
+                markers.sort(function(a, b) {
+                    return a.percent > b.percent;
+                });
+                markers.map(function(marker, key, markers) {
+                    gradient += marker.color + ' ' + marker.percent + '%,';
+                    if (key === (markers.length - 1)) {
+                        f1 += 'color-stop(' + marker.percent / 100 + ',' + marker.color + ')';
+                        f2 += marker.color + ' ' + marker.percent + '%';
+                    } else {
+                        f1 += 'color-stop(' + marker.percent / 100 + ',' + marker.color + '),';
+                        f2 += marker.color + ' ' + marker.percent + '%,';
+                    }
+                });
+                gradient = gradient.substring(0, gradient.length - 1);
+                gradient += ')';
+                api.gradient = prefix + 'linear-' + gradient;
+                api._trigger('gradientChange', gradient);
+
+                // enable value on input element
+                api.$element.val(gradient);
+
+                if (prefix === '-webkit-') {
+                    self.$panel[0].style.backgroundImage = prefix + 'gradient(linear, left top, right top, ' + f1 + ')';
+                }
+                self.$panel[0].style.backgroundImage = prefix + 'linear-gradient(left, ' + f2 + ')';
+
+                api.components.trigger.update(api);
+                
+                return gradient;
+            },
+            retrieve: function(self) {
+                self.markers.map(function(marker) {
+                    marker.$element.blur();
+                    marker.$element.remove();
+                });
+                self.markers = [];
+                self.g_panel.makeMarker('#fff', 0, self);
+                self.g_panel.makeMarker('#000', 100, self);
+                self.g_wheel.setDegree(0, self);
+                this.makeGradient(self);
+            },
+            getPrefix: function() {
+                var ua = window.navigator.userAgent;
+                var prefix = '';
+                if (/MSIE/g.test(ua)) {
+                    prefix = '-ms-';
+                } else if (/Firefox/g.test(ua)) {
+                    prefix = '-moz-';
+                } else if (/(WebKit)/i.test(ua)) {
+                    prefix = '-webkit-';
+                } else if (/Opera/g.test(ua)) {
+                    prefix = '-o-';
+                }
+                return prefix;
+            },
         },
-        makeMarker: function(color, percent) {
-            var self = this;
-            var $doc = this.$doc;
-            var Marker = function() {
-                this.color = color;
-                this.percent = percent;
-                this._id = ++self.count;
-                this.$element = $('<span class="' + self.classes.marker + '"><i></i></span>').attr('tabindex', 0).data('id', this._id);
-                this.$element.appendTo(self.$markers);
-                this.$element.on('mousedown.asColorInput', function(e) {
+        g_panel: {
+            init: function(self) {
+                this.makeMarker('#fff', 0, self);
+                this.makeMarker('#000', 100, self);
+                this.bind(self);
+
+                self.api.$element.on('asColorInput::change', function(event, instance) {
+                    if (self.current && self.api.isGradient && !self.api.clear) {
+                        if (instance.color.value.a === 0) {
+                            instance.color.value.a = 1;
+                        }
+                        self.current.setColor(instance.color.toRGBA());
+                        self.g_controll.makeGradient(self);
+                        self.api._trigger('apply');
+                    }else if (self.api.clear) {
+                        self.count = 0;
+                        self.g_controll.retrieve(self);
+                        self.api.gradient = '';
+                    }
+                });
+            },
+            bind: function(self) {
+                var itself = this;
+                // create new marker
+                self.$markers.on('mousedown.asColorInput', function(e) {
                     var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                     if (rightclick) {
                         return false;
                     }
-                    self.mousedown.call(self, e, this);
+                    var position = e.pageX - self.$markers.offset().left;
+                    var percent = Math.round((position / self.width) * 100);
+                    itself.makeMarker('#fff', percent, self);
+                    self.g_controll.makeGradient(self);
                     return false;
                 });
-            };
-            Marker.prototype.setColor = function(color) {
-                this.color = color;
-                this.$element.find('i').css({
-                    background: color
-                });
-            };
-            Marker.prototype.setPercent = function(percent) {
-                this.percent = percent;
-                this.$element.css({
-                    left: percent + '%'
-                });
-            };
-
-            var marker = new Marker();
-            marker.setPercent(percent);
-            marker.setColor(color);
-            this.markers.push(marker);
-            this.current = marker;
-            marker.hasBinded = false;
-            marker.$element.on('focus', function() {
-                if (!marker.hasBinded) {
-                    $doc.on('keydown.' + marker._id, function(e) {
-                        var key = e.keyCode || e.which;
-                        if (key === 46) {
-                            self.del(marker);
-                            self.makeGradient();
+            },
+            makeMarker: function(color, percent, self) {
+                var itself = this;
+                var $doc = self.$doc;
+                var Marker = function() {
+                    this.color = color;
+                    this.percent = percent;
+                    this._id = ++self.count;
+                    this.$element = $('<span class="' + self.classes.marker + '"><i></i></span>').attr('tabindex', 0).data('id', this._id);
+                    this.$element.appendTo(self.$markers);
+                    this.$element.on('mousedown.asColorInput', function(e) {
+                        var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                        if (rightclick) {
+                            return false;
                         }
+                        itself.mousedown(e, this, self);
+                        return false;
                     });
-                    marker.$element.addClass(self.classes.active);
-                    marker.hasBinded = true;
-                }
-            }).on('blur', function() {
-                $doc.off('keydown.' + marker._id);
-                marker.$element.removeClass(self.classes.active);
-                marker.hasBinded = false;
-            });
-
-            return marker;
-        },
-        makeGradient: function() {
-            var markers = this.markers,
-                api = this.api,
-                self = this,
-                gradient = 'gradient(' + this.degree + 'deg,',
-                f1 = '',
-                f2 = '';
-            // sort array by percent 
-            markers.sort(function(a, b) {
-                return a.percent > b.percent;
-            });
-            markers.map(function(marker, key, markers) {
-                gradient += marker.color + ' ' + marker.percent + '%,';
-                if (key === (markers.length - 1)) {
-                    f1 += 'color-stop(' + marker.percent / 100 + ',' + marker.color + ')';
-                    f2 += marker.color + ' ' + marker.percent + '%';
-                } else {
-                    f1 += 'color-stop(' + marker.percent / 100 + ',' + marker.color + '),';
-                    f2 += marker.color + ' ' + marker.percent + '%,';
-                }
-            });
-            gradient = gradient.substring(0, gradient.length - 1);
-            gradient += ')';
-            api.gradient = gradient;
-            api._trigger('gradientChange', gradient);
-
-            // show value on input element
-            api.$element.val(gradient);
-
-            var gradientArray = ['-moz-linear-gradient(left, ' + f2 + ')', '-webkit-gradient(linear, left top, right top, ' + f1 + ')', '-webkit-linear-gradient(left, ' + f2 + ')', '-o-linear-gradient(left, ' + f2 + ')'];
-            $.each(gradientArray, function(key, value) {
-                self.$panel[0].style.backgroundImage = value;
-            });
-            return gradient;
-        },
-        setGradient: function() {
-            var self = this;
-            // copy array with object element
-            this.origin = {};
-            this.origin.markers = [];
-            this.markers.map(function(marker) {
-                var copy = {
-                    color: marker.color,
-                    percent: marker.percent
                 };
-                self.origin.markers.push(copy);
-            });
-            this.origin.degree = this.degree;
-        },
-        retrieve: function() {
-            var self = this;
-            self.markers.map(function(marker) {
+                Marker.prototype.setColor = function(color) {
+                    this.color = color;
+                    this.$element.find('i').css({
+                        background: color
+                    });
+                };
+                Marker.prototype.setPercent = function(percent) {
+                    this.percent = percent;
+                    this.$element.css({
+                        left: percent + '%'
+                    });
+                };
+
+                var marker = new Marker();
+                marker.setPercent(percent);
+                marker.setColor(color);
+                self.markers.push(marker);
+
+                if (self.current !== null) {
+                    self.api.originalColor = self.current.color;
+                    self.api._trigger('apply');
+                }
+
+                self.$markers.children().removeClass(self.classes.active);
+                self.current = marker;
+                marker.$element.addClass(self.classes.active).focus();
+
+                marker.hasBinded = false;
+                marker.$element.on('focus', function() {
+                    if (!marker.hasBinded) {
+                        $doc.on('keydown.' + marker._id, function(e) {
+                            var key = e.keyCode || e.which;
+                            if (key === 46) {
+                                if (self.count <= 2) {
+                                    return;
+                                }
+                                itself.del(marker, self);
+                                self.g_controll.makeGradient(self);
+                                self.$markers.children().eq(self.count - 1).addClass(self.classes.active).focus();
+                            }
+                        });
+                        
+                        marker.hasBinded = true;
+                    }
+                }).on('blur', function() {
+                    $doc.off('keydown.' + marker._id);
+                    marker.hasBinded = false;
+                });
+
+                return marker;
+            },
+            mousedown: function(e, dom, self) {
+                var itself = this,
+                    api = self.api;
+                // get current marker
+                var id = $(dom).data('id');
+                var instance;
+                $.each(self.markers, function(key, marker) {
+                    if (marker._id === id) {
+                        instance = marker;
+                    }
+                });
+                
+                if (self.current !== instance) {
+                    api.originalColor = self.current.color;
+                    self.current.$element.removeClass(self.classes.active);
+                    self.current = instance;
+                    instance.$element.addClass(self.classes.active);
+                }
+
+                // get marker current position
+                var begining = $(dom).position().left,
+                    start = e.pageX,
+                    end;
+
+                api.set(instance.color);
+
+                this.mousemove = function(e) {
+                    end = e.pageX || start;
+                    var position = begining + end - start;
+                    itself.move(instance, position, self);
+                    return false;
+                };
+
+                this.mouseup = function() {
+                    $(document).off({
+                        mousemove: this.mousemove,
+                        mouseup: this.mouseup
+                    });
+
+                    return false;
+                };
+
+                $(document).on({
+                    mousemove: $.proxy(this.mousemove, this),
+                    mouseup: $.proxy(this.mouseup, this)
+                });
+                $(dom).focus();
+                return false;
+            },
+            move: function(marker, position, self) {
+                position = Math.max(0, Math.min(self.width, position));
+                var percent = Math.round((position / self.width) * 100);
+
+                marker.setPercent(percent);
+                self.g_controll.makeGradient(self);
+            },
+            del: function(marker, self) {
+                self.count -= 1;
                 marker.$element.blur();
                 marker.$element.remove();
-            });
-            self.markers = [];
-            if (!self.origin) {
-                self.makeMarker('#fff', 0);
-                self.makeMarker('#000', 100);
-                self.setDegree(0);
-            } else {
-                self.origin.markers.map(function(marker) {
-                    self.makeMarker(marker.color, marker.percent);
+                self.markers.splice(self.markers.indexOf(marker), 1);
+            },
+        },
+        g_wheel: {
+            init: function(self) {
+                var itself = this;
+                this.bind(self);
+
+                setTimeout(function() {
+                    itself.setDegree(0, self);
+                    self.initialized = true;
+                }, 0);
+            },
+            bind: function(self) {
+                var itself = this;
+                self.$wheel.on('mousedown.asColorInput', function(e) {
+                    var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                    if (rightclick) {
+                        return false;
+                    }
+                    itself.mousedown(e, self);
+                    return false;
                 });
-                self.setDegree(self.origin.degree);
-            }
-        },
-        // wheel method
-        getPosition: function(a, b) {
-            var r = this.r;
-            var x = a / Math.sqrt(a * a + b * b) * r;
-            var y = b / Math.sqrt(a * a + b * b) * r;
-            return {
-                x: x,
-                y: y
-            };
-        },
-        calDegree: function(x, y) {
-            var deg = Math.round(Math.atan(Math.abs(y / x)) * (180 / Math.PI));
-            if (x <= 0 && y > 0) {
-                return 180 - deg;
-            }
-            if (x <= 0 && y <= 0) {
-                return deg + 180;
-            }
-            if (x > 0 && y <= 0) {
-                return 360 - deg;
-            }
-            if (x > 0 && y > 0) {
-                return deg;
-            }
-        },
-        _setDegree: function(deg) {
-            this.degree = deg;
-            this.$degree.val(deg);
-            if (this.initialized) {
-                // avoid setting value on input element when init
-                this.makeGradient();
-            }
-        },
-        setDegree: function(deg) {
-            if (this.degree === deg) {
-                return false;
-            }
-            var r = this.r || this.$wheel.width() / 2;
-            var pos = this.calPointer(deg, r);
-            this.$pointer.css({
-                left: pos.x,
-                top: pos.y
-            });
-            this._setDegree(deg);
-        },
-        calPointer: function(deg, r) {
-            var x = Math.cos(deg * Math.PI / 180) * r;
-            var y = Math.sin(deg * Math.PI / 180) * r;
-            return {
-                x: r + x,
-                y: r - y
-            };
-        },
-        wheelMousedown: function(e) {
-            var offset = this.$wheel.offset();
-            var r = this.$wheel.width() / 2;
-            var startX = offset.left + r;
-            var startY = offset.top + r;
-            var $doc = this.$doc;
+            },
+            mousedown: function(e, self) {
+                var offset = self.$wheel.offset();
+                var r = self.$wheel.width() / 2;
+                var startX = offset.left + r;
+                var startY = offset.top + r;
+                var $doc = self.$doc;
+                var itself = this;
 
-            this.r = r;
+                this.r = r;
 
-            this.wheelMove = function(e) {
-                var x = e.pageX - startX;
-                var y = startY - e.pageY;
-                var position = this.getPosition(x, y);
-                var deg = this.calDegree(position.x, position.y);
-                this._setDegree(deg);
+                this.wheelMove = function(e) {
+                    var x = e.pageX - startX;
+                    var y = startY - e.pageY;
+                    var position = itself.getPosition(x, y);
+                    var deg = itself.calDegree(position.x, position.y);
+                    itself._setDegree(deg, self);
+                    var pos = itself.calPointer(deg, r);
+                    self.$pointer.css({
+                        left: pos.x,
+                        top: pos.y
+                    });
+                };
+                this.wheelMouseup = function() {
+                    $doc.off({
+                        mousemove: this.wheelMove,
+                        mouseup: this.wheelMouseup
+                    });
+                    return false;
+                };
+                $doc.on({
+                    mousemove: $.proxy(this.wheelMove, this),
+                    mouseup: $.proxy(this.wheelMouseup, this)
+                });
+
+                // set value first
+                this.wheelMove(e);
+            },
+            getPosition: function(a, b) {
+                var r = this.r;
+                var x = a / Math.sqrt(a * a + b * b) * r;
+                var y = b / Math.sqrt(a * a + b * b) * r;
+                return {
+                    x: x,
+                    y: y
+                };
+            },
+            calDegree: function(x, y) {
+                var deg = Math.round(Math.atan(Math.abs(y / x)) * (180 / Math.PI));
+                if (x <= 0 && y > 0) {
+                    return 180 - deg;
+                }
+                if (x <= 0 && y <= 0) {
+                    return deg + 180;
+                }
+                if (x > 0 && y <= 0) {
+                    return 360 - deg;
+                }
+                if (x > 0 && y > 0) {
+                    return deg;
+                }
+            },
+            _setDegree: function(deg, self) {
+                self.degree = deg;
+                self.$degree.val(deg);
+                if (self.initialized) {
+                    // avoid setting value on input element when init
+                    self.g_controll.makeGradient(self);
+                }
+            },
+            setDegree: function(deg, self) {
+                if (self.degree === deg) {
+                    return false;
+                }
+                var r = this.r || self.$wheel.width() / 2;
                 var pos = this.calPointer(deg, r);
-                this.$pointer.css({
+                self.$pointer.css({
                     left: pos.x,
                     top: pos.y
                 });
-            };
-            this.wheelMouseup = function() {
-                $doc.off({
-                    mousemove: this.wheelMove,
-                    mouseup: this.wheelMouseup
-                });
-                return false;
-            };
-            $doc.on({
-                mousemove: $.proxy(this.wheelMove, this),
-                mouseup: $.proxy(this.wheelMouseup, this)
-            });
-
-            // set value first
-            this.wheelMove(e);
+                this._setDegree(deg, self);
+            },
+            calPointer: function(deg, r) {
+                var x = Math.cos(deg * Math.PI / 180) * r;
+                var y = Math.sin(deg * Math.PI / 180) * r;
+                return {
+                    x: r + x,
+                    y: r - y
+                };
+            },
         },
-        del: function(marker) {
-            marker.$element.blur();
-            marker.$element.remove();
-            this.markers.splice(this.markers.indexOf(marker), 1);
+        g_degree: {
+            init: function(self) {
+                this.bind(self);
+            },
+            bind: function(self) {
+                self.$degree.on('blur.asColorInput', function() {
+                    var deg = parseInt(this.value, 10);
+                    self.g_wheel.setDegree(deg, self);
+                    return false;
+                }).on('keydown.asColorInput', function(e) {
+                    var key = e.keyCode || e.which;
+                    if (key === 13) {
+                        $(this).blur();
+                        return false;
+                    }
+                });
+            }
         },
         destory: function() {
             this.$element.off('click');

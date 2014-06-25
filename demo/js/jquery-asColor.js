@@ -1,12 +1,6 @@
-/*
- * jquery-color
- * https://github.com/amazingSurge/jquery-color
- *
- * Copyright (c) 2013 amazingSurge
- * Licensed under the GPL license.
- */
-
-
+/*! asColor - v0.1.2 - 2014-06-10
+* https://github.com/amazingSurge/asColor
+* Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, undefined) {
     var expandHex = function(hex) {
         if (!hex) {
@@ -25,7 +19,8 @@
                 return {
                     r: (result[1].substr(-1) === '%') ? parseInt(result[1].slice(0, -1) * 2.55, 10) : parseInt(result[1], 10),
                     g: (result[2].substr(-1) === '%') ? parseInt(result[2].slice(0, -1) * 2.55, 10) : parseInt(result[2], 10),
-                    b: (result[3].substr(-1) === '%') ? parseInt(result[3].slice(0, -1) * 2.55, 10) : parseInt(result[3], 10)
+                    b: (result[3].substr(-1) === '%') ? parseInt(result[3].slice(0, -1) * 2.55, 10) : parseInt(result[3], 10),
+                    a: 1
                 };
             },
             to: function(color) {
@@ -52,7 +47,8 @@
                 var hsl = {
                     h: ((result[1] % 360) + 360) % 360,
                     s: parseFloat(result[2] / 100),
-                    l: parseFloat(result[3] / 100)
+                    l: parseFloat(result[3] / 100),
+                    a: 1
                 };
 
                 return AsColor.HSLToRGB(hsl);
@@ -90,7 +86,8 @@
                 return {
                     r: parseInt(hex.substr(0, 2), 16),
                     g: parseInt(hex.substr(2, 2), 16),
-                    b: parseInt(hex.substr(4, 2), 16)
+                    b: parseInt(hex.substr(4, 2), 16),
+                    a: 1
                 };
             },
             to: function(color) {
@@ -105,7 +102,7 @@
         },
         TRANSPARENT: {
             match: /transparent/,
-            parse: function(result) {
+            parse: function() {
                 return {
                     r: 0,
                     g: 0,
@@ -113,7 +110,7 @@
                     a: 0
                 };
             },
-            to: function(color) {
+            to: function() {
                 return 'transparent';
             }
         }
@@ -150,7 +147,7 @@
             }
             this.from(string);
         },
-        from: function(string, format) {
+        from: function(string) {
             if (typeof string === 'string') {
                 var matched = null;
                 for (var i in CssColorStrings) {

@@ -10,18 +10,27 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
-        <link rel="stylesheet" href="css/bootstrap.css">
         <link rel="stylesheet" href="css/prism.css">
         <link rel="stylesheet" href="css/main.css">       
-        <link rel="stylesheet" href="css/asColorInput.css">
+        <link rel="stylesheet" href="../css/asColorInput.css">
 
         <script src="js/vendor/jquery-1.9.1.min.js"></script>
         <script src="js/vendor/jquery.toc.js"></script>
         <script src="js/vendor/prism.js"></script>
-        <script src="js/vendor/bootstrap.js"></script>
 
         <script src="js/jquery-asColor.js"></script>
-        <script src="../dist/jquery-asColorInput.js"></script>
+        <script src="../src/jquery-asColorInput-core.js"></script>
+        <script src="../src/jquery-asColorInput-alpha.js"></script>
+        <script src="../src/jquery-asColorInput-buttons.js"></script>
+        <script src="../src/jquery-asColorInput-gradient.js"></script>
+        <script src="../src/jquery-asColorInput-hue.js"></script>
+        <script src="../src/jquery-asColorInput-buttons.js"></script>
+        <script src="../src/jquery-asColorInput-hex.js"></script>
+        <script src="../src/jquery-asColorInput-info.js"></script>
+        <script src="../src/jquery-asColorInput-keyboard.js"></script>
+        <script src="../src/jquery-asColorInput-palettes.js"></script>
+        <script src="../src/jquery-asColorInput-preview.js"></script>
+        <script src="../src/jquery-asColorInput-saturation.js"></script>
     </head>
 <body>
 <!--[if lt IE 7]>
@@ -31,171 +40,136 @@
 <div id="toc"></div>
 <div id="wrapper">
     <section>
-        <h2>Modes</h2>
-        <!-- <section>
-            <h3>type=color</h3>
-            <pre class="has-example"><code class="language-javascript">
-&lt;input type='color' name='color' /&gt;
-            </code></pre>
-            <div class="example">
-                <input type='color' name='color' />
-                
-            </div>
-        </section>
-        <section> -->
-            <h3>Custom</h3>
-            <pre class="has-example"><code class="language-javascript">
-$(".custom").asColorInput({
-    color: '#f00'
-});
-            </code></pre>
-            <div class="example">
-                <input type='text' class="custom" />                
-                <script>
-                    $(document).ready(function() {
-                        $(".custom").asColorInput({
-                            color: '#f00',
-                            skin: 'flatSpirit'
-                        });
-                    });
-                </script>
-            </div>
-        </section>
-        <section>
-            <h3>Flat</h3>
-            <pre class="has-example"><code class="language-javascript">
-$(".flat").asColorInput({
-    flat: true
-});
-            </code></pre>
-            <div class="example">
-                <input type='text' class="flat" />
-                
-                <script>
-                    
-                    $(document).ready(function() {
-                        $(".flat").asColorInput({
-                            flat: true,
-                            skin: 'flatSpirit'
-                        });                           
-                    });
-                </script>
-            </div>
-        </section>
-
-        <section>
-            <h3>Keyboard</h3>
-            <pre class="has-example"><code class="language-javascript">
-$(".keyboard").asColorInput({
-    flat: true,
-    keyboard: true,
-    skin: 'flatSpirit'
-});
-            </code></pre>
-            <div class="example">
-                <input type='text' class="keyboard" />
-                <script>
-                    
-                    $(document).ready(function() {
-                        $(".keyboard").asColorInput({
-                            flat: true,
-                            keyboard: true,
-                            skin: 'flatSpirit'
-                        });                           
-                    });
-                </script>
-            </div>
-        </section>
-
-    </section>
-    <section>
-        <h2>Skin</h2>
-        <section>
-            <h3>realWorld</h3>
-            <pre class="example"><code class="language-javascript">
-$(".simple").asColorInput({
-    skin: 'realWorld'
-});
-            </code></pre>
-            <div class="example">
-                <input type='text' />
-                <input type='text' class="simple" />
-                
-                <script>
-                    $(document).ready(function() {
-                        $(".simple").asColorInput({
-                            skin: 'realWorld'
-                        });                          
-                    });
-                </script>
-            </div>
-        </section>
-        <section>
-            <h3>skin-3</h3>
-            <pre class="example"><code class="language-javascript">
-$(".realWorld").asColorInput({
-    showInput: true,
-    skin: 'realWorld'
-});
-            </code></pre>
-            <div class="example">
-                <input type='text' class="style-realWorld" />
-                
-                <script>
-                    $(document).ready(function() {
-                        $(".style-realWorld").asColorInput({
-                            showInput: true,
-                            skin: 'realWorld'
-                        });                          
-                    });
-                </script>
-            </div>
-        </section>
-    </section>  
-
-    <section>
-        <h2>Components</h2>
-        <section>
-            <ul>
-                <li>saturation</li>
-                <li>hue</li>
-                <li>alpha</li>
-                <li>check</li>
-                <li>hex</li>
-                <li>info</li>
-                <li>preview</li>
-                <li>palette</li>
-                <li>Hhue</li>
-                <li>Halpha</li>
-            </ul>
-        </section>
+        <h3>Default</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_1").asColorInput();
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_1" value="#000" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_1").asColorInput();
+                });
+            </script>
+        </div>
     </section>
 
     <section>
-        <h2>Event</h2>
-        <section>
-            <h3>change</h3>
-        </section>
-        <section>
-            <h3>move</h3>
-        </section>
-        <section>
-            <h3>hide</h3>
-        </section>
-        <section>
-            <h3>show</h3>
-        </section>
-        <section>
-            <h3>beforeShow</h3>
-        </section>
-        <section>
-            <h3>beforeShow</h3>
-        </section>
+        <h3>Mode: palettes</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_2").asColorInput();
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_2" data-mode="palettes" value="#000" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_2").asColorInput();
+                });
+            </script>
+        </div>
     </section>
-      
-        
-        
-    
+
+    <section>
+        <h3>Mode: complex</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_3").asColorInput();
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_3" data-mode="complex" value="#000" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_3").asColorInput();
+                });
+            </script>
+        </div>
+    </section>
+
+    <section>
+        <h3>Mode: gradient</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_4").asColorInput();
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_4" data-mode="gradient" value="#000" style="width: 1000px" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_4").asColorInput();
+                });
+            </script>
+        </div>
+    </section>
+
+    <section>
+        <h3>Mode: gradient with gradient value</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_4_2").asColorInput();
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_4_2" data-mode="gradient" value="gradient(0deg,#ff0000 0%,rgba(25,11,111,1) 50%,rgba(205,240,86,1) 100%)" style="width: 500px" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_4_2").asColorInput();
+                });
+            </script>
+        </div>
+    </section>
+
+
+    <section>
+        <h3>Hide Input</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_5").asColorInput({
+    hideInput: true
+});
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_5" value="#000" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_5").asColorInput({
+                        hideInput: true
+                    });
+                });
+            </script>
+        </div>
+    </section>
+
+    <section>
+        <h3>Read Only</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_6").asColorInput({
+    readonly: true
+});
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_6" value="#000" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_6").asColorInput({
+                        readonly: true
+                    });
+                });
+            </script>
+        </div>
+    </section>
+    <section>
+        <h3>Disable hideFireChange</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_7").asColorInput({
+    hideFireChange: false
+});
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_7" value="#000" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_7").asColorInput({
+                        hideFireChange: false
+                    });
+                });
+            </script>
+        </div>
+    </section>
 </div>
 
 <script>

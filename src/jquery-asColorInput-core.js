@@ -2,25 +2,18 @@
  * jquery-asColorInput
  * https://github.com/amazingSurge/jquery-asColorInput
  *
- * Copyright (c) 2013 AmazingSurge
+ * Copyright (c) 2014 AmazingSurge
  * Licensed under the GPL license.
  */
 (function(window, document, $, Color, undefined) {
     "use strict";
 
     var id = 0,
-        IE = !! /msie/i.exec(window.navigator.userAgent);
+        IE = !!/msie/i.exec(window.navigator.userAgent);
 
     function createId(api) {
         api.id = id;
         id++;
-    }
-
-    function noop() {
-        return;
-    }
-    if (!window.localStorage) {
-        window.localStorage = noop;
     }
 
     // Constructor
@@ -30,55 +23,34 @@
 
         //flag
         this.opened = false;
+        this.firstOpen = true;
         this.disabled = false;
-        this.isFirstOpen = true;
-
-        if (this.$element.attr('name')) {
-            this.name = this.$element.attr('name');
-        } else {
-            this.name = options.name;
-        }
-
-        // options
-        var meta_data = [];
-        $.each(this.$element.data(), function(k, v) {
-            var re = new RegExp("^asColorInput", "i");
-            if (re.test(k)) {
-                meta_data[k.toLowerCase().replace(re, '')] = v;
-            }
-        });
+        this.clear = false;
 
         createId(this);
 
-        this.options = $.extend(true, {}, AsColorInput.defaults, options, meta_data);
+        this.options = $.extend(true, {}, AsColorInput.defaults, options, this.$element.data());
         this.namespace = this.options.namespace;
 
         this.classes = {
+            wrap: this.namespace + '-wrap',
+            dropdown: this.namespace + '-dropdown',
             input: this.namespace + '-input',
+            clear: this.namespace + '-clear',
             skin: this.namespace + '_' + this.options.skin,
-            show: this.namespace + '_show',
+            open: this.namespace + '_open',
             mask: this.namespace + '-mask',
-            flat: this.namespace + '_flat',
-            showInput: this.namespace + '_showInput',
-            disabled: this.namespace + '_disabled'
+            hideInput: this.namespace + '_hideInput',
+            disabled: this.namespace + '_disabled',
+            mode: this.namespace + '-mode_' + this.options.mode
         };
 
         this.components = $.extend(true, {}, this.components);
 
-        if (this.options.localStorage) {
-            var key = 'input_' + this.id;
-            var value = this.getLocalItem(key);
-            if (value) {
-                this.element.value = value;
-            }
-        }
-
-        var _comps = AsColorInput.skins[this.options.skin] || 'saturation,hue';
-        this._comps = _comps.split(',');
+        this._comps = AsColorInput.modes[this.options.mode];
 
         // color value and format
         // here get init value from input elemnt
-        // fix: how about setting it on options ?
         if (this.element.value === '') {
             this.color = new Color({
                 r: 255,
@@ -87,18 +59,18 @@
                 a: 1
             }, this.options.format);
         } else {
+            if (this.options.mode === 'gradient') {
+                this.gradient = this.element.value;
+            }
             this.color = new Color(this.element.value, this.options.format);
         }
 
-        if (this.options.showInput) {
-            this.$element.addClass(this.classes.showInput);
-        } else {
-            if (this.options.format) {
-                this.$element.val(this.get(this.options.format));
-            } else {
-                this.$element.val(this.color.toString());
-            }
+        if (this.options.hideInput) {
+            this.$element.addClass(this.classes.hideInput);
         }
+
+
+        this.updateInput();
 
         //save this.color  as a rgba value 
         this.originalColor = this.color.toRGBA();
@@ -112,72 +84,84 @@
         components: {},
         init: function() {
             var self = this;
-            this.$picker = $('<div draggable=false class="' + this.namespace + ' drag-disable"></div>');
-            this.$element.wrap('<div class="' + this.namespace + '-wrap"></div>').addClass(this.classes.input);
+            this.$dropdown = $('<div class="' + this.classes.dropdown + '" data-mode="'+this.options.mode+'"></div>');
+            this.$element.wrap('<div class="' + this.classes.wrap + '"></div>').addClass(this.classes.input);
+            this.$clear = $('<a href="#" class="' + this.classes.clear + '">x</a>').insertAfter(this.$element);
             this.$wrap = this.$element.parent();
+            this.$body = $('body');
+
+            this.$dropdown.data('asColorInput', this);
 
             if (this.options.skin) {
-                this.$picker.addClass(this.classes.skin);
+                this.$dropdown.addClass(this.classes.skin);
                 this.$element.parent().addClass(this.classes.skin);
             }
 
             this.create();
-            if (this.options.flat) {
-                this.$element.addClass(this.classes.flat);
-                this.$picker.addClass(this.classes.flat).insertAfter(this.$element);
-                this.show();
-            } else {
-                this.$picker.appendTo('body');
-                this.$element.on({
-                    'click.asColorInput': function() {
-                        if (!self.opened) {
-                            self.show();
-                        }
-                        return false;
-                    },
-                    'keydown.asColorInput': function(e) {
-                        if (e.keyCode === 9) {
-                            self.close();
-                        } else if (e.keyCode === 13) {
-                            self.color.from(self.$element.val());
-                            self.update({}, 'input');
-                            self.close();
-                        }
-                    },
-                    'keyup.asColorInput': function() {
+
+            if(this.options.readonly){
+                this.$element.prop('readonly', true);
+            }
+            
+            this.$element.on({
+                'click.asColorInput': function() {
+                    if (!self.opened) {
+                        self.open();
+                    }
+                    return false;
+                },
+                'keydown.asColorInput': function(e) {
+                    if (self.isGradient) {
+                        return;
+                    }
+                    if (e.keyCode === 9) {
+                        self.close();
+                    } else if (e.keyCode === 13) {
                         self.color.from(self.$element.val());
                         self.update({}, 'input');
+                        self.close();
                     }
-                });
-            }
+                },
+                'keyup.asColorInput': function() {
+                    if (self.isGradient) {
+                        return;
+                    }
+                    self.color.from(self.$element.val());
+                    self.update({}, 'input');
+                }
+            });
+            this.$clear.on('click', function() {
+                self.clear = true;
+                self.color.from('transparent');
+                self.update({});
+                self.$element.val('');
+                self.clear = false;
+                return false;
+            })
 
             this._trigger('ready');
         },
         create: function() {
             var self = this;
-            if (!this.options.flat) {
-                this.components.trigger.init(this);
-            }
-            $.each(this._comps, function(i, v) {
-                self.components[v] && self.components[v].init(self);
+            
+            this.components.trigger.init(this);
+            
+            $.each(this._comps, function(key, options) {
+                if (options === true) {
+                    options = {};
+                }
+                if (self.options.components[key] !== undefined) {
+                    options = $.extend(options, self.options.components[key]);
+                }
+                self.components[key] && self.components[key].init(self, options);
             });
+
             this._trigger('create');
-        },
-        bindEvent: function() {
-            $(window).on('resize.asColorInput', $.proxy(this.position, this));
-            this.$picker.on('click.asColorInput', function() {
-                return false;
-            });
-            this.$wrap.on('click.asColorInput', function() {
-                return false;
-            });
-        },
-        unbindEvent: function() {
-            $(window).off('resize.asColorInput');
         },
         _trigger: function(eventType) {
             // event
             this.$element.trigger('asColorInput::' + eventType, this);
+            this.$element.trigger(eventType + '.asColorInput', this);
 
             // callback
             eventType = eventType.replace(/\b\w+\b/g, function(word) {
@@ -202,28 +186,37 @@
             this._trigger('change', color);
 
             // update all components 
-            $.each(this._comps, function(i, v) {
-                if (trigger !== v) {
-                    self.components[v] && self.components[v].update && self.components[v].update(self);
+            $.each(this._comps, function(key, options) {
+                if (trigger !== key) {
+                    self.components[key] && self.components[key].update && self.components[key].update(self);
                 }
             });
 
-            if (!this.options.flat) {
-                this.components.trigger.update(this);
-            }
+            this.components.trigger.update(this);
 
             if (trigger !== 'input') {
                 if (!this.isGradient) {
-                    if (self.options.format) {
-                        self.$element.val(self.get(self.options.format));
-                    } else {
-                        self.$element.val(self.color.toString());
+                    this.updateInput();
+                }
+            }
+        },
+        updateInput: function(){
+            var format = this.options.format;
+
+            if (format) {
+                if(this.options.reduceAlpha && this.color.value.a === 1){
+                    switch(format){
+                        case 'rgba':
+                            format = 'rgb';
+                            break;
+                        case 'hsla':
+                            format = 'hsl';
+                            break;
                     }
                 }
-                if (self.options.localStorage) {
-                    var key = 'input_' + this.id;
-                    self.setLocalItem(key, self.$element.val());
-                }
+                this.$element.val(this.get(format));
+            } else {
+                this.$element.val(this.color.toString());
             }
         },
         opacity: function(data) {
@@ -240,8 +233,8 @@
                 offset = hidden ? this.$trigger.offset() : this.$element.offset(),
                 height = hidden ? this.$trigger.outerHeight() : this.$element.outerHeight(),
                 width = hidden ? this.$trigger.outerWidth() : this.$element.outerWidth() + this.$trigger.outerWidth(),
-                picker_width = this.$picker.outerWidth(true),
-                picker_height = this.$picker.outerHeight(true),
+                picker_width = this.$dropdown.outerWidth(true),
+                picker_height = this.$dropdown.outerHeight(true),
                 top, left;
 
             if (picker_height + offset.top > $(window).height() + $(window).scrollTop()) {
@@ -256,83 +249,92 @@
                 left = offset.left;
             }
 
-            this.$picker.css({
+            this.$dropdown.css({
                 position: 'absolute',
                 top: top,
                 left: left
             });
         },
-        // thanks to http://stackoverflow.com/questions/826782/css-rule-to-disable-text-selection-highlighting
-        makeUnselectable: function() {
-            $('body').addClass('unselectable');
-            if (IE) {
-                this.$picker.find("*:not(input)").attr("unselectable", "on");
-            }
-        },
-        cancelUnselectable: function() {
-            $('body').removeClass('unselectable');
-            if (IE) {
-                this.$picker.find("*:not(input)").removeAttr("unselectable");
-            }
-        },
-        setLocalItem: function(key, value) {
-            var prefixedKey = this.namespace + '_' + key,
-                jsonValue = JSON.stringify(value);
-            localStorage[prefixedKey] = jsonValue;
-        },
-        getLocalItem: function(key) {
-            var prefixedKey = this.namespace + '_' + key,
-                value = localStorage[prefixedKey];
-            return value ? JSON.parse(value) : value;
-        },
 
         /*
-            Public Method
+         *  Public Method
          */
-
-        show: function() {
+        open: function() {
             if (this.disabled) {
                 return;
             }
 
             var self = this;
 
-            this.$picker.on('mousedown', function(e) {
-                e.stopPropagation();
-            });
-
-            $(document).on('click.asColorInput', function() {
-                if (self.opened) {
-                    if (self.options.hideFireChange) {
-                        self.apply();
-                    } else {
-                        self.close();
-                    }
-                }
-            });
-
-            if (this.options.flat === false) {
-                this.position();
-                this.bindEvent();
+            if(this.$dropdown[0] !== this.$body.children().last()[0]) {
+                this.$dropdown.detach().appendTo(this.$body);
             }
 
-            this.$picker.addClass(this.classes.show);
+            this.$mask = $('.'+self.classes.mask);
+            if (this.$mask.length == 0) {
+                this.createMask();
+            }
+
+            // ensure the mask is always right before the dropdown
+            if(this.$dropdown.prev()[0] !== this.$mask[0]){
+                this.$dropdown.before(this.$mask);
+            }
+
+            $("#asColorInput-dropdown").removeAttr("id");
+            this.$dropdown.attr("id", "asColorInput-dropdown");
+
+            // show the mask
+            this.$mask.show();
+
+            this.position();
+
+            $(window).on('resize.asColorInput', $.proxy(this.position, this));
+
+            this.$dropdown.addClass(this.classes.open);
 
             this.opened = true;
-            this.isFirstOpen = false;
-            this._trigger('show');
+
+            if(this.firstOpen){
+                this.firstOpen = false;
+
+                this._trigger('firstOpen');
+            }
+            this._trigger('open');
+        },
+        createMask: function(){
+            this.$mask = $(document.createElement("div"));
+            this.$mask.attr("class",this.classes.mask);
+            this.$mask.hide();
+            this.$mask.appendTo(this.$body);
+
+            var self = this;
+
+            this.$mask.on("mousedown touchstart click", function (e) {
+                var $dropdown = $("#asColorInput-dropdown"), self;
+                if ($dropdown.length > 0) {
+                    self = $dropdown.data("asColorInput");
+                    if (self.opened) {
+                        if (self.options.hideFireChange) {
+                            self.apply();
+                        } else {
+                            self.cancel();
+                        }
+                    }
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
         },
         close: function() {
-            if (this.options.flat === true) {
-                return;
-            }
-            $(document).off('click.asColorInput');
-            this.unbindEvent();
-
             this.opened = false;
             this.$element.blur();
+            this.$mask.hide();
 
-            this.$picker.removeClass(this.classes.show);
+            this.$dropdown.removeClass(this.classes.open);
+
+            $(window).off('resize.asColorInput');
+
             this._trigger('close');
         },
         clear: function() {
@@ -344,11 +346,15 @@
             this.color.from(this.originalColor);
             this.update({});
             this.close();
+
+            return false;
         },
         apply: function() {
             this.originalColor = this.color.toRGBA();
             this.close();
             this._trigger('apply');
+
+            return false;
         },
         set: function(value) {
             this.color.from(value);
@@ -386,7 +392,7 @@
             return this;
         },
         destroy: function() {
-            // need to fix
+
         }
     };
 
@@ -400,34 +406,50 @@
         namespace: 'asColorInput',
         readonly: false,
         skin: null,
-        flat: false,
-        showInput: false,
-        localStorage: true,
+        hideInput: false,
         hideFireChange: true,
         keyboard: false,
-        onlyBtn: false,
-        format: 'rgb',
-        name: null,
+        format: 'rgba',
+        reduceAlpha: true,
+        mode: 'simple',
         components: {
-            check: {
-                disabled: 'apply',
-                applyText: 'apply',
-                cancelText: 'cancel'
-            }
-        }, // callback onInit:
+            
+        },
         onInit: null,
         onReady: null,
         onChange: null,
         onClose: null,
-        onShow: null,
+        onOpen: null,
         onApply: null
     };
 
-    AsColorInput.skins = {
-        'flatSpirit': 'saturation,hHue,hAlpha,hex,preview,palettes,check,gradient',
-        'realWorld': 'saturation,hue,alpha,hex,preview,check',
-        'fullStack': 'saturation,hue,alpha,hex,preview,palettes,gradient',
-        'basicStyle': 'saturation,hue,hex,preview,palettes,check,gradient'
+    AsColorInput.modes = {
+        'simple': {
+            saturation: true,
+            hue: true,
+            alpha: true
+        },
+        'palettes': {
+            palettes: true
+        },
+        'complex': {
+            preview: true,
+            palettes: true,
+            saturation: true,
+            hue: true,
+            alpha: true,
+            hex: true,
+            buttons: true
+        },
+        'gradient': {
+            preview: true,
+            palettes: true,
+            saturation: true,
+            hue: true,
+            alpha: true,
+            hex: true,
+            gradient: true
+        }
     };
 
     AsColorInput.registerComponent('trigger', {
@@ -440,17 +462,22 @@
             api.$trigger.insertAfter(api.$element);
             api.$trigger.on('click', function() {
                 if (!api.opened) {
-                    api.show();
+                    api.open();
                 } else {
                     api.close();
                 }
-                api.opened = !api.opened;
                 return false;
             });
             this.update(api);
         },
         update: function(api) {
-            this.$trigger_inner.css('backgroundColor', api.color.toRGBA());
+            if (api.isGradient) {
+                this.$trigger_inner.css('backgroundColor', 'transparent');
+                this.$trigger_inner[0].style.backgroundImage = api.gradient;
+            }else {
+                this.$trigger_inner[0].style.backgroundImage = '';
+                this.$trigger_inner.css('backgroundColor', api.color.toRGBA());
+            }
         },
         destroy: function(api) {
             api.$trigger.remove();
@@ -477,11 +504,11 @@
             });
         }
     };
-}(window, document, jQuery, (function() {
+}(window, document, jQuery, (function($) {
     if ($.asColor === undefined) {
         // console.info('lost dependency lib of $.asColor , please load it first !');
         return false;
     } else {
         return $.asColor;
     }
-}())));
+}(jQuery))));

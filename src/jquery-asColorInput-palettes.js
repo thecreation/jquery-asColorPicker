@@ -1,137 +1,77 @@
 // palettes
 
 (function($) {
+    function noop() {
+        return;
+    }
+    if (!window.localStorage) {
+        window.localStorage = noop;
+    }
+
     $.asColorInput.registerComponent('palettes', {
-        height: 150,
-        palettes: {
-            defines: [''],
-            colors: ['#fff', '#000', '#000', '#ccc'],
-            max: 6
+        defaults: {
+            colors: ['#fff', '#ffff00', '#f00', '#0f0', '#0ff', '#000'],
+            max: 10,
+            localStorage: true
         },
-        init: function(api) {
-            var list = '<ul>',
-                self = this,
-                palettes = $.extend(true, {}, this.palettes, api.options.components.palettes);
+        init: function(api, options) {
+            var self = this;
 
-            this.keyboardBinded = false;
+            this.options = $.extend(true, {}, this.defaults, options);
 
-            if (api.options.localStorage) {
-                var storeKey = 'palettes_' + api.id;
-                var storeValue = api.getLocalItem(storeKey);
+            // load colors from local storage
+            if (this.options.localStorage) {
+                var storeKey = api.namespace + '_palettes_' + api.id;
+                var storeValue = this.getLocalItem(storeKey);
                 if (storeValue) {
-                    palettes.colors = storeValue;
+                    this.options.colors = storeValue;
                 }
             }
 
-            $.each(palettes.colors, function(index, value) {
-                list += '<li style="background-color:' + value + '" data-color="' + value + '">' + value + '</li>';
+            var list = '';
+            $.each(this.options.colors, function(index, value) {
+                list += self.getItem(value);
             });
 
-            list += '</ul>';
-
-            this.$list = $(list);
-            this.$palettes = $('<div class="' + api.namespace + '-palettes"></div>').append(this.$list).appendTo(api.$picker);
+            this.$palettes = $('<ul class="' + api.namespace + '-palettes"></ul>').html(list).appendTo(api.$dropdown);
 
             this.$palettes.delegate('li', 'click', function(e) {
-                var color = $(e.target).data('color');
-                self.$list.find('li').removeClass('' + api.namespace + '-palettes-checked');
-                $(e.target).addClass('' + api.namespace + '-palettes-checked');
-                api.set(color);
-                // fix: does here need close ?
-                // api.close();
-            });
+                var color = $(this).data('color');
 
-            this.$palettes.attr('tabindex', '0').on('blur', function() {
-                self.$list.find('li').removeClass('' + api.namespace + '-palettes-checked');
+                api.set(color);
+
+                e.preventDefault();
+                e.stopPropagation();
             });
 
             api.$element.on('asColorInput::apply', function(event, api) {
-                if (palettes.colors.indexOf(api.originalColor) !== -1) {
+                if (self.options.colors.indexOf(api.originalColor) !== -1) {
                     return;
                 }
-                if (palettes.colors.length >= palettes.max) {
-                    palettes.colors.shift();
-                    self.$list.find('li').eq(0).remove();
+                if (self.options.colors.length >= self.options.max) {
+                    self.options.colors.shift();
+                    self.$palettes.find('li').eq(0).remove();
                 }
-                palettes.colors.push(api.originalColor);
-                self.$list.append('<li style="background-color:' + api.originalColor + '" data-color="' + api.originalColor + '">' + api.originalColor + '</li>');
+                self.options.colors.push(api.originalColor);
+                self.$palettes.append(self.getItem(api.originalColor));
 
-                if (api.options.localStorage) {
-                    api.setLocalItem(storeKey, palettes.colors);
+                if (self.options.localStorage) {
+                    self.setLocalItem(storeKey, self.options.colors);
                 }
-            });
-            api.$element.on('asColorInput::ready', function() {
-                self.keyboard(api);
-                return false;
             });
         },
-        keyboard: function(api) {
-            var keyboard, index, len, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
-            } else {
-                return false;
-            }
+        getItem: function(color){
+            return '<li data-color="' + color + '"><div style="background-color:' + color + '" /></li>';
+        },
+        setLocalItem: function(key, value) {
+            var jsonValue = JSON.stringify(value);
 
-            this.$palettes.attr('tabindex', '0').on('blur', function() {
-                keyboard.detach();
-                self.keyboardBinded = false;
-            });
+            localStorage[key] = jsonValue;
+        },
+        getLocalItem: function(key) {
+            var value = localStorage[key];
 
-            this.$palettes.attr('tabindex', '0').on('focus', function() {
-                if (self.keyboardBinded === true) {
-                    return;
-                }
-                var $lists = self.$list.find('li');
-                index = -1;
-                len = $lists.length;
-
-                function select(index) {
-                    $lists.removeClass(api.namespace + '-palettes-checked');
-                    $lists.eq(index).addClass(api.namespace + '-palettes-checked');
-                }
-
-                function getIndex() {
-                    return $lists.index(self.$palettes.find('.' + api.namespace + '-palettes-checked'));
-                }
-
-                keyboard.attach({
-                    left: function() {
-                        var hasIndex = getIndex();
-                        if (hasIndex === -1) {
-                            index = index - 1;
-                        } else {
-                            index = hasIndex - 1;
-                        }
-                        if (index < 0) {
-                            index = len - 1;
-                        }
-                        select(index);
-                    },
-                    right: function() {
-                        var hasIndex = getIndex();
-                        if (hasIndex === -1) {
-                            index = index + 1;
-                        } else {
-                            index = hasIndex + 1;
-                        }
-                        if (index >= len) {
-                            index = 0;
-                        }
-                        select(index);
-                    },
-                    RETURN: function() {
-                        if (index < 0) {
-                            return;
-                        }
-                        var color = $lists.eq(index).data('color');
-                        api.set(color);
-                        api.close();
-                    }
-                });
-
-                self.keyboardBinded = true;
-            });
+            return value ? JSON.parse(value) : value;
         }
     });
 })(jQuery);

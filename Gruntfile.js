@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 stripBanners: true
             },
             dist: {
-                src: ['src/jquery-asColorInput-core.js', 'src/jquery-asColorInput-keyboard.js', 'src/jquery-asColorInput-hAlpha.js', 'src/jquery-asColorInput-hHue.js', 'src/jquery-asColorInput-alpha.js', 'src/jquery-asColorInput-check.js', 'src/jquery-asColorInput-hex.js', 'src/jquery-asColorInput-hue.js', 'src/jquery-asColorInput-info.js', 'src/jquery-asColorInput-palettes.js', 'src/jquery-asColorInput-preview.js', 'src/jquery-asColorInput-saturation.js', 'src/jquery-asColorInput-gradient.js'],
+                src: ['src/jquery-asColorInput-core.js', 'src/jquery-asColorInput-keyboard.js', 'src/jquery-asColorInput-alpha.js', 'src/jquery-asColorInput-buttons.js', 'src/jquery-asColorInput-hex.js', 'src/jquery-asColorInput-hue.js', 'src/jquery-asColorInput-info.js', 'src/jquery-asColorInput-palettes.js', 'src/jquery-asColorInput-preview.js', 'src/jquery-asColorInput-saturation.js', 'src/jquery-asColorInput-gradient.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
 
@@ -30,25 +30,21 @@ module.exports = function(grunt) {
                 src: '<%= concat.dist.dest %>',
                 dest: 'dist/<%= pkg.name %>.min.js'
             },
+            core: {
+                src: 'src/jquery-asColorInput-core.js',
+                dest: 'dist/jquery-asColorInput-core.min.js'
+            },
             keyboard: {
                 src: 'src/jquery-asColorInput-keyboard.js',
                 dest: 'dist/jquery-asColorInput-keyboard.min.js'
-            },
-            hAlpha: {
-                src: 'src/jquery-asColorInput-hAlpha.js',
-                dest: 'dist/jquery-asColorInput-hAlpha.min.js'
-            },
-            hHue: {
-                src: 'src/jquery-asColorInput-hHue.js',
-                dest: 'dist/jquery-asColorInput-hHue.min.js'
             },
             alpha: {
                 src: 'src/jquery-asColorInput-alpha.js',
                 dest: 'dist/jquery-asColorInput-alpha.min.js'
             },
-            check: {
-                src: 'src/jquery-asColorInput-check.js',
-                dest: 'dist/jquery-asColorInput-check.min.js'
+            buttons: {
+                src: 'src/jquery-asColorInput-buttons.js',
+                dest: 'dist/jquery-asColorInput-buttons.min.js'
             },
             hex: {
                 src: 'src/jquery-asColorInput-hex.js',
@@ -122,30 +118,32 @@ module.exports = function(grunt) {
             }
         },
         watch: {
-            gruntfile: {
-                files: '<%= jshint.gruntfile.src %>',
-                tasks: ['jshint:gruntfile']
-            },
-            src: {
-                files: '<%= jshint.src.src %>',
-                tasks: ['jshint:src', 'qunit']
-            },
-            test: {
-                files: '<%= jshint.test.src %>',
-                tasks: ['jshint:test', 'qunit']
-            },
+            less: {
+                files: 'less/**/*.less',
+                tasks: ['css']
+            }
         },
 
-        recess: {
+        less: {
             dist: {
-                options: {
-                    compile: true
-                },
                 files: {
-                    'demo/css/asColorInput.css': ['less/jquery-asColorInput.less']
+                    'css/asColorInput.css': ['less/jquery-asColorInput.less']
                 }
             }
         },
+
+        autoprefixer: {
+            options: {
+                browsers: ['last 2 versions', 'ie 8', 'ie 9', 'android 2.3', 'android 4', 'opera 12']
+            },
+            src: {
+                expand: true,
+                cwd: 'css/',
+                src: ['*.css', '!*.min.css'],
+                dest: 'css/'
+            }
+        },
+
         replace: {
             bower: {
                 src: ['bower.json'],
@@ -180,23 +178,17 @@ module.exports = function(grunt) {
     });
 
     // These plugins provide necessary tasks.
-    grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-
-    grunt.loadNpmTasks('grunt-jsbeautifier');
-    grunt.loadNpmTasks('grunt-recess');
-    grunt.loadNpmTasks('grunt-text-replace');
-    grunt.loadNpmTasks('grunt-contrib-copy');
+    // Load npm plugins to provide necessary tasks.
+    require('load-grunt-tasks')(grunt, {
+        pattern: ['grunt-*']
+    });
 
     // Default task.
     grunt.registerTask('default', ['jshint', 'clean', 'concat']);
     grunt.registerTask('dist', ['concat', 'uglify']);
     grunt.registerTask('dev', ['concat']);
 
-    grunt.registerTask('css', ['recess']);
+    grunt.registerTask('css', ['less', 'autoprefixer']);
     grunt.registerTask('cp', ['copy']);
 
     grunt.registerTask('js', ['jsbeautifier', 'jshint']);
