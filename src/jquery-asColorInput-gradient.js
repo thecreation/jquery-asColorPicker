@@ -10,11 +10,25 @@
             gradientText: 'Gradient',
             cancelText: 'Cancel',
             keepMode: false,
-            parse: function(text){
+            parse: function(text) {
+                var re = /gradient\(\s*(\d{1,3})deg\s*,((?:\s*(#([a-f0-9]{6}|[a-f0-9]{3})|((rgb|rgba|hsl|hsla)\([^\)]*\)))\s*(\d{1,3}%)\s*\,?)+)\)/,
+                    markers_re = /(#([^\s]+)|((rgb|rgba|hsl|hsla)\([^\)]*\)))\s*(\d{1,3}%)/g;
                 
+                if (re.exec(text) === null) {
+                    return null;
+                }else {
+                    return {
+                        degree: re.exec(text)[1],
+                        markers: re.exec(text)[2].match(markers_re)
+                    };
+                }
             },
-            format: function(value){
-                
+            format: function(value) {
+                if (value) {
+                    return value;
+                }else {
+                    return;
+                }
             }
         },
         init: function(api, options) {
@@ -65,9 +79,9 @@
                 if (instance.options.mode !== 'gradient') {
                     return;
                 }
-                if ((matched = self.g_input.gradient.match.exec(self.api.gradient)) != null) {
+                if ((self.value = self.options.parse(self.api.gradient)) != null) {
                     self.keepGradient(self);
-                    self.g_input.gradient.parse(matched, self);
+                    self.g_input.getMarkers(self.value, self);
                 }
 
                 if (self.options.keepMode) {
@@ -97,33 +111,27 @@
                     if (e.keyCode === 27) {
                         self.api.close();
                     }else if (e.keyCode === 13) {
-                        if ((matched = itself.gradient.match.exec(self.api.$element.val())) != null) {
-                            itself.gradient.parse(matched, self);
+                        if ((self.value = self.options.parse(self.api.$element.val())) != null) {
+                            itself.getMarkers(self.value, self);
                             self.api.update({}, 'input');
                             self.api.$element.focus();
                         }
                     }
                 });
             },
-            gradient: {
-                match: /gradient\(\s*(\d{1,3})deg\s*,((\s*\S*)+)\)/,
-                parse: function(result, self) {
-                    var markers_re = /(#([^\s]+)|rgb\([^\)]+\)|rgba\([^\)]+\))\s*(\d{1,3}%)/g,
-                        degree = result[1],
-                        markers = result[2].match(markers_re),
-                        percent;
+            getMarkers: function(value, self) {
+                var markers = value.markers;
 
-                    self.$markers.children().remove();
-                    self.markers = [];
-                    self.count = 0;
-                    self.g_wheel.setDegree(degree, self);
-                    for (var i in markers) {
-                        self.api.color.from(markers[i]);
-                        percent = parseInt(markers[i].match(/[^\,\(]\)*\s+(\d{1,3})%/)[1]);
-                        self.g_panel.makeMarker(self.api.color, percent, self);
-                        self.api.set(self.api.color);
-                    }
-                },
+                self.$markers.children().remove();
+                self.markers = [];
+                self.count = 0;
+                self.g_wheel.setDegree(value.degree, self);
+                for (var i in markers) {
+                    self.api.color.from(markers[i]);
+                    percent = parseInt(markers[i].match(/[^\,\(]\)*\s+(\d{1,3})%/)[1]);
+                    self.g_panel.makeMarker(self.api.color, percent, self);
+                    self.api.set(self.api.color);
+                }
             },
         },
         g_controll: {
@@ -544,6 +552,10 @@
                     }
                 });
             }
+        },
+        get: function() {
+            var value = this.options.format(self.value);
+            return value;
         },
         destory: function() {
             this.$element.off('click');
