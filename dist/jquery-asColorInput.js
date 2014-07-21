@@ -1,4 +1,4 @@
-/*! asColorInput - v0.1.3 - 2014-06-26
+/*! asColorInput - v0.1.3 - 2014-07-21
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -1593,7 +1593,6 @@
                         }
                         self.current.setColor(instance.color.toRGBA());
                         self.g_controll.makeGradient(self);
-                        self.api._trigger('apply');
                     }else if (self.api.clear) {
                         self.count = 0;
                         self.g_controll.retrieve(self);
@@ -1677,6 +1676,8 @@
                         });
                         
                         marker.hasBinded = true;
+                        self.api.originalColor = self.current.color;
+                        self.api._trigger('apply');
                     }
                 }).on('blur', function() {
                     $doc.off('keydown.' + marker._id);
@@ -1702,6 +1703,7 @@
                     self.current.$element.removeClass(self.classes.active);
                     self.current = instance;
                     instance.$element.addClass(self.classes.active);
+                    api._trigger('apply');
                 }
 
                 // get marker current position
