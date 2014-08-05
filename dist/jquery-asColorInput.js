@@ -1,4 +1,4 @@
-/*! asColorInput - v0.1.3 - 2014-07-21
+/*! asColorInput - v0.1.3 - 2014-08-05
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -358,6 +358,9 @@
             return this;
         },
         get: function(type) {
+            if (this.isGradient) {
+                return this.element.value;
+            }
             if (type === undefined) {
                 return this.color.toString();
             }

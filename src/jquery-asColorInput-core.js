@@ -362,6 +362,9 @@
             return this;
         },
         get: function(type) {
+            if (this.isGradient) {
+                return this.element.value;
+            }
             if (type === undefined) {
                 return this.color.toString();
             }
