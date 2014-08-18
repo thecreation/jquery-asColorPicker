@@ -1,4 +1,4 @@
-/*! asColorInput - v0.1.3 - 2014-08-05
+/*! asColorInput - v0.1.3 - 2014-08-18
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -155,16 +155,23 @@
             this._trigger('create');
         },
         _trigger: function(eventType) {
+            var method_arguments = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1) : undefined,
+                data;
+            if (method_arguments) {
+                data = method_arguments;
+                data.push(this);
+            }else {
+                data = this;
+            }
             // event
-            this.$element.trigger('asColorInput::' + eventType, this);
-            this.$element.trigger(eventType + '.asColorInput', this);
+            this.$element.trigger('asColorInput::' + eventType, data);
+            this.$element.trigger(eventType + '.asColorInput', data);
 
             // callback
             eventType = eventType.replace(/\b\w+\b/g, function(word) {
                 return word.substring(0, 1).toUpperCase() + word.substring(1);
             });
             var onFunction = 'on' + eventType;
-            var method_arguments = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1) : undefined;
             if (typeof this.options[onFunction] === 'function') {
                 this.options[onFunction].apply(this, method_arguments);
             }
@@ -179,7 +186,7 @@
                 self.color.set(color);
             }
 
-            this._trigger('change', color);
+            this._trigger('change', this.get(), this.options.name, 'asColorInput');
 
             // update all components 
             $.each(this._comps, function(key, options) {
@@ -1589,7 +1596,7 @@
                 this.makeMarker('#000', 100, self);
                 this.bind(self);
 
-                self.api.$element.on('asColorInput::change', function(event, instance) {
+                self.api.$element.on('asColorInput::change', function(event, color, name, pluginName, instance) {
                     if (self.current && self.api.isGradient && !self.api.clear) {
                         if (instance.color.value.a === 0) {
                             instance.color.value.a = 1;

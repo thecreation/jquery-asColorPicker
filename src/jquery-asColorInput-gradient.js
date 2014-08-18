@@ -262,7 +262,7 @@
                 this.makeMarker('#000', 100, self);
                 this.bind(self);
 
-                self.api.$element.on('asColorInput::change', function(event, instance) {
+                self.api.$element.on('asColorInput::change', function(event, color, name, pluginName, instance) {
                     if (self.current && self.api.isGradient && !self.api.clear) {
                         if (instance.color.value.a === 0) {
                             instance.color.value.a = 1;
