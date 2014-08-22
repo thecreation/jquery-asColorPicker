@@ -138,7 +138,7 @@
 .asColorInput-gradient_enable {
   display: block;
 }
-.asColorInput-gradient-panel {
+.asColorInput-gradient-preview {
   float: left;
   height: 20px;
   border: 1px solid #bbbbbb;
@@ -165,7 +165,7 @@
   position: absolute;
   border-radius: 100%;
 }
-.asColorInput-gradient-degree {
+.asColorInput-gradient-angle {
   float: left;
 }
 .asColorInput-dropdown {
@@ -240,7 +240,7 @@
   padding-top: 20px;
   border-top: 1px solid #bbbbbb;
 }
-.asColorInput-gradient-panel {
+.asColorInput-gradient-preview {
   width: 160px;
 }
 .asColorInput-gradient-markers {
@@ -283,7 +283,7 @@
 .asColorInput-gradient-wheel i {
   background-color: #888888;
 }
-.asColorInput-gradient-degree {
+.asColorInput-gradient-angle {
   margin-left: 10px;
   width: 24px;
 }

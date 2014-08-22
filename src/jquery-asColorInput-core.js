@@ -51,24 +51,11 @@
 
         // color value and format
         // here get init value from input elemnt
-        if (this.element.value === '') {
-            this.color = new Color({
-                r: 255,
-                g: 255,
-                b: 255,
-                a: 1
-            }, this.options.format);
-        } else {
-            if (this.options.mode === 'gradient') {
-                this.gradient = this.element.value;
-            }
-            this.color = new Color(this.element.value, this.options.format);
-        }
+        this.color = new Color(this.element.value, this.options.format);
 
         if (this.options.hideInput) {
             this.$element.addClass(this.classes.hideInput);
         }
-
 
         this.updateInput();
 
@@ -117,7 +104,7 @@
                     if (e.keyCode === 9) {
                         self.close();
                     } else if (e.keyCode === 13) {
-                        self.color.from(self.$element.val());
+                        self.color.val(self.$element.val());
                         self.update({}, 'input');
                         self.close();
                     }
@@ -126,13 +113,13 @@
                     if (self.isGradient) {
                         return;
                     }
-                    self.color.from(self.$element.val());
+                    self.color.val(self.$element.val());
                     self.update({}, 'input');
                 }
             });
             this.$clear.on('click', function() {
                 self.clear = true;
-                self.color.from('transparent');
+                self.color.val('transparent');
                 self.update({});
                 self.$element.val('');
                 self.clear = false;
@@ -345,12 +332,12 @@
             this._trigger('close');
         },
         clear: function() {
-            this.color.from('#fff');
+            this.color.val('#fff');
             this.update({});
             this.close();
         },
         cancel: function() {
-            this.color.from(this.originalColor);
+            this.color.val(this.originalColor);
             this.update({});
             this.close();
 
@@ -364,7 +351,7 @@
             return false;
         },
         set: function(value) {
-            this.color.from(value);
+            this.color.val(value);
             this.update();
             return this;
         },
@@ -481,13 +468,8 @@
             this.update(api);
         },
         update: function(api) {
-            if (api.isGradient) {
-                this.$trigger_inner.css('backgroundColor', 'transparent');
-                this.$trigger_inner[0].style.backgroundImage = api.gradient;
-            }else {
-                this.$trigger_inner[0].style.backgroundImage = '';
-                this.$trigger_inner.css('backgroundColor', api.color.toRGBA());
-            }
+            this.$trigger_inner[0].style.backgroundImage = '';
+            this.$trigger_inner.css('backgroundColor', api.color.toRGBA());
         },
         destroy: function(api) {
             api.$trigger.remove();
