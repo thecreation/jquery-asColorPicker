@@ -248,7 +248,7 @@
 
                         var position = that.getPosition(x, y);
                         var angle = that.calAngle(position.x, position.y);
-                        that.set(angle);
+                        self.setAngle(angle);
                     };
                     this.wheelMouseup = function() {
                         $doc.off({
@@ -288,12 +288,6 @@
                         return deg;
                     }
                 },
-                set: function(value){
-                    self.gradient.angle(value);
-                    self.$gradient.trigger('update', {
-                        angle: value
-                    });
-                },
                 position: function(angle) {
                     var r = this.r || self.$wheel.width() / 2;
                     var pos = this.calPointer(angle, r);
@@ -317,7 +311,7 @@
                     self.$angle = self.$gradient.find('.' + api.namespace + '-gradient-angle');
 
                     self.$angle.on('blur.asColorInput', function() {
-                        that.set(this.value);
+                        self.setAngle(this.value);
                         return false;
                     }).on('keydown.asColorInput', function(e) {
                         var key = e.keyCode || e.which;
@@ -331,12 +325,6 @@
                         if(typeof data.angle !== 'undefined') {
                             self.$angle.val(data.angle);
                         }
-                    });
-                },
-                set: function(value) {
-                    self.gradient.angle(value);
-                    self.$gradient.trigger('update', {
-                        angle: value
                     });
                 }
             }
@@ -392,9 +380,14 @@
         del: function(id){
             this.gradient.removeById(id);
             this.gradient.reorder();
-            console.info(id);
             this.$gradient.trigger('del', {
                 id: id
+            });
+        },
+        setAngle: function(value){
+            this.gradient.angle(value);
+            this.$gradient.trigger('update', {
+                angle: value
             });
         }
     };
