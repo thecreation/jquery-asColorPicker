@@ -5,6 +5,9 @@
 .asColorInput_hideInput {
   display: none;
 }
+.asColorInput_hideInput .asColorInput-clear {
+  display: none;
+}
 .asColorInput-dropdown {
   user-select: none;
   display: none;
@@ -254,7 +257,7 @@
   margin-left: -6px;
   border: 1px solid #bbbbbb;
 }
-.asColorInput-gradient-marker:after {
+.asColorInput-gradient-marker i {
   position: absolute;
   left: 2px;
   bottom: -3px;
@@ -273,7 +276,7 @@
 .asColorInput-gradient-marker_active {
   border-color: #41a9e5;
 }
-.asColorInput-gradient-marker_active:after {
+.asColorInput-gradient-marker_active i {
   border-right-color: #41a9e5;
   border-bottom-color: #41a9e5;
 }

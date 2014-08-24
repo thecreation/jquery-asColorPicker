@@ -170,6 +170,7 @@ module.exports = function(grunt) {
                     cwd: 'bower_components/',
                     src: [
                         'jquery-asColor/dist/*.js',
+                        'jquery-asGradient/dist/*.js'
                     ],
                     dest: 'demo/js/'
                 }]

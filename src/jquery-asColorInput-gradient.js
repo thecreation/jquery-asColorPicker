@@ -16,6 +16,15 @@
         return prefix;
     }
 
+    function conventToPercentage(n){
+        if(n < 0){
+            n = 0;
+        } else if(n > 1){
+            n = 1;
+        }
+        return n*100 + '%';
+    }
+
     var Gradient = function(api, options) {
         this.api = api;
         this.options = options;
@@ -79,11 +88,15 @@
             markers: {
                 init: function(){
                     self.$markers = self.$gradient.find('.' + api.namespace + '-gradient-markers');
+                    var that = this;
+                    self.$gradient.on('add', function(e, data){
+                        that.add(data.color, data.position, data.index);
+                    });
                 },
-                add: function(){
-
+                add: function(color, position){
+                    $('<span style="background: '+color.toString()+'; left:'+ conventToPercentage(position) +'" class="' + self.classes.marker + '"><i style="background: '+color.toString()+'"></i></span>').attr('tabindex', 0).appendTo(self.$markers);
                 },
-                remove: function(){
+                remove: function(index){
 
                 }
             },
@@ -93,8 +106,10 @@
                     self.$wheel = self.$gradient.find('.' + api.namespace + '-gradient-wheel');
                     self.$pointer = self.$wheel.find('i');
 
-                    self.$gradient.on('update', function(e){
-                        that.position(self.gradient.angle());
+                    self.$gradient.on('update', function(e, data){
+                        if(typeof data.angle !== 'undefined') {
+                            that.position(data.angle);
+                        }
                     });
 
                     self.$wheel.on('mousedown.asColorInput', function(e) {
@@ -119,6 +134,7 @@
                     this.wheelMove = function(e) {
                         var x = e.pageX - startX;
                         var y = startY - e.pageY;
+
                         var position = that.getPosition(x, y);
                         var angle = that.calAngle(position.x, position.y);
                         that.set(angle);
@@ -147,17 +163,17 @@
                     };
                 },
                 calAngle: function(x, y) {
-                    var deg = Math.round(Math.atan(Math.abs(y / x)) * (180 / Math.PI));
-                    if (x <= 0 && y > 0) {
-                        return 180 - deg;
-                    }
-                    if (x <= 0 && y <= 0) {
-                        return deg + 180;
-                    }
-                    if (x > 0 && y <= 0) {
+                    var deg = Math.round(Math.atan(Math.abs(x / y)) * (180 / Math.PI));
+                    if (x < 0 && y > 0) {
                         return 360 - deg;
                     }
-                    if (x > 0 && y > 0) {
+                    if (x < 0 && y <= 0) {
+                        return deg + 180;
+                    }
+                    if (x >= 0 && y <= 0) {
+                        return 180 - deg;
+                    }
+                    if (x >= 0 && y > 0) {
                         return deg;
                     }
                 },
@@ -176,8 +192,8 @@
                     });
                 },
                 calPointer: function(angle, r) {
-                    var x = Math.cos(angle * Math.PI / 180) * r;
-                    var y = Math.sin(angle * Math.PI / 180) * r;
+                    var x = Math.sin(angle * Math.PI / 180) * r;
+                    var y = Math.cos(angle * Math.PI / 180) * r;
                     return {
                         x: r + x,
                         y: r - y
@@ -200,8 +216,10 @@
                         }
                     });
 
-                    self.$gradient.on('update', function(e){
-                        self.$angle.val(self.gradient.angle());
+                    self.$gradient.on('update', function(e, data){
+                        if(typeof data.angle !== 'undefined') {
+                            self.$angle.val(data.angle);
+                        }
                     });
                 },
                 set: function(value) {
@@ -225,16 +243,33 @@
                 this.gradient = this._last;
             } else {
                 var gradient = new $.asGradient();
-                gradient.append(this.api.color.toString(), 0);
-                gradient.append(this.api.color.toString(), 1);
                 this.gradient = gradient;
-                this.$gradient.trigger('update');
+
+                this.add(this.api.color.toString(), 0, 0);
+                this.add(this.api.color.toString(), 1, 1);
+                // gradient.append(this.api.color.toString(), 0);
+                // gradient.append(this.api.color.toString(), 1);
             }
+            this.$gradient.trigger('update', this.gradient.value);
         },
         disable: function(){
             this.$gradient.removeClass(this.classes.enable);
             this._last = this.gradient;
             this.api.color.val(this.api.color.get(0).color.toString());
+        },
+        add: function(color, position, index){
+            this.gradient.insert(color, position, index);
+            this.$gradient.trigger('add', {
+                color: this.gradient.get(index).color,
+                position: position,
+                index: index
+            });
+        },
+        remove: function(){
+            this.gradient.remove(index);
+            this.$gradient.trigger('remove', {
+                index: index
+            });
         }
     };
 
