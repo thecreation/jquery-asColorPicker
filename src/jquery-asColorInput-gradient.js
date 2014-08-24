@@ -80,10 +80,10 @@
                 },
                 render: function(){
                     self.$preview.css({
-                        'background-image': self.gradient.toString(getPrefix()),
+                        'background-image': self.gradient.toStringWithAngle('to right', getPrefix()),
                     });
                     self.$preview.css({
-                        'background-image': self.gradient.toString(),
+                        'background-image': self.gradient.toStringWithAngle('to right'),
                     });
                 }
             },
