@@ -35,6 +35,7 @@
         };
         this.isOpened = false;
         this.initialized = false;
+        this.current = null;
         this.$doc = $(document);
 
         var self = this;
@@ -76,33 +77,142 @@
                     var that = this;
                     self.$preview = self.$gradient.find('.' + api.namespace + '-gradient-preview');
 
-                    self.$gradient.on('update', function(e){
+                    self.$gradient.on('add del update', function(e){
                         that.render();
                     });
                 },
                 render: function(){
                     self.$preview.css({
-                        'background-image': self.gradient.toString(getPrefix()),
+                        'background-image': self.gradient.toStringWithAngle('to right', getPrefix()),
                     });
                     self.$preview.css({
-                        'background-image': self.gradient.toString(),
+                        'background-image': self.gradient.toStringWithAngle('to right'),
                     });
                 }
             },
             markers: {
+                width: 160,
                 init: function(){
                     self.$markers = self.$gradient.find('.' + api.namespace + '-gradient-markers');
                     var that = this;
                     self.$gradient.on('add', function(e, data){
-                        that.add(data.color, data.position, data.index);
+                        that.add(data.stop.color.toString(), data.stop.position, data.stop.id);
+                    });
+
+                    self.$gradient.on('active', function(e, data){
+                        that.active(data.id);
+                    });
+
+                    self.$gradient.on('del', function(e, data){
+                        that.del(data.id);
+                    });
+
+                    self.$markers.on('mousedown.asColorInput', function(e) {
+                        var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                        if (rightclick) {
+                            return false;
+                        }
+
+                        var position = parseFloat((e.pageX - self.$markers.offset().left) / self.markers.width, 10);
+                        self.add('#fff', position);
+                        return false;
+                    });
+
+                    self.$markers.on('mousedown.asColorInput', 'span', function(e){
+                        var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                        if (rightclick) {
+                            return false;
+                        }
+                        that.mousedown(this, e);
+                        return false;
+                    });
+
+                    self.$markers.on('focus.asColorInput', 'span', function(e){
+                        if (!$(this).isBinded) {
+                            var id = $(this).data('id');
+                            $(document).on('keydown.asColorInput' + id, function(e) {
+                                var key = e.keyCode || e.which;
+                                if (key === 46 || key === 8) {
+                                    if (self.gradient.length <= 2) {
+                                        return;
+                                    }
+
+                                    return self.del(id);
+                                }
+                            });
+                            
+                            $(this).isBinded = true;
+                        }
+                    }).on('blur', 'span', function() {
+                        $(document).off('keydown.asColorInput' + $(this).data('id'));
+                        $(this).isBinded = false;
+                    });
+
+                    self.$markers.on('click', 'span', function(e){
+                        var id = $(this).data('id');
+                        self.active(id);
                     });
                 },
-                add: function(color, position){
-                    $('<span style="background: '+color.toString()+'; left:'+ conventToPercentage(position) +'" class="' + self.classes.marker + '"><i style="background: '+color.toString()+'"></i></span>').attr('tabindex', 0).appendTo(self.$markers);
+                add: function(color, position, id){
+                    $('<span data-id="'+id+'" style="background: '+color+'; left:'+ conventToPercentage(position) +'" class="' + self.classes.marker + '"><i style="background: '+color+'"></i></span>').attr('tabindex', 0).appendTo(self.$markers);
                 },
-                remove: function(index){
+                del: function(id){
+                    self.$markers.find('[data-id="'+id+'"]').remove();
+                },
+                active: function(id){
+                    var $marker = self.$markers.find('[data-id="'+id+'"]');
+                    
+                    self.$markers.children().removeClass(self.classes.active);
+                    $marker.addClass(self.classes.active);
 
-                }
+                    $marker.focus();
+                },
+                mousedown: function(marker, e) {
+                    var that = this,
+                        id = $(marker).data('id'),
+                        first = $(marker).position().left,
+                        start = e.pageX,
+                        end;
+
+                    this.mousemove = function(e) {
+                        end = e.pageX || start;
+                        var position = (first + end - start)/this.width;
+                        that.move(marker, position, id);
+                        return false;
+                    };
+
+                    this.mouseup = function() {
+                        $(document).off({
+                            mousemove: this.mousemove,
+                            mouseup: this.mouseup
+                        });
+
+                        return false;
+                    };
+
+                    $(document).on({
+                        mousemove: $.proxy(this.mousemove, this),
+                        mouseup: $.proxy(this.mouseup, this)
+                    });
+                    $(marker).focus();
+                    return false;
+                },
+                move: function(marker, position, id) {
+                    position = Math.max(0, Math.min(1, position));
+                    $(marker).css({
+                        left: conventToPercentage(position)
+                    });
+                    if(!id){
+                        id = $(marker).data('id');
+                    }
+
+                    self.gradient.getById(id).setPosition(position);
+
+                    self.$gradient.trigger('update', {
+                        id: $(marker).data('id'),
+                        position: position
+                    });
+                },
             },
             wheel: {
                 init: function(){
@@ -141,7 +251,7 @@
 
                         var position = that.getPosition(x, y);
                         var angle = that.calAngle(position.x, position.y);
-                        that.set(angle);
+                        self.setAngle(angle);
                     };
                     this.wheelMouseup = function() {
                         $doc.off({
@@ -183,7 +293,7 @@
                 },
                 set: function(value){
                     self.gradient.angle(value);
-                    self.$gradient.switch('update', {
+                    self.$gradient.trigger('update', {
                         angle: value
                     });
                 },
@@ -210,7 +320,7 @@
                     self.$angle = self.$gradient.find('.' + api.namespace + '-gradient-angle');
 
                     self.$angle.on('blur.asColorInput', function() {
-                        that.set(this.value);
+                        self.setAngle(this.value);
                         return false;
                     }).on('keydown.asColorInput', function(e) {
                         var key = e.keyCode || e.which;
@@ -228,7 +338,7 @@
                 },
                 set: function(value) {
                     self.gradient.angle(value);
-                    self.$gradient.switch('update', {
+                    self.$gradient.trigger('update', {
                         angle: value
                     });
                 }
@@ -243,6 +353,8 @@
 
         enable: function(){
             this.$gradient.addClass(this.classes.enable);
+            this.markers.width = this.$markers.width();
+            
             if(this._last){
                 this.gradient = this._last;
             } else {
@@ -251,29 +363,47 @@
 
                 this.add(this.api.color.toString(), 0, 0);
                 this.add(this.api.color.toString(), 1, 1);
-                // gradient.append(this.api.color.toString(), 0);
-                // gradient.append(this.api.color.toString(), 1);
             }
             this.api.color = this.gradient;
-            this.$gradient.switch('update', this.gradient.value);
+            this.$gradient.trigger('update', this.gradient.value);
+        },
+        active: function(id){
+            if(this.current !== id){
+                this.current = id;
+
+                this.$gradient.trigger('active', {
+                    id: id
+                });
+            }
         },
         disable: function(){
             this.$gradient.removeClass(this.classes.enable);
             this._last = this.gradient;
             this.api.color.val(this.api.color.get(0).color.toString());
         },
-        add: function(color, position, index){
-            this.gradient.insert(color, position, index);
-            this.$gradient.switch('add', {
-                color: this.gradient.get(index).color,
-                position: position,
-                index: index
+        add: function(color, position){
+            var stop = this.gradient.insert(color, position);
+            this.gradient.reorder();
+
+            this.$gradient.trigger('add', {
+                stop: stop
+            });
+
+            this.active(stop.id);
+
+            return stop;
+        },
+        del: function(id){
+            this.gradient.removeById(id);
+            this.gradient.reorder();
+            this.$gradient.trigger('del', {
+                id: id
             });
         },
-        remove: function(){
-            this.gradient.remove(index);
-            this.$gradient.switch('remove', {
-                index: index
+        setAngle: function(value){
+            this.gradient.angle(value);
+            this.$gradient.trigger('update', {
+                angle: value
             });
         }
     };
