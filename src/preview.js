@@ -1,8 +1,8 @@
 // preview
 
 (function($) {
-     "use strict";
-     
+    "use strict";
+
     $.asColorInput.registerComponent('preview', {
         init: function(api) {
             var self = this;
@@ -12,22 +12,26 @@
             this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous div');
 
             api.$element.on('asColorInput::firstOpen', function() {
-                self.update(api);
+                self.update(api.color);
                 self.$previous.css('backgroundColor', api.color.toRGBA());
 
                 api.$element.on('asColorInput::apply', function(event, api) {
                     self.$previous.css('backgroundColor', api.color.toRGBA());
                 });
 
-                self.$previous.on('click', function(){
-                    api.set(api.originalColor);
+                self.$previous.on('click', function() {
+                    //api.set(api.originalColor);
 
                     return false;
-                }); 
+                });
+            });
+
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
             });
         },
-        update: function(api) {
-            this.$current.css('backgroundColor', api.color.toRGBA());
+        update: function(color) {
+            this.$current.css('backgroundColor', color.toRGBA());
         }
     });
 })(jQuery);

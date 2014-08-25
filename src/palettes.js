@@ -1,8 +1,8 @@
 // palettes
 
 (function($) {
-     "use strict";
-     
+    "use strict";
+
     function noop() {
         return;
     }
@@ -62,7 +62,7 @@
                 }
             });
         },
-        getItem: function(color){
+        getItem: function(color) {
             return '<li data-color="' + color + '"><div style="background-color:' + color + '" /></li>';
         },
         setLocalItem: function(key, value) {

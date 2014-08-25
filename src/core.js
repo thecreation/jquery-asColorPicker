@@ -51,9 +51,6 @@
 
         this._comps = AsColorInput.modes[this.options.mode];
 
-        //save this.color  as a rgba value 
-        this.originalColor = this.color.toRGBA();
-
         this._trigger('init');
         this.init();
     };
@@ -63,7 +60,7 @@
         components: {},
         init: function() {
             var self = this;
-  
+
             this.color = new Color(this.element.value, this.options.format, this.options.color);
 
             this._create();
@@ -73,10 +70,10 @@
                 this.$element.parent().addClass(this.classes.skin);
             }
 
-            if(this.options.readonly){
+            if (this.options.readonly) {
                 this.$element.prop('readonly', true);
             }
-            
+
             this._bindEvent();
 
             this.initialed = true;
@@ -86,16 +83,14 @@
         _create: function() {
             var self = this;
 
-            this.$dropdown = $('<div class="' + this.classes.dropdown + '" data-mode="'+this.options.mode+'"></div>');
+            this.$dropdown = $('<div class="' + this.classes.dropdown + '" data-mode="' + this.options.mode + '"></div>');
             this.$element.wrap('<div class="' + this.classes.wrap + '"></div>').addClass(this.classes.input);
-            
+
             this.$wrap = this.$element.parent();
             this.$body = $('body');
 
             this.$dropdown.data('asColorInput', this);
 
-            this.components.trigger.init(this);
-            
             $.each(this._comps, function(key, options) {
                 if (options === true) {
                     options = {};
@@ -109,6 +104,7 @@
             this._trigger('create');
         },
         _bindEvent: function() {
+            var self = this;
             this.$element.on({
                 'click.asColorInput': function() {
                     if (!self.opened) {
@@ -117,23 +113,14 @@
                     return false;
                 },
                 'keydown.asColorInput': function(e) {
-                    if (self.isGradient) {
-                        return;
-                    }
                     if (e.keyCode === 9) {
                         self.close();
                     } else if (e.keyCode === 13) {
-                        self.color.val(self.$element.val());
-                        self.update({}, 'input');
-                        self.close();
+                        self.val(self.$element.val());
                     }
                 },
                 'keyup.asColorInput': function() {
-                    if (self.isGradient) {
-                        return;
-                    }
-                    self.color.val(self.$element.val());
-                    self.update({}, 'input');
+                    //self.val(self.$element.val());
                 }
             });
         },
@@ -143,7 +130,7 @@
             if (method_arguments) {
                 data = method_arguments;
                 data.push(this);
-            }else {
+            } else {
                 data = this;
             }
             // event
@@ -159,34 +146,19 @@
                 this.options[onFunction].apply(this, method_arguments);
             }
         },
-        update: function(color, trigger) {
+        update: function() {
             var self = this;
 
-            //set chosen color to color object
-            if (color !== {}) {
-                self.color.set(color);
-            }
-
+            this._trigger('update', this.color);
             this._trigger('change', this.val(), this.options.name, 'asColorInput');
-
-            // update all components 
-            $.each(this._comps, function(key, options) {
-                if (trigger !== key) {
-                    self.components[key] && self.components[key].update && self.components[key].update(self);
-                }
-            });
-
-            this.components.trigger.update(this);
 
             this.$element.val(this.color.toString());
         },
-        opacity: function(data) {
-            if (data) {
-                this.update({
-                    a: data
-                });
+        opacity: function(v) {
+            if (v) {
+                this.color.alpha(v);
             } else {
-                return this.color.value.a;
+                return this.color.alpha();
             }
         },
         position: function() {
@@ -227,17 +199,17 @@
 
             var self = this;
 
-            if(this.$dropdown[0] !== this.$body.children().last()[0]) {
+            if (this.$dropdown[0] !== this.$body.children().last()[0]) {
                 this.$dropdown.detach().appendTo(this.$body);
             }
 
-            this.$mask = $('.'+self.classes.mask);
+            this.$mask = $('.' + self.classes.mask);
             if (this.$mask.length == 0) {
                 this.createMask();
             }
 
             // ensure the mask is always right before the dropdown
-            if(this.$dropdown.prev()[0] !== this.$mask[0]){
+            if (this.$dropdown.prev()[0] !== this.$mask[0]) {
                 this.$dropdown.before(this.$mask);
             }
 
@@ -255,23 +227,24 @@
 
             this.opened = true;
 
-            if(this.firstOpen){
+            if (this.firstOpen) {
                 this.firstOpen = false;
 
                 this._trigger('firstOpen');
             }
             this._trigger('open');
         },
-        createMask: function(){
+        createMask: function() {
             this.$mask = $(document.createElement("div"));
-            this.$mask.attr("class",this.classes.mask);
+            this.$mask.attr("class", this.classes.mask);
             this.$mask.hide();
             this.$mask.appendTo(this.$body);
 
             var self = this;
 
-            this.$mask.on("mousedown touchstart click", function (e) {
-                var $dropdown = $("#asColorInput-dropdown"), self;
+            this.$mask.on("mousedown touchstart click", function(e) {
+                var $dropdown = $("#asColorInput-dropdown"),
+                    self;
                 if ($dropdown.length > 0) {
                     self = $dropdown.data("asColorInput");
                     if (self.opened) {
@@ -299,19 +272,16 @@
             this._trigger('close');
         },
         clear: function() {
-            this.color.val('#fff');
-            this.update({});
-            this.close();
+            this.val('');
         },
         cancel: function() {
-            this.color.val(this.originalColor);
-            this.update({});
             this.close();
 
             return false;
         },
         apply: function() {
-            this.originalColor = this.color.toRGBA();
+
+
             this.close();
             this._trigger('apply');
 
@@ -319,21 +289,20 @@
         },
         val: function(value) {
             if (typeof value === 'undefined') {
-                return this.value.toString();
+                return this.color.toString();
             }
 
-            if (value) {
-                this.set(value);
-            } else {
-                this.clear();
-            }
+            this.set(value);
         },
-        set: function(value, update) {
-            this.color.val(value);
-
-            if (update !== false) {
-                this.update();
+        set: function(value) {
+            if (typeof value === 'string') {
+                this.color.val(value);
+            } else {
+                this.color.set(value);
             }
+
+            this.update();
+
             return this;
         },
         get: function() {
@@ -378,7 +347,7 @@
         },
         mode: 'simple',
         components: {
-            
+
         },
         onInit: null,
         onReady: null,
@@ -390,14 +359,17 @@
 
     AsColorInput.modes = {
         'simple': {
+            trigger: true,
             saturation: true,
             hue: true,
             alpha: true
         },
         'palettes': {
+            trigger: true,
             palettes: true
         },
         'complex': {
+            trigger: true,
             preview: true,
             palettes: true,
             saturation: true,
@@ -407,6 +379,7 @@
             buttons: true
         },
         'gradient': {
+            trigger: true,
             preview: true,
             palettes: true,
             saturation: true,
@@ -433,11 +406,16 @@
                 }
                 return false;
             });
-            this.update(api);
+            var self = this;
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
+            });
+
+            this.update(api.color);
         },
-        update: function(api) {
+        update: function(color) {
             this.$trigger_inner[0].style.backgroundImage = '';
-            this.$trigger_inner.css('backgroundColor', api.color.toRGBA());
+            this.$trigger_inner.css('backgroundColor', color.toRGBA());
         },
         destroy: function(api) {
             api.$trigger.remove();

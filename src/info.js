@@ -1,8 +1,8 @@
 // info
 
 (function($) {
-     "use strict";
-     
+    "use strict";
+
     $.asColorInput.registerComponent('info', {
         color: ['white', 'black', 'transparent'],
         init: function(api) {
@@ -41,16 +41,20 @@
                 }
                 var color = {};
                 color[type] = val;
-                api.value(color);
+                api.set(color);
+            });
+            var self = this;
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
             });
 
-            this.update(api);
+            this.update(api.color);
         },
-        update: function(api) {
-            this.$r.val(api.color.value.r);
-            this.$g.val(api.color.value.g);
-            this.$b.val(api.color.value.b);
-            this.$a.val(api.color.value.a);
+        update: function(color) {
+            this.$r.val(color.value.r);
+            this.$g.val(color.value.g);
+            this.$b.val(color.value.b);
+            this.$a.val(color.value.a);
         },
     });
 })(jQuery);

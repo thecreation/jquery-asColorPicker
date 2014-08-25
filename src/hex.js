@@ -1,8 +1,8 @@
 // hex
 
 (function($) {
-     "use strict";
-     
+    "use strict";
+
     $.asColorInput.registerComponent('hex', {
         init: function(api) {
             var template = '<input type="text" class="' + api.namespace + '-hex" />';
@@ -12,10 +12,15 @@
                 api.set(this.value);
             });
 
-            this.update(api);
+            var self = this;
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
+            });
+
+            this.update(api.color);
         },
-        update: function(api) {
-            this.$hex.val(api.color.toHEX());
+        update: function(color) {
+            this.$hex.val(color.toHEX());
         },
     });
 })(jQuery);

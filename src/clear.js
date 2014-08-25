@@ -1,8 +1,8 @@
 // clear
 
 (function($) {
-     "use strict";
-     
+    "use strict";
+
     $.asColorInput.registerComponent('clear', {
         defaults: {
 

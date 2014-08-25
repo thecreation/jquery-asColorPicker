@@ -140,7 +140,7 @@ module.exports = function(grunt) {
     });
 
     // Default task.
-    grunt.registerTask('default', ['jshint', 'clean', 'concat']);
+    grunt.registerTask('default', ['clean', 'dist']);
     grunt.registerTask('dist', ['concat', 'uglify']);
     grunt.registerTask('dev', ['concat']);
 

@@ -1,7 +1,7 @@
 // keyboard
 
 (function(window, document, $, undefined) {
-     "use strict";
+    "use strict";
 
     var $doc = $(document);
     var keyboard = {

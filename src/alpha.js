@@ -1,8 +1,8 @@
 // alpha
 
 (function($) {
-     "use strict";
-     
+    "use strict";
+
     $.asColorInput.registerComponent('alpha', {
         size: 150,
         defaults: {
@@ -14,6 +14,7 @@
 
             this.options = $.extend(this.defaults, options);
             self.direction = this.options.direction;
+            this.api = api;
 
             this.$alpha = $('<div class="' + api.namespace + '-alpha ' + api.namespace + '-alpha-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
             this.$handle = this.$alpha.children('i');
@@ -28,33 +29,37 @@
                 self.step = self.size / 360;
 
                 // update
-                self.update(api);
+                self.update(api.color);
 
                 // bind events
-                self.bindEvents(api);
-                self.keyboard(api);
+                self.bindEvents();
+                self.keyboard();
+            });
+
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
             });
         },
-        bindEvents: function(api){
+        bindEvents: function() {
             var self = this;
             this.$alpha.on('mousedown.asColorInput', function(e) {
                 var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                 if (rightclick) {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(api, e);
+                $.proxy(self.mousedown, self)(e);
             });
         },
-        mousedown: function(api, e) {
+        mousedown: function(e) {
             var offset = this.$alpha.offset();
             if (this.direction === 'vertical') {
                 this.data.startY = e.pageY;
                 this.data.top = e.pageY - offset.top;
-                this.move(api, this.data.top);
+                this.move(this.data.top);
             } else {
                 this.data.startX = e.pageX;
                 this.data.left = e.pageX - offset.left;
-                this.move(api, this.data.left);
+                this.move(this.data.left);
             }
 
             this.mousemove = function(e) {
@@ -65,7 +70,7 @@
                     position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
                 }
 
-                this.move(api, position);
+                this.move(position);
                 return false;
             };
 
@@ -89,7 +94,7 @@
             });
             return false;
         },
-        move: function(api, position, alpha, update) {
+        move: function(position, alpha, update) {
             position = Math.max(0, Math.min(this.size, position));
             this.data.cach = position;
             if (typeof alpha === 'undefined') {
@@ -107,39 +112,39 @@
             }
 
             if (update !== false) {
-                api.update({
+                this.api.set({
                     a: Math.round(alpha * 100) / 100
-                }, 'alpha');
+                });
             }
         },
-        moveLeft: function(api) {
+        moveLeft: function() {
             var step = this.step,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(api, data.left);
+            this.move(data.left);
         },
-        moveRight: function(api) {
+        moveRight: function() {
             var step = this.step,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(api, data.left);
+            this.move(data.left);
         },
-        moveUp: function(api) {
+        moveUp: function() {
             var step = this.step,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(api, data.top);
+            this.move(data.top);
         },
-        moveDown: function(api) {
+        moveDown: function() {
             var step = this.step,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(api, data.top);
+            this.move(data.top);
         },
-        keyboard: function(api) {
+        keyboard: function() {
             var keyboard, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
+            if (this.api._keyboard) {
+                keyboard = $.extend(true, {}, this.api._keyboard);
             } else {
                 return false;
             }
@@ -148,19 +153,19 @@
                 if (this.direction === 'vertical') {
                     keyboard.attach({
                         up: function() {
-                            self.moveUp.call(self, api);
+                            self.moveUp();
                         },
                         down: function() {
-                            self.moveDown.call(self, api);
+                            self.moveDown();
                         }
                     });
                 } else {
                     keyboard.attach({
                         left: function() {
-                            self.moveLeft.call(self, api);
+                            self.moveLeft();
                         },
                         right: function() {
-                            self.moveRight.call(self, api);
+                            self.moveRight();
                         }
                     });
                 }
@@ -169,11 +174,11 @@
                 keyboard.detach();
             });
         },
-        update: function(api) {
-            var position = this.size * (1 - api.color.value.a);
-            this.$alpha.css('backgroundColor', api.color.toHEX());
+        update: function(color) {
+            var position = this.size * (1 - color.value.a);
+            this.$alpha.css('backgroundColor', color.toHEX());
 
-            this.move(api, position, api.color.value.a, false);
+            this.move(position, color.value.a, false);
         },
         destroy: function() {
             $(document).off({

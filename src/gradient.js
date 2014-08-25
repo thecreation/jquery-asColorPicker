@@ -16,13 +16,13 @@
         return prefix;
     }
 
-    function conventToPercentage(n){
-        if(n < 0){
+    function conventToPercentage(n) {
+        if (n < 0) {
             n = 0;
-        } else if(n > 1){
+        } else if (n > 1) {
             n = 1;
         }
-        return n*100 + '%';
+        return n * 100 + '%';
     }
 
     var Gradient = function(api, options) {
@@ -44,7 +44,7 @@
                 self.$wrap = $(self.options.template.call(self)).appendTo(api.$dropdown);
 
                 self.$gradient = self.$wrap.filter('.' + api.namespace + '-gradient');
-                
+
                 this.angle.init();
                 this.preview.init();
                 this.markers.init();
@@ -55,8 +55,8 @@
             bind: function() {
                 var namespace = api.namespace;
 
-                if(self.options.switchable){
-                    self.$wrap.on('click', '.' + namespace + '-gradient-switch', function(){
+                if (self.options.switchable) {
+                    self.$wrap.on('click', '.' + namespace + '-gradient-switch', function() {
                         if (self.isOpened) {
                             self.disable();
                         } else {
@@ -67,21 +67,21 @@
                         return false;
                     });
                 }
-                
-                self.$wrap.on('click', '.' + namespace + '-gradient-cancel', function(){
+
+                self.$wrap.on('click', '.' + namespace + '-gradient-cancel', function() {
 
                 });
             },
             preview: {
-                init: function(){
+                init: function() {
                     var that = this;
                     self.$preview = self.$gradient.find('.' + api.namespace + '-gradient-preview');
 
-                    self.$gradient.on('add del update', function(e){
+                    self.$gradient.on('add del update', function(e) {
                         that.render();
                     });
                 },
-                render: function(){
+                render: function() {
                     self.$preview.css({
                         'background-image': self.gradient.toStringWithAngle('to right', getPrefix()),
                     });
@@ -92,18 +92,18 @@
             },
             markers: {
                 width: 160,
-                init: function(){
+                init: function() {
                     self.$markers = self.$gradient.find('.' + api.namespace + '-gradient-markers');
                     var that = this;
-                    self.$gradient.on('add', function(e, data){
+                    self.$gradient.on('add', function(e, data) {
                         that.add(data.stop.color.toString(), data.stop.position, data.stop.id);
                     });
 
-                    self.$gradient.on('active', function(e, data){
+                    self.$gradient.on('active', function(e, data) {
                         that.active(data.id);
                     });
 
-                    self.$gradient.on('del', function(e, data){
+                    self.$gradient.on('del', function(e, data) {
                         that.del(data.id);
                     });
 
@@ -118,7 +118,7 @@
                         return false;
                     });
 
-                    self.$markers.on('mousedown.asColorInput', 'span', function(e){
+                    self.$markers.on('mousedown.asColorInput', 'span', function(e) {
                         var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                         if (rightclick) {
                             return false;
@@ -127,7 +127,7 @@
                         return false;
                     });
 
-                    self.$markers.on('focus.asColorInput', 'span', function(e){
+                    self.$markers.on('focus.asColorInput', 'span', function(e) {
                         if (!$(this).isBinded) {
                             var id = $(this).data('id');
                             $(document).on('keydown.asColorInput' + id, function(e) {
@@ -140,7 +140,7 @@
                                     return self.del(id);
                                 }
                             });
-                            
+
                             $(this).isBinded = true;
                         }
                     }).on('blur', 'span', function() {
@@ -148,20 +148,20 @@
                         $(this).isBinded = false;
                     });
 
-                    self.$markers.on('click', 'span', function(e){
+                    self.$markers.on('click', 'span', function(e) {
                         var id = $(this).data('id');
                         self.active(id);
                     });
                 },
-                add: function(color, position, id){
-                    $('<span data-id="'+id+'" style="background: '+color+'; left:'+ conventToPercentage(position) +'" class="' + self.classes.marker + '"><i style="background: '+color+'"></i></span>').attr('tabindex', 0).appendTo(self.$markers);
+                add: function(color, position, id) {
+                    $('<span data-id="' + id + '" style="background: ' + color + '; left:' + conventToPercentage(position) + '" class="' + self.classes.marker + '"><i style="background: ' + color + '"></i></span>').attr('tabindex', 0).appendTo(self.$markers);
                 },
-                del: function(id){
-                    self.$markers.find('[data-id="'+id+'"]').remove();
+                del: function(id) {
+                    self.$markers.find('[data-id="' + id + '"]').remove();
                 },
-                active: function(id){
-                    var $marker = self.$markers.find('[data-id="'+id+'"]');
-                    
+                active: function(id) {
+                    var $marker = self.$markers.find('[data-id="' + id + '"]');
+
                     self.$markers.children().removeClass(self.classes.active);
                     $marker.addClass(self.classes.active);
 
@@ -176,7 +176,7 @@
 
                     this.mousemove = function(e) {
                         end = e.pageX || start;
-                        var position = (first + end - start)/this.width;
+                        var position = (first + end - start) / this.width;
                         that.move(marker, position, id);
                         return false;
                     };
@@ -202,7 +202,7 @@
                     $(marker).css({
                         left: conventToPercentage(position)
                     });
-                    if(!id){
+                    if (!id) {
                         id = $(marker).data('id');
                     }
 
@@ -215,13 +215,13 @@
                 },
             },
             wheel: {
-                init: function(){
+                init: function() {
                     var that = this;
                     self.$wheel = self.$gradient.find('.' + api.namespace + '-gradient-wheel');
                     self.$pointer = self.$wheel.find('i');
 
-                    self.$gradient.on('update', function(e, data){
-                        if(typeof data.angle !== 'undefined') {
+                    self.$gradient.on('update', function(e, data) {
+                        if (typeof data.angle !== 'undefined') {
                             that.position(data.angle);
                         }
                     });
@@ -291,7 +291,7 @@
                         return deg;
                     }
                 },
-                set: function(value){
+                set: function(value) {
                     self.gradient.angle(value);
                     self.$gradient.trigger('update', {
                         angle: value
@@ -315,7 +315,7 @@
                 }
             },
             angle: {
-                init: function(){
+                init: function() {
                     var that = this;
                     self.$angle = self.$gradient.find('.' + api.namespace + '-gradient-angle');
 
@@ -330,8 +330,8 @@
                         }
                     });
 
-                    self.$gradient.on('update', function(e, data){
-                        if(typeof data.angle !== 'undefined') {
+                    self.$gradient.on('update', function(e, data) {
+                        if (typeof data.angle !== 'undefined') {
                             self.$angle.val(data.angle);
                         }
                     });
@@ -351,11 +351,11 @@
     Gradient.prototype = {
         constructor: Gradient,
 
-        enable: function(){
+        enable: function() {
             this.$gradient.addClass(this.classes.enable);
             this.markers.width = this.$markers.width();
-            
-            if(this._last){
+
+            if (this._last) {
                 this.gradient = this._last;
             } else {
                 var gradient = new asGradient();
@@ -367,8 +367,8 @@
             this.api.color = this.gradient;
             this.$gradient.trigger('update', this.gradient.value);
         },
-        active: function(id){
-            if(this.current !== id){
+        active: function(id) {
+            if (this.current !== id) {
                 this.current = id;
 
                 this.$gradient.trigger('active', {
@@ -376,12 +376,12 @@
                 });
             }
         },
-        disable: function(){
+        disable: function() {
             this.$gradient.removeClass(this.classes.enable);
             this._last = this.gradient;
             this.api.color.val(this.api.color.get(0).color.toString());
         },
-        add: function(color, position){
+        add: function(color, position) {
             var stop = this.gradient.insert(color, position);
             this.gradient.reorder();
 
@@ -393,14 +393,14 @@
 
             return stop;
         },
-        del: function(id){
+        del: function(id) {
             this.gradient.removeById(id);
             this.gradient.reorder();
             this.$gradient.trigger('del', {
                 id: id
             });
         },
-        setAngle: function(value){
+        setAngle: function(value) {
             this.gradient.angle(value);
             this.$gradient.trigger('update', {
                 angle: value
@@ -424,30 +424,30 @@
                     return;
                 }
             },
-            template: function(){
+            template: function() {
                 var namespace = this.api.namespace;
                 var control = '<div class="' + namespace + '-gradient-control">';
-                if(this.options.switchable){
-                    control += '<a href="#" class="' + namespace + '-gradient-switch">'+this.options.switchText+'</a>';
+                if (this.options.switchable) {
+                    control += '<a href="#" class="' + namespace + '-gradient-switch">' + this.options.switchText + '</a>';
                 }
-                control += '<a href="#" class="' + namespace + '-gradient-cancel">'+this.options.cancelText+'</a>' +
-                '</div>';
+                control += '<a href="#" class="' + namespace + '-gradient-cancel">' + this.options.cancelText + '</a>' +
+                    '</div>';
 
                 return control +
-                '<div class="' + namespace + '-gradient">' +
+                    '<div class="' + namespace + '-gradient">' +
                     '<div class="' + namespace + '-gradient-preview">' +
-                        '<div class="' + namespace + '-gradient-markers"></div>' +
+                    '<div class="' + namespace + '-gradient-markers"></div>' +
                     '</div>' +
                     '<div class="' + namespace + '-gradient-wheel">' +
-                         '<i></i>' +
+                    '<i></i>' +
                     '</div>' +
                     '<input class="' + namespace + '-gradient-angle" type="text" value="" size="3" />' +
-                '</div>';
+                    '</div>';
             }
         },
         init: function(api, options) {
             var self = this;
-            
+
             api.$element.on('asColorInput::ready', function(event, instance) {
                 if (instance.options.mode !== 'gradient') {
                     return;
@@ -466,4 +466,4 @@
     } else {
         return $.asGradient;
     }
-}(jQuery));
+}(jQuery)));

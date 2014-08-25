@@ -1,8 +1,8 @@
 // hue
 
 (function($) {
-     "use strict";
-     
+    "use strict";
+
     $.asColorInput.registerComponent('hue', {
         size: 150,
         defaults: {
@@ -14,6 +14,7 @@
 
             this.options = $.extend(this.defaults, options);
             this.direction = this.options.direction;
+            this.api = api;
 
             this.$hue = $('<div class="' + api.namespace + '-hue ' + api.namespace + '-hue-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
             this.$handle = this.$hue.children('i');
@@ -28,33 +29,38 @@
                 self.step = self.size / 360;
 
                 // update
-                self.update(api);
+                self.update(api.color);
 
                 // bind events
                 self.bindEvents(api);
                 self.keyboard(api);
             });
+
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
+            });
+
         },
-        bindEvents: function(api){
+        bindEvents: function() {
             var self = this;
             this.$hue.on('mousedown.asColorInput', function(e) {
                 var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                 if (rightclick) {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(api, e);
+                $.proxy(self.mousedown, self)(e);
             });
         },
-        mousedown: function(api, e) {
+        mousedown: function(e) {
             var offset = this.$hue.offset();
             if (this.direction === 'vertical') {
                 this.data.startY = e.pageY;
                 this.data.top = e.pageY - offset.top;
-                this.move(api, this.data.top);
+                this.move(this.data.top);
             } else {
                 this.data.startX = e.pageX;
                 this.data.left = e.pageX - offset.left;
-                this.move(api, this.data.left);
+                this.move(this.data.left);
             }
 
             this.mousemove = function(e) {
@@ -65,7 +71,7 @@
                     position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
                 }
 
-                this.move(api, position);
+                this.move(position);
                 return false;
             };
 
@@ -90,7 +96,7 @@
 
             return false;
         },
-        move: function(api, position, hub, update) {
+        move: function(position, hub, update) {
             position = Math.max(0, Math.min(this.size, position));
             this.data.cach = position;
             if (typeof hub === 'undefined') {
@@ -107,39 +113,39 @@
                 });
             }
             if (update !== false) {
-                api.update({
+                this.api.set({
                     h: hub
-                }, 'hue');
+                });
             }
         },
-        moveLeft: function(api) {
+        moveLeft: function() {
             var step = this.step,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(api, data.left);
+            this.move(data.left);
         },
-        moveRight: function(api) {
+        moveRight: function() {
             var step = this.step,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(api, data.left);
+            this.move(data.left);
         },
-        moveUp: function(api) {
+        moveUp: function() {
             var step = this.step,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(api, data.top);
+            this.move(data.top);
         },
-        moveDown: function(api) {
+        moveDown: function() {
             var step = this.step,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(api, data.top);
+            this.move(data.top);
         },
-        keyboard: function(api) {
+        keyboard: function() {
             var keyboard, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
+            if (this.api._keyboard) {
+                keyboard = $.extend(true, {}, this.api._keyboard);
             } else {
                 return false;
             }
@@ -148,19 +154,19 @@
                 if (this.direction === 'vertical') {
                     keyboard.attach({
                         up: function() {
-                            self.moveUp.call(self, api);
+                            self.moveUp();
                         },
                         down: function() {
-                            self.moveDown.call(self, api);
+                            self.moveDown();
                         }
                     });
                 } else {
                     keyboard.attach({
                         left: function() {
-                            self.moveLeft.call(self, api);
+                            self.moveLeft();
                         },
                         right: function() {
-                            self.moveRight.call(self, api);
+                            self.moveRight();
                         }
                     });
                 }
@@ -169,9 +175,9 @@
                 keyboard.detach();
             });
         },
-        update: function(api) {
-            var position = (api.color.value.h === 0) ? 0 : this.size * (1 - api.color.value.h / 360);
-            this.move(api, position, api.color.value.h, false);
+        update: function(color) {
+            var position = (color.value.h === 0) ? 0 : this.size * (1 - color.value.h / 360);
+            this.move(position, color.value.h, false);
         },
         destroy: function() {
             $(document).off({

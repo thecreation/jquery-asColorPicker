@@ -2,7 +2,7 @@
 
 (function($) {
     "use strict";
-     
+
     $.asColorInput.registerComponent('saturation', {
         defaults: {},
         width: 0,
@@ -13,6 +13,7 @@
             var self = this;
             var template = '<div class="' + api.namespace + '-saturation"><i><b></b></i></div>';
             this.options = $.extend(this.defaults, options),
+            this.api = api;
 
             //build element and add component to picker
             this.$saturation = $(template).appendTo(api.$dropdown);
@@ -29,14 +30,18 @@
                 self.size = self.$handle.width() / 2;
 
                 // update
-                self.update(api);
-                
+                self.update(api.color);
+
                 // bind events
-                self.bindEvents(api);
+                self.bindEvents();
                 self.keyboard(api);
             });
+
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
+            });
         },
-        bindEvents: function(api) {
+        bindEvents: function() {
             var self = this;
 
             this.$saturation.on('mousedown.asColorInput', function(e) {
@@ -44,10 +49,10 @@
                 if (rightclick) {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(api, e);
+                $.proxy(self.mousedown, self)(e);
             });
         },
-        mousedown: function(api, e) {
+        mousedown: function(e) {
             var offset = this.$saturation.offset();
 
             this.data.startY = e.pageY;
@@ -56,12 +61,12 @@
             this.data.left = e.pageX - offset.left;
             this.data.cach = {};
 
-            this.move(api, this.data.left, this.data.top);
+            this.move(this.data.left, this.data.top);
 
             this.mousemove = function(e) {
                 var x = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
                 var y = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
-                this.move(api, x, y);
+                this.move(x, y);
                 return false;
             };
 
@@ -83,7 +88,7 @@
 
             return false;
         },
-        move: function(api, x, y, update) {
+        move: function(x, y, update) {
             y = Math.max(0, Math.min(this.height, y));
             x = Math.max(0, Math.min(this.width, x));
 
@@ -99,55 +104,55 @@
             });
 
             if (update !== false) {
-                api.update({
+                this.api.set({
                     s: x / this.width,
                     v: 1 - (y / this.height)
-                }, 'saturation');
+                });
             }
         },
-        update: function(api) {
-            if (api.color.value.h === undefined) {
-                api.color.value.h = 0;
+        update: function(color) {
+            if (color.value.h === undefined) {
+                color.value.h = 0;
             }
             this.$saturation.css('backgroundColor', $.asColor.HSLToHEX({
-                h: api.color.value.h,
+                h: color.value.h,
                 s: 1,
                 l: 0.5
             }));
 
-            var x = api.color.value.s * this.width;
-            var y = (1 - api.color.value.v) * this.height;
+            var x = color.value.s * this.width;
+            var y = (1 - color.value.v) * this.height;
 
-            this.move(api, x, y, false);
+            this.move(x, y, false);
         },
-        moveLeft: function(api) {
+        moveLeft: function() {
             var step = this.step.left,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(api, data.left, data.top);
+            this.move(data.left, data.top);
         },
-        moveRight: function(api) {
+        moveRight: function() {
             var step = this.step.left,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(api, data.left, data.top);
+            this.move(data.left, data.top);
         },
-        moveUp: function(api) {
+        moveUp: function() {
             var step = this.step.top,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(api, data.left, data.top);
+            this.move(data.left, data.top);
         },
-        moveDown: function(api) {
+        moveDown: function() {
             var step = this.step.top,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(api, data.left, data.top);
+            this.move(data.left, data.top);
         },
-        keyboard: function(api) {
+        keyboard: function() {
             var keyboard, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
+            if (this.api._keyboard) {
+                keyboard = $.extend(true, {}, this.api._keyboard);
             } else {
                 return false;
             }
@@ -155,16 +160,16 @@
             this.$saturation.attr('tabindex', '0').on('focus', function() {
                 keyboard.attach({
                     left: function() {
-                        self.moveLeft.call(self, api);
+                        self.moveLeft();
                     },
                     right: function() {
-                        self.moveRight.call(self, api);
+                        self.moveRight();
                     },
                     up: function() {
-                        self.moveUp.call(self, api);
+                        self.moveUp();
                     },
                     down: function() {
-                        self.moveDown.call(self, api);
+                        self.moveDown();
                     }
                 });
                 return false;

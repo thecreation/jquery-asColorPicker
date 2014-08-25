@@ -1,4 +1,4 @@
-/*! asColorInput - v0.1.3 - 2014-08-18
+/*! asColorInput - v0.1.3 - 2014-08-26
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -21,7 +21,7 @@
         this.opened = false;
         this.firstOpen = true;
         this.disabled = false;
-        this.clear = false;
+        this.initialed = false;
 
         createId(this);
 
@@ -32,7 +32,6 @@
             wrap: this.namespace + '-wrap',
             dropdown: this.namespace + '-dropdown',
             input: this.namespace + '-input',
-            clear: this.namespace + '-clear',
             skin: this.namespace + '_' + this.options.skin,
             open: this.namespace + '_open',
             mask: this.namespace + '-mask',
@@ -40,36 +39,13 @@
             disabled: this.namespace + '_disabled',
             mode: this.namespace + '-mode_' + this.options.mode
         };
-
-        this.components = $.extend(true, {}, this.components);
-
-        this._comps = AsColorInput.modes[this.options.mode];
-
-        // color value and format
-        // here get init value from input elemnt
-        if (this.element.value === '') {
-            this.color = new Color({
-                r: 255,
-                g: 255,
-                b: 255,
-                a: 1
-            }, this.options.format);
-        } else {
-            if (this.options.mode === 'gradient') {
-                this.gradient = this.element.value;
-            }
-            this.color = new Color(this.element.value, this.options.format);
-        }
-
         if (this.options.hideInput) {
             this.$element.addClass(this.classes.hideInput);
         }
 
+        this.components = $.extend(true, {}, this.components);
 
-        this.updateInput();
-
-        //save this.color  as a rgba value 
-        this.originalColor = this.color.toRGBA();
+        this._comps = AsColorInput.modes[this.options.mode];
 
         this._trigger('init');
         this.init();
@@ -80,68 +56,37 @@
         components: {},
         init: function() {
             var self = this;
-            this.$dropdown = $('<div class="' + this.classes.dropdown + '" data-mode="'+this.options.mode+'"></div>');
-            this.$element.wrap('<div class="' + this.classes.wrap + '"></div>').addClass(this.classes.input);
-            this.$clear = $('<a href="#" class="' + this.classes.clear + '">x</a>').insertAfter(this.$element);
-            this.$wrap = this.$element.parent();
-            this.$body = $('body');
 
-            this.$dropdown.data('asColorInput', this);
+            this.color = new Color(this.element.value, this.options.format, this.options.color);
+
+            this._create();
 
             if (this.options.skin) {
                 this.$dropdown.addClass(this.classes.skin);
                 this.$element.parent().addClass(this.classes.skin);
             }
 
-            this.create();
-
-            if(this.options.readonly){
+            if (this.options.readonly) {
                 this.$element.prop('readonly', true);
             }
-            
-            this.$element.on({
-                'click.asColorInput': function() {
-                    if (!self.opened) {
-                        self.open();
-                    }
-                    return false;
-                },
-                'keydown.asColorInput': function(e) {
-                    if (self.isGradient) {
-                        return;
-                    }
-                    if (e.keyCode === 9) {
-                        self.close();
-                    } else if (e.keyCode === 13) {
-                        self.color.from(self.$element.val());
-                        self.update({}, 'input');
-                        self.close();
-                    }
-                },
-                'keyup.asColorInput': function() {
-                    if (self.isGradient) {
-                        return;
-                    }
-                    self.color.from(self.$element.val());
-                    self.update({}, 'input');
-                }
-            });
-            this.$clear.on('click', function() {
-                self.clear = true;
-                self.color.from('transparent');
-                self.update({});
-                self.$element.val('');
-                self.clear = false;
-                return false;
-            })
 
+            this._bindEvent();
+
+            this.initialed = true;
             this._trigger('ready');
         },
-        create: function() {
+
+        _create: function() {
             var self = this;
-            
-            this.components.trigger.init(this);
-            
+
+            this.$dropdown = $('<div class="' + this.classes.dropdown + '" data-mode="' + this.options.mode + '"></div>');
+            this.$element.wrap('<div class="' + this.classes.wrap + '"></div>').addClass(this.classes.input);
+
+            this.$wrap = this.$element.parent();
+            this.$body = $('body');
+
+            this.$dropdown.data('asColorInput', this);
+
             $.each(this._comps, function(key, options) {
                 if (options === true) {
                     options = {};
@@ -154,13 +99,34 @@
 
             this._trigger('create');
         },
+        _bindEvent: function() {
+            var self = this;
+            this.$element.on({
+                'click.asColorInput': function() {
+                    if (!self.opened) {
+                        self.open();
+                    }
+                    return false;
+                },
+                'keydown.asColorInput': function(e) {
+                    if (e.keyCode === 9) {
+                        self.close();
+                    } else if (e.keyCode === 13) {
+                        self.val(self.$element.val());
+                    }
+                },
+                'keyup.asColorInput': function() {
+                    //self.val(self.$element.val());
+                }
+            });
+        },
         _trigger: function(eventType) {
             var method_arguments = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1) : undefined,
                 data;
             if (method_arguments) {
                 data = method_arguments;
                 data.push(this);
-            }else {
+            } else {
                 data = this;
             }
             // event
@@ -176,59 +142,19 @@
                 this.options[onFunction].apply(this, method_arguments);
             }
         },
-        // update all component value except trigger component
-        // and set color to color object
-        update: function(color, trigger) {
+        update: function() {
             var self = this;
 
-            //set chosen color to color object
-            if (color !== {}) {
-                self.color.set(color);
-            }
+            this._trigger('update', this.color);
+            this._trigger('change', this.val(), this.options.name, 'asColorInput');
 
-            this._trigger('change', this.get(), this.options.name, 'asColorInput');
-
-            // update all components 
-            $.each(this._comps, function(key, options) {
-                if (trigger !== key) {
-                    self.components[key] && self.components[key].update && self.components[key].update(self);
-                }
-            });
-
-            this.components.trigger.update(this);
-
-            if (trigger !== 'input') {
-                if (!this.isGradient) {
-                    this.updateInput();
-                }
-            }
+            this.$element.val(this.color.toString());
         },
-        updateInput: function(){
-            var format = this.options.format;
-
-            if (format) {
-                if(this.options.reduceAlpha && this.color.value.a === 1){
-                    switch(format){
-                        case 'rgba':
-                            format = 'rgb';
-                            break;
-                        case 'hsla':
-                            format = 'hsl';
-                            break;
-                    }
-                }
-                this.$element.val(this.get(format));
+        opacity: function(v) {
+            if (v) {
+                this.color.alpha(v);
             } else {
-                this.$element.val(this.color.toString());
-            }
-        },
-        opacity: function(data) {
-            if (data) {
-                this.update({
-                    a: data
-                });
-            } else {
-                return this.color.value.a;
+                return this.color.alpha();
             }
         },
         position: function() {
@@ -269,17 +195,17 @@
 
             var self = this;
 
-            if(this.$dropdown[0] !== this.$body.children().last()[0]) {
+            if (this.$dropdown[0] !== this.$body.children().last()[0]) {
                 this.$dropdown.detach().appendTo(this.$body);
             }
 
-            this.$mask = $('.'+self.classes.mask);
+            this.$mask = $('.' + self.classes.mask);
             if (this.$mask.length == 0) {
                 this.createMask();
             }
 
             // ensure the mask is always right before the dropdown
-            if(this.$dropdown.prev()[0] !== this.$mask[0]){
+            if (this.$dropdown.prev()[0] !== this.$mask[0]) {
                 this.$dropdown.before(this.$mask);
             }
 
@@ -297,23 +223,24 @@
 
             this.opened = true;
 
-            if(this.firstOpen){
+            if (this.firstOpen) {
                 this.firstOpen = false;
 
                 this._trigger('firstOpen');
             }
             this._trigger('open');
         },
-        createMask: function(){
+        createMask: function() {
             this.$mask = $(document.createElement("div"));
-            this.$mask.attr("class",this.classes.mask);
+            this.$mask.attr("class", this.classes.mask);
             this.$mask.hide();
             this.$mask.appendTo(this.$body);
 
             var self = this;
 
-            this.$mask.on("mousedown touchstart click", function (e) {
-                var $dropdown = $("#asColorInput-dropdown"), self;
+            this.$mask.on("mousedown touchstart click", function(e) {
+                var $dropdown = $("#asColorInput-dropdown"),
+                    self;
                 if ($dropdown.length > 0) {
                     self = $dropdown.data("asColorInput");
                     if (self.opened) {
@@ -341,51 +268,41 @@
             this._trigger('close');
         },
         clear: function() {
-            this.color.from('#fff');
-            this.update({});
-            this.close();
+            this.val('');
         },
         cancel: function() {
-            this.color.from(this.originalColor);
-            this.update({});
             this.close();
 
             return false;
         },
         apply: function() {
-            this.originalColor = this.color.toRGBA();
+
+
             this.close();
             this._trigger('apply');
 
             return false;
         },
-        set: function(value) {
-            this.color.from(value);
-            this.update();
-            return this;
-        },
-        get: function(type) {
-            if (this.isGradient) {
-                return this.element.value;
-            }
-            if (type === undefined) {
+        val: function(value) {
+            if (typeof value === 'undefined') {
                 return this.color.toString();
             }
-            if (type === 'rgb') {
-                return this.color.toRGB();
+
+            this.set(value);
+        },
+        set: function(value) {
+            if (typeof value === 'string') {
+                this.color.val(value);
+            } else {
+                this.color.set(value);
             }
-            if (type === 'rgba') {
-                return this.color.toRGBA();
-            }
-            if (type === 'hsl') {
-                return this.color.toHSL();
-            }
-            if (type === 'hsla') {
-                return this.color.toHSLA();
-            }
-            if (type === 'hex') {
-                return this.color.toHEX();
-            }
+
+            this.update();
+
+            return this;
+        },
+        get: function() {
+            return this.color;
         },
         enable: function() {
             this.disabled = false;
@@ -416,10 +333,17 @@
         hideFireChange: true,
         keyboard: false,
         format: 'rgba',
-        reduceAlpha: true,
+        color: {
+            shortenHex: false,
+            hexUseName: false,
+            reduceAlpha: false,
+            nameDegradation: 'HEX',
+            invalidValue: '',
+            zeroAlphaAsTransparent: true
+        },
         mode: 'simple',
         components: {
-            
+
         },
         onInit: null,
         onReady: null,
@@ -431,14 +355,17 @@
 
     AsColorInput.modes = {
         'simple': {
+            trigger: true,
             saturation: true,
             hue: true,
             alpha: true
         },
         'palettes': {
+            trigger: true,
             palettes: true
         },
         'complex': {
+            trigger: true,
             preview: true,
             palettes: true,
             saturation: true,
@@ -448,6 +375,7 @@
             buttons: true
         },
         'gradient': {
+            trigger: true,
             preview: true,
             palettes: true,
             saturation: true,
@@ -474,16 +402,16 @@
                 }
                 return false;
             });
-            this.update(api);
+            var self = this;
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
+            });
+
+            this.update(api.color);
         },
-        update: function(api) {
-            if (api.isGradient) {
-                this.$trigger_inner.css('backgroundColor', 'transparent');
-                this.$trigger_inner[0].style.backgroundImage = api.gradient;
-            }else {
-                this.$trigger_inner[0].style.backgroundImage = '';
-                this.$trigger_inner.css('backgroundColor', api.color.toRGBA());
-            }
+        update: function(color) {
+            this.$trigger_inner[0].style.backgroundImage = '';
+            this.$trigger_inner.css('backgroundColor', color.toRGBA());
         },
         destroy: function(api) {
             api.$trigger.remove();
@@ -519,8 +447,34 @@
     }
 }(jQuery))));
 
+// clear
+
+(function($) {
+    "use strict";
+
+    $.asColorInput.registerComponent('clear', {
+        defaults: {
+
+        },
+        init: function(api, options) {
+            var self = this;
+
+            this.options = $.extend(this.defaults, options);
+            this.$clear = $('<a href="#"' + api.namespace + '-clear"></a>').insertAfter(this.$element);
+
+            this.$clear.on('click', function() {
+                api.clear();
+                return false;
+            });
+        }
+    });
+})(jQuery);
+
 // keyboard
+
 (function(window, document, $, undefined) {
+    "use strict";
+
     var $doc = $(document);
     var keyboard = {
         keys: {
@@ -575,6 +529,8 @@
 // alpha
 
 (function($) {
+    "use strict";
+
     $.asColorInput.registerComponent('alpha', {
         size: 150,
         defaults: {
@@ -586,6 +542,7 @@
 
             this.options = $.extend(this.defaults, options);
             self.direction = this.options.direction;
+            this.api = api;
 
             this.$alpha = $('<div class="' + api.namespace + '-alpha ' + api.namespace + '-alpha-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
             this.$handle = this.$alpha.children('i');
@@ -600,33 +557,37 @@
                 self.step = self.size / 360;
 
                 // update
-                self.update(api);
+                self.update(api.color);
 
                 // bind events
-                self.bindEvents(api);
-                self.keyboard(api);
+                self.bindEvents();
+                self.keyboard();
+            });
+
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
             });
         },
-        bindEvents: function(api){
+        bindEvents: function() {
             var self = this;
             this.$alpha.on('mousedown.asColorInput', function(e) {
                 var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                 if (rightclick) {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(api, e);
+                $.proxy(self.mousedown, self)(e);
             });
         },
-        mousedown: function(api, e) {
+        mousedown: function(e) {
             var offset = this.$alpha.offset();
             if (this.direction === 'vertical') {
                 this.data.startY = e.pageY;
                 this.data.top = e.pageY - offset.top;
-                this.move(api, this.data.top);
+                this.move(this.data.top);
             } else {
                 this.data.startX = e.pageX;
                 this.data.left = e.pageX - offset.left;
-                this.move(api, this.data.left);
+                this.move(this.data.left);
             }
 
             this.mousemove = function(e) {
@@ -637,7 +598,7 @@
                     position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
                 }
 
-                this.move(api, position);
+                this.move(position);
                 return false;
             };
 
@@ -661,7 +622,7 @@
             });
             return false;
         },
-        move: function(api, position, alpha, update) {
+        move: function(position, alpha, update) {
             position = Math.max(0, Math.min(this.size, position));
             this.data.cach = position;
             if (typeof alpha === 'undefined') {
@@ -679,39 +640,39 @@
             }
 
             if (update !== false) {
-                api.update({
+                this.api.set({
                     a: Math.round(alpha * 100) / 100
-                }, 'alpha');
+                });
             }
         },
-        moveLeft: function(api) {
+        moveLeft: function() {
             var step = this.step,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(api, data.left);
+            this.move(data.left);
         },
-        moveRight: function(api) {
+        moveRight: function() {
             var step = this.step,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(api, data.left);
+            this.move(data.left);
         },
-        moveUp: function(api) {
+        moveUp: function() {
             var step = this.step,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(api, data.top);
+            this.move(data.top);
         },
-        moveDown: function(api) {
+        moveDown: function() {
             var step = this.step,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(api, data.top);
+            this.move(data.top);
         },
-        keyboard: function(api) {
+        keyboard: function() {
             var keyboard, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
+            if (this.api._keyboard) {
+                keyboard = $.extend(true, {}, this.api._keyboard);
             } else {
                 return false;
             }
@@ -720,19 +681,19 @@
                 if (this.direction === 'vertical') {
                     keyboard.attach({
                         up: function() {
-                            self.moveUp.call(self, api);
+                            self.moveUp();
                         },
                         down: function() {
-                            self.moveDown.call(self, api);
+                            self.moveDown();
                         }
                     });
                 } else {
                     keyboard.attach({
                         left: function() {
-                            self.moveLeft.call(self, api);
+                            self.moveLeft();
                         },
                         right: function() {
-                            self.moveRight.call(self, api);
+                            self.moveRight();
                         }
                     });
                 }
@@ -741,11 +702,11 @@
                 keyboard.detach();
             });
         },
-        update: function(api) {
-            var position = this.size * (1 - api.color.value.a);
-            this.$alpha.css('backgroundColor', api.color.toHEX());
+        update: function(color) {
+            var position = this.size * (1 - color.value.a);
+            this.$alpha.css('backgroundColor', color.toHEX());
 
-            this.move(api, position, api.color.value.a, false);
+            this.move(position, color.value.a, false);
         },
         destroy: function() {
             $(document).off({
@@ -759,6 +720,8 @@
 // buttons
 
 (function($) {
+    "use strict";
+
     $.asColorInput.registerComponent('buttons', {
         defaults: {
             apply: false,
@@ -774,11 +737,11 @@
 
             api.$element.on('asColorInput::firstOpen', function() {
                 if (self.options.apply) {
-                    self.$apply = $('<a href="#" alt="'+self.options.applyText+'" class="' + api.namespace + '-buttons-apply"></a>').text(self.options.applyText).appendTo(self.$buttons).on('click', $.proxy(api.apply, api));
+                    self.$apply = $('<a href="#" alt="' + self.options.applyText + '" class="' + api.namespace + '-buttons-apply"></a>').text(self.options.applyText).appendTo(self.$buttons).on('click', $.proxy(api.apply, api));
                 }
 
                 if (self.options.cancel) {
-                    self.$cancel = $('<a href="#" alt="'+self.options.cancelText+'" class="' + api.namespace + '-buttons-cancel"></a>').text(self.options.cancelText).appendTo(self.$buttons).on('click', $.proxy(api.cancel, api));
+                    self.$cancel = $('<a href="#" alt="' + self.options.cancelText + '" class="' + api.namespace + '-buttons-cancel"></a>').text(self.options.cancelText).appendTo(self.$buttons).on('click', $.proxy(api.cancel, api));
                 }
             });
         }
@@ -788,6 +751,8 @@
 // hex
 
 (function($) {
+    "use strict";
+
     $.asColorInput.registerComponent('hex', {
         init: function(api) {
             var template = '<input type="text" class="' + api.namespace + '-hex" />';
@@ -797,10 +762,15 @@
                 api.set(this.value);
             });
 
-            this.update(api);
+            var self = this;
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
+            });
+
+            this.update(api.color);
         },
-        update: function(api) {
-            this.$hex.val(api.color.toHEX());
+        update: function(color) {
+            this.$hex.val(color.toHEX());
         },
     });
 })(jQuery);
@@ -808,6 +778,8 @@
 // hue
 
 (function($) {
+    "use strict";
+
     $.asColorInput.registerComponent('hue', {
         size: 150,
         defaults: {
@@ -819,6 +791,7 @@
 
             this.options = $.extend(this.defaults, options);
             this.direction = this.options.direction;
+            this.api = api;
 
             this.$hue = $('<div class="' + api.namespace + '-hue ' + api.namespace + '-hue-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
             this.$handle = this.$hue.children('i');
@@ -833,33 +806,38 @@
                 self.step = self.size / 360;
 
                 // update
-                self.update(api);
+                self.update(api.color);
 
                 // bind events
                 self.bindEvents(api);
                 self.keyboard(api);
             });
+
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
+            });
+
         },
-        bindEvents: function(api){
+        bindEvents: function() {
             var self = this;
             this.$hue.on('mousedown.asColorInput', function(e) {
                 var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                 if (rightclick) {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(api, e);
+                $.proxy(self.mousedown, self)(e);
             });
         },
-        mousedown: function(api, e) {
+        mousedown: function(e) {
             var offset = this.$hue.offset();
             if (this.direction === 'vertical') {
                 this.data.startY = e.pageY;
                 this.data.top = e.pageY - offset.top;
-                this.move(api, this.data.top);
+                this.move(this.data.top);
             } else {
                 this.data.startX = e.pageX;
                 this.data.left = e.pageX - offset.left;
-                this.move(api, this.data.left);
+                this.move(this.data.left);
             }
 
             this.mousemove = function(e) {
@@ -870,7 +848,7 @@
                     position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
                 }
 
-                this.move(api, position);
+                this.move(position);
                 return false;
             };
 
@@ -895,7 +873,7 @@
 
             return false;
         },
-        move: function(api, position, hub, update) {
+        move: function(position, hub, update) {
             position = Math.max(0, Math.min(this.size, position));
             this.data.cach = position;
             if (typeof hub === 'undefined') {
@@ -912,39 +890,39 @@
                 });
             }
             if (update !== false) {
-                api.update({
+                this.api.set({
                     h: hub
-                }, 'hue');
+                });
             }
         },
-        moveLeft: function(api) {
+        moveLeft: function() {
             var step = this.step,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(api, data.left);
+            this.move(data.left);
         },
-        moveRight: function(api) {
+        moveRight: function() {
             var step = this.step,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(api, data.left);
+            this.move(data.left);
         },
-        moveUp: function(api) {
+        moveUp: function() {
             var step = this.step,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(api, data.top);
+            this.move(data.top);
         },
-        moveDown: function(api) {
+        moveDown: function() {
             var step = this.step,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(api, data.top);
+            this.move(data.top);
         },
-        keyboard: function(api) {
+        keyboard: function() {
             var keyboard, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
+            if (this.api._keyboard) {
+                keyboard = $.extend(true, {}, this.api._keyboard);
             } else {
                 return false;
             }
@@ -953,19 +931,19 @@
                 if (this.direction === 'vertical') {
                     keyboard.attach({
                         up: function() {
-                            self.moveUp.call(self, api);
+                            self.moveUp();
                         },
                         down: function() {
-                            self.moveDown.call(self, api);
+                            self.moveDown();
                         }
                     });
                 } else {
                     keyboard.attach({
                         left: function() {
-                            self.moveLeft.call(self, api);
+                            self.moveLeft();
                         },
                         right: function() {
-                            self.moveRight.call(self, api);
+                            self.moveRight();
                         }
                     });
                 }
@@ -974,9 +952,9 @@
                 keyboard.detach();
             });
         },
-        update: function(api) {
-            var position = (api.color.value.h === 0) ? 0 : this.size * (1 - api.color.value.h / 360);
-            this.move(api, position, api.color.value.h, false);
+        update: function(color) {
+            var position = (color.value.h === 0) ? 0 : this.size * (1 - color.value.h / 360);
+            this.move(position, color.value.h, false);
         },
         destroy: function() {
             $(document).off({
@@ -990,6 +968,8 @@
 // info
 
 (function($) {
+    "use strict";
+
     $.asColorInput.registerComponent('info', {
         color: ['white', 'black', 'transparent'],
         init: function(api) {
@@ -1028,16 +1008,20 @@
                 }
                 var color = {};
                 color[type] = val;
-                api.value(color);
+                api.set(color);
+            });
+            var self = this;
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
             });
 
-            this.update(api);
+            this.update(api.color);
         },
-        update: function(api) {
-            this.$r.val(api.color.value.r);
-            this.$g.val(api.color.value.g);
-            this.$b.val(api.color.value.b);
-            this.$a.val(api.color.value.a);
+        update: function(color) {
+            this.$r.val(color.value.r);
+            this.$g.val(color.value.g);
+            this.$b.val(color.value.b);
+            this.$a.val(color.value.a);
         },
     });
 })(jQuery);
@@ -1045,6 +1029,8 @@
 // palettes
 
 (function($) {
+    "use strict";
+
     function noop() {
         return;
     }
@@ -1104,7 +1090,7 @@
                 }
             });
         },
-        getItem: function(color){
+        getItem: function(color) {
             return '<li data-color="' + color + '"><div style="background-color:' + color + '" /></li>';
         },
         setLocalItem: function(key, value) {
@@ -1123,6 +1109,8 @@
 // preview
 
 (function($) {
+    "use strict";
+
     $.asColorInput.registerComponent('preview', {
         init: function(api) {
             var self = this;
@@ -1132,28 +1120,35 @@
             this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous div');
 
             api.$element.on('asColorInput::firstOpen', function() {
-                self.update(api);
+                self.update(api.color);
                 self.$previous.css('backgroundColor', api.color.toRGBA());
 
                 api.$element.on('asColorInput::apply', function(event, api) {
                     self.$previous.css('backgroundColor', api.color.toRGBA());
                 });
 
-                self.$previous.on('click', function(){
-                    api.set(api.originalColor);
+                self.$previous.on('click', function() {
+                    //api.set(api.originalColor);
 
                     return false;
-                }); 
+                });
+            });
+
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
             });
         },
-        update: function(api) {
-            this.$current.css('backgroundColor', api.color.toRGBA());
+        update: function(color) {
+            this.$current.css('backgroundColor', color.toRGBA());
         }
     });
 })(jQuery);
+
 // saturation
 
 (function($) {
+    "use strict";
+
     $.asColorInput.registerComponent('saturation', {
         defaults: {},
         width: 0,
@@ -1164,6 +1159,7 @@
             var self = this;
             var template = '<div class="' + api.namespace + '-saturation"><i><b></b></i></div>';
             this.options = $.extend(this.defaults, options),
+            this.api = api;
 
             //build element and add component to picker
             this.$saturation = $(template).appendTo(api.$dropdown);
@@ -1180,14 +1176,18 @@
                 self.size = self.$handle.width() / 2;
 
                 // update
-                self.update(api);
-                
+                self.update(api.color);
+
                 // bind events
-                self.bindEvents(api);
+                self.bindEvents();
                 self.keyboard(api);
             });
+
+            api.$element.on('asColorInput::update', function(e, color) {
+                self.update(color);
+            });
         },
-        bindEvents: function(api) {
+        bindEvents: function() {
             var self = this;
 
             this.$saturation.on('mousedown.asColorInput', function(e) {
@@ -1195,10 +1195,10 @@
                 if (rightclick) {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(api, e);
+                $.proxy(self.mousedown, self)(e);
             });
         },
-        mousedown: function(api, e) {
+        mousedown: function(e) {
             var offset = this.$saturation.offset();
 
             this.data.startY = e.pageY;
@@ -1207,12 +1207,12 @@
             this.data.left = e.pageX - offset.left;
             this.data.cach = {};
 
-            this.move(api, this.data.left, this.data.top);
+            this.move(this.data.left, this.data.top);
 
             this.mousemove = function(e) {
                 var x = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
                 var y = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
-                this.move(api, x, y);
+                this.move(x, y);
                 return false;
             };
 
@@ -1234,7 +1234,7 @@
 
             return false;
         },
-        move: function(api, x, y, update) {
+        move: function(x, y, update) {
             y = Math.max(0, Math.min(this.height, y));
             x = Math.max(0, Math.min(this.width, x));
 
@@ -1250,55 +1250,55 @@
             });
 
             if (update !== false) {
-                api.update({
+                this.api.set({
                     s: x / this.width,
                     v: 1 - (y / this.height)
-                }, 'saturation');
+                });
             }
         },
-        update: function(api) {
-            if (api.color.value.h === undefined) {
-                api.color.value.h = 0;
+        update: function(color) {
+            if (color.value.h === undefined) {
+                color.value.h = 0;
             }
             this.$saturation.css('backgroundColor', $.asColor.HSLToHEX({
-                h: api.color.value.h,
+                h: color.value.h,
                 s: 1,
                 l: 0.5
             }));
 
-            var x = api.color.value.s * this.width;
-            var y = (1 - api.color.value.v) * this.height;
+            var x = color.value.s * this.width;
+            var y = (1 - color.value.v) * this.height;
 
-            this.move(api, x, y, false);
+            this.move(x, y, false);
         },
-        moveLeft: function(api) {
+        moveLeft: function() {
             var step = this.step.left,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(api, data.left, data.top);
+            this.move(data.left, data.top);
         },
-        moveRight: function(api) {
+        moveRight: function() {
             var step = this.step.left,
                 data = this.data;
             data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(api, data.left, data.top);
+            this.move(data.left, data.top);
         },
-        moveUp: function(api) {
+        moveUp: function() {
             var step = this.step.top,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(api, data.left, data.top);
+            this.move(data.left, data.top);
         },
-        moveDown: function(api) {
+        moveDown: function() {
             var step = this.step.top,
                 data = this.data;
             data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(api, data.left, data.top);
+            this.move(data.left, data.top);
         },
-        keyboard: function(api) {
+        keyboard: function() {
             var keyboard, self = this;
-            if (api._keyboard) {
-                keyboard = $.extend(true, {}, api._keyboard);
+            if (this.api._keyboard) {
+                keyboard = $.extend(true, {}, this.api._keyboard);
             } else {
                 return false;
             }
@@ -1306,16 +1306,16 @@
             this.$saturation.attr('tabindex', '0').on('focus', function() {
                 keyboard.attach({
                     left: function() {
-                        self.moveLeft.call(self, api);
+                        self.moveLeft();
                     },
                     right: function() {
-                        self.moveRight.call(self, api);
+                        self.moveRight();
                     },
                     up: function() {
-                        self.moveUp.call(self, api);
+                        self.moveUp();
                     },
                     down: function() {
-                        self.moveDown.call(self, api);
+                        self.moveDown();
                     }
                 });
                 return false;
@@ -1334,568 +1334,470 @@
 
 // gradient
 
-(function($) {
+(function($, asGradient) {
+    function getPrefix() {
+        var ua = window.navigator.userAgent;
+        var prefix = '';
+        if (/MSIE/g.test(ua)) {
+            prefix = '-ms-';
+        } else if (/Firefox/g.test(ua)) {
+            prefix = '-moz-';
+        } else if (/(WebKit)/i.test(ua)) {
+            prefix = '-webkit-';
+        } else if (/Opera/g.test(ua)) {
+            prefix = '-o-';
+        }
+        return prefix;
+    }
+
+    function conventToPercentage(n) {
+        if (n < 0) {
+            n = 0;
+        } else if (n > 1) {
+            n = 1;
+        }
+        return n * 100 + '%';
+    }
+
+    var Gradient = function(api, options) {
+        this.api = api;
+        this.options = options;
+        this.classes = {
+            enable: api.namespace + '-gradient_enable',
+            marker: api.namespace + '-gradient-marker',
+            active: api.namespace + '-gradient-marker_active'
+        };
+        this.isOpened = false;
+        this.initialized = false;
+        this.current = null;
+        this.$doc = $(document);
+
+        var self = this;
+        $.extend(self, {
+            init: function() {
+                self.$wrap = $(self.options.template.call(self)).appendTo(api.$dropdown);
+
+                self.$gradient = self.$wrap.filter('.' + api.namespace + '-gradient');
+
+                this.angle.init();
+                this.preview.init();
+                this.markers.init();
+                this.wheel.init();
+
+                this.bind();
+            },
+            bind: function() {
+                var namespace = api.namespace;
+
+                if (self.options.switchable) {
+                    self.$wrap.on('click', '.' + namespace + '-gradient-switch', function() {
+                        if (self.isOpened) {
+                            self.disable();
+                        } else {
+                            self.enable();
+                        }
+                        self.api.position();
+                        self.isOpened = !self.isOpened;
+                        return false;
+                    });
+                }
+
+                self.$wrap.on('click', '.' + namespace + '-gradient-cancel', function() {
+
+                });
+            },
+            preview: {
+                init: function() {
+                    var that = this;
+                    self.$preview = self.$gradient.find('.' + api.namespace + '-gradient-preview');
+
+                    self.$gradient.on('add del update', function(e) {
+                        that.render();
+                    });
+                },
+                render: function() {
+                    self.$preview.css({
+                        'background-image': self.gradient.toStringWithAngle('to right', getPrefix()),
+                    });
+                    self.$preview.css({
+                        'background-image': self.gradient.toStringWithAngle('to right'),
+                    });
+                }
+            },
+            markers: {
+                width: 160,
+                init: function() {
+                    self.$markers = self.$gradient.find('.' + api.namespace + '-gradient-markers');
+                    var that = this;
+                    self.$gradient.on('add', function(e, data) {
+                        that.add(data.stop.color.toString(), data.stop.position, data.stop.id);
+                    });
+
+                    self.$gradient.on('active', function(e, data) {
+                        that.active(data.id);
+                    });
+
+                    self.$gradient.on('del', function(e, data) {
+                        that.del(data.id);
+                    });
+
+                    self.$markers.on('mousedown.asColorInput', function(e) {
+                        var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                        if (rightclick) {
+                            return false;
+                        }
+
+                        var position = parseFloat((e.pageX - self.$markers.offset().left) / self.markers.width, 10);
+                        self.add('#fff', position);
+                        return false;
+                    });
+
+                    self.$markers.on('mousedown.asColorInput', 'span', function(e) {
+                        var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                        if (rightclick) {
+                            return false;
+                        }
+                        that.mousedown(this, e);
+                        return false;
+                    });
+
+                    self.$markers.on('focus.asColorInput', 'span', function(e) {
+                        if (!$(this).isBinded) {
+                            var id = $(this).data('id');
+                            $(document).on('keydown.asColorInput' + id, function(e) {
+                                var key = e.keyCode || e.which;
+                                if (key === 46 || key === 8) {
+                                    if (self.gradient.length <= 2) {
+                                        return;
+                                    }
+
+                                    return self.del(id);
+                                }
+                            });
+
+                            $(this).isBinded = true;
+                        }
+                    }).on('blur', 'span', function() {
+                        $(document).off('keydown.asColorInput' + $(this).data('id'));
+                        $(this).isBinded = false;
+                    });
+
+                    self.$markers.on('click', 'span', function(e) {
+                        var id = $(this).data('id');
+                        self.active(id);
+                    });
+                },
+                add: function(color, position, id) {
+                    $('<span data-id="' + id + '" style="background: ' + color + '; left:' + conventToPercentage(position) + '" class="' + self.classes.marker + '"><i style="background: ' + color + '"></i></span>').attr('tabindex', 0).appendTo(self.$markers);
+                },
+                del: function(id) {
+                    self.$markers.find('[data-id="' + id + '"]').remove();
+                },
+                active: function(id) {
+                    var $marker = self.$markers.find('[data-id="' + id + '"]');
+
+                    self.$markers.children().removeClass(self.classes.active);
+                    $marker.addClass(self.classes.active);
+
+                    $marker.focus();
+                },
+                mousedown: function(marker, e) {
+                    var that = this,
+                        id = $(marker).data('id'),
+                        first = $(marker).position().left,
+                        start = e.pageX,
+                        end;
+
+                    this.mousemove = function(e) {
+                        end = e.pageX || start;
+                        var position = (first + end - start) / this.width;
+                        that.move(marker, position, id);
+                        return false;
+                    };
+
+                    this.mouseup = function() {
+                        $(document).off({
+                            mousemove: this.mousemove,
+                            mouseup: this.mouseup
+                        });
+
+                        return false;
+                    };
+
+                    $(document).on({
+                        mousemove: $.proxy(this.mousemove, this),
+                        mouseup: $.proxy(this.mouseup, this)
+                    });
+                    $(marker).focus();
+                    return false;
+                },
+                move: function(marker, position, id) {
+                    position = Math.max(0, Math.min(1, position));
+                    $(marker).css({
+                        left: conventToPercentage(position)
+                    });
+                    if (!id) {
+                        id = $(marker).data('id');
+                    }
+
+                    self.gradient.getById(id).setPosition(position);
+
+                    self.$gradient.trigger('update', {
+                        id: $(marker).data('id'),
+                        position: position
+                    });
+                },
+            },
+            wheel: {
+                init: function() {
+                    var that = this;
+                    self.$wheel = self.$gradient.find('.' + api.namespace + '-gradient-wheel');
+                    self.$pointer = self.$wheel.find('i');
+
+                    self.$gradient.on('update', function(e, data) {
+                        if (typeof data.angle !== 'undefined') {
+                            that.position(data.angle);
+                        }
+                    });
+
+                    self.$wheel.on('mousedown.asColorInput', function(e) {
+                        var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                        if (rightclick) {
+                            return false;
+                        }
+                        that.mousedown(e, self);
+                        return false;
+                    });
+                },
+                mousedown: function(e, self) {
+                    var offset = self.$wheel.offset();
+                    var r = self.$wheel.width() / 2;
+                    var startX = offset.left + r;
+                    var startY = offset.top + r;
+                    var $doc = self.$doc;
+                    var that = this;
+
+                    this.r = r;
+
+                    this.wheelMove = function(e) {
+                        var x = e.pageX - startX;
+                        var y = startY - e.pageY;
+
+                        var position = that.getPosition(x, y);
+                        var angle = that.calAngle(position.x, position.y);
+                        self.setAngle(angle);
+                    };
+                    this.wheelMouseup = function() {
+                        $doc.off({
+                            mousemove: this.wheelMove,
+                            mouseup: this.wheelMouseup
+                        });
+                        return false;
+                    };
+                    $doc.on({
+                        mousemove: $.proxy(this.wheelMove, this),
+                        mouseup: $.proxy(this.wheelMouseup, this)
+                    });
+
+                    this.wheelMove(e);
+                },
+                getPosition: function(a, b) {
+                    var r = this.r;
+                    var x = a / Math.sqrt(a * a + b * b) * r;
+                    var y = b / Math.sqrt(a * a + b * b) * r;
+                    return {
+                        x: x,
+                        y: y
+                    };
+                },
+                calAngle: function(x, y) {
+                    var deg = Math.round(Math.atan(Math.abs(x / y)) * (180 / Math.PI));
+                    if (x < 0 && y > 0) {
+                        return 360 - deg;
+                    }
+                    if (x < 0 && y <= 0) {
+                        return deg + 180;
+                    }
+                    if (x >= 0 && y <= 0) {
+                        return 180 - deg;
+                    }
+                    if (x >= 0 && y > 0) {
+                        return deg;
+                    }
+                },
+                set: function(value) {
+                    self.gradient.angle(value);
+                    self.$gradient.trigger('update', {
+                        angle: value
+                    });
+                },
+                position: function(angle) {
+                    var r = this.r || self.$wheel.width() / 2;
+                    var pos = this.calPointer(angle, r);
+                    self.$pointer.css({
+                        left: pos.x,
+                        top: pos.y
+                    });
+                },
+                calPointer: function(angle, r) {
+                    var x = Math.sin(angle * Math.PI / 180) * r;
+                    var y = Math.cos(angle * Math.PI / 180) * r;
+                    return {
+                        x: r + x,
+                        y: r - y
+                    };
+                }
+            },
+            angle: {
+                init: function() {
+                    var that = this;
+                    self.$angle = self.$gradient.find('.' + api.namespace + '-gradient-angle');
+
+                    self.$angle.on('blur.asColorInput', function() {
+                        self.setAngle(this.value);
+                        return false;
+                    }).on('keydown.asColorInput', function(e) {
+                        var key = e.keyCode || e.which;
+                        if (key === 13) {
+                            $(this).blur();
+                            return false;
+                        }
+                    });
+
+                    self.$gradient.on('update', function(e, data) {
+                        if (typeof data.angle !== 'undefined') {
+                            self.$angle.val(data.angle);
+                        }
+                    });
+                },
+                set: function(value) {
+                    self.gradient.angle(value);
+                    self.$gradient.trigger('update', {
+                        angle: value
+                    });
+                }
+            }
+        });
+
+        this.init();
+    };
+
+    Gradient.prototype = {
+        constructor: Gradient,
+
+        enable: function() {
+            this.$gradient.addClass(this.classes.enable);
+            this.markers.width = this.$markers.width();
+
+            if (this._last) {
+                this.gradient = this._last;
+            } else {
+                var gradient = new asGradient();
+                this.gradient = gradient;
+
+                this.add(this.api.color.toString(), 0, 0);
+                this.add(this.api.color.toString(), 1, 1);
+            }
+            this.api.color = this.gradient;
+            this.$gradient.trigger('update', this.gradient.value);
+        },
+        active: function(id) {
+            if (this.current !== id) {
+                this.current = id;
+
+                this.$gradient.trigger('active', {
+                    id: id
+                });
+            }
+        },
+        disable: function() {
+            this.$gradient.removeClass(this.classes.enable);
+            this._last = this.gradient;
+            this.api.color.val(this.api.color.get(0).color.toString());
+        },
+        add: function(color, position) {
+            var stop = this.gradient.insert(color, position);
+            this.gradient.reorder();
+
+            this.$gradient.trigger('add', {
+                stop: stop
+            });
+
+            this.active(stop.id);
+
+            return stop;
+        },
+        del: function(id) {
+            this.gradient.removeById(id);
+            this.gradient.reorder();
+            this.$gradient.trigger('del', {
+                id: id
+            });
+        },
+        setAngle: function(value) {
+            this.gradient.angle(value);
+            this.$gradient.trigger('update', {
+                angle: value
+            });
+        }
+    };
+
     $.asColorInput.registerComponent('gradient', {
-        degree: 1,
+        angle: 1,
         count: 0,
         markers: [],
         current: null,
         defaults: {
-            gradientText: 'Gradient',
+            switchable: true,
+            switchText: 'Gradient',
             cancelText: 'Cancel',
-            keepMode: false,
-            parse: function(text) {
-                var re = /gradient\(\s*(\d{1,3})deg\s*,((?:\s*(#([a-f0-9]{6}|[a-f0-9]{3})|((rgb|rgba|hsl|hsla)\([^\)]*\)))\s*(\d{1,3}%)\s*\,?)+)\)/,
-                    markers_re = /(#([^\s]+)|((rgb|rgba|hsl|hsla)\([^\)]*\)))\s*(\d{1,3}%)/g;
-                
-                if (re.exec(text) === null) {
-                    return null;
-                }else {
-                    return {
-                        degree: re.exec(text)[1],
-                        markers: re.exec(text)[2].match(markers_re)
-                    };
-                }
-            },
             format: function(value) {
                 if (value) {
                     return value;
-                }else {
+                } else {
                     return;
                 }
+            },
+            template: function() {
+                var namespace = this.api.namespace;
+                var control = '<div class="' + namespace + '-gradient-control">';
+                if (this.options.switchable) {
+                    control += '<a href="#" class="' + namespace + '-gradient-switch">' + this.options.switchText + '</a>';
+                }
+                control += '<a href="#" class="' + namespace + '-gradient-cancel">' + this.options.cancelText + '</a>' +
+                    '</div>';
+
+                return control +
+                    '<div class="' + namespace + '-gradient">' +
+                    '<div class="' + namespace + '-gradient-preview">' +
+                    '<div class="' + namespace + '-gradient-markers"></div>' +
+                    '</div>' +
+                    '<div class="' + namespace + '-gradient-wheel">' +
+                    '<i></i>' +
+                    '</div>' +
+                    '<input class="' + namespace + '-gradient-angle" type="text" value="" size="3" />' +
+                    '</div>';
             }
         },
         init: function(api, options) {
             var self = this;
-            this.options = $.extend(this.defaults, options);
-
-            var template = '<div class="' + api.namespace + '-gradient-control">' +
-                    '<a href="#" class="' + api.namespace + '-gradient-trigger">'+this.options.gradientText+'</a>' +
-                    '<a href="#" class="' + api.namespace + '-gradient-cancel">'+this.options.cancelText+'</a>' +
-                '</div>' +
-                '<div class="' + api.namespace + '-gradient">' +
-                    '<div class="' + api.namespace + '-gradient-panel">' +
-                        '<div class="' + api.namespace + '-gradient-markers"></div>' +
-                    '</div>' +
-                    '<div class="' + api.namespace + '-gradient-wheel">' +
-                         '<i></i>' +
-                    '</div>' +
-                    '<input class="' + api.namespace + '-gradient-degree" type="text" value="360" size="3" />' +
-                '</div>';
-            this.api = api;
-            this.classes = {
-                enable: api.namespace + '-gradient' + '_enable',
-                marker: api.namespace + '-gradient-marker',
-                active: api.namespace + '-gradient-marker_active'
-            };
-            this.isOpened = false;
-            this.initialized = false;
-            this.$doc = $(document);
-
-            this.$template = $(template).appendTo(api.$dropdown);
-            this.$control = self.$template.eq(0);
-            this.$trigger = this.$control.find('.' + api.namespace + '-gradient-trigger');
-            this.$cancel = this.$control.find('.' + api.namespace + '-gradient-cancel');
-            this.$gradient = this.$template.eq(1);
-            this.$panel = this.$gradient.find('.' + api.namespace + '-gradient-panel');
-            this.$markers = this.$gradient.find('.' + api.namespace + '-gradient-markers');
-            this.$wheel = this.$gradient.find('.' + api.namespace + '-gradient-wheel');
-            this.$pointer = this.$wheel.find('i');
-            this.$degree = this.$gradient.find('.' + api.namespace + '-gradient-degree');
-
-            this.g_input.init(this);
-            this.g_control.init(this);
-            this.g_panel.init(this);
-            this.g_wheel.init(this);
-            this.g_degree.init(this);
 
             api.$element.on('asColorInput::ready', function(event, instance) {
                 if (instance.options.mode !== 'gradient') {
                     return;
                 }
-                if ((self.value = self.options.parse(self.api.gradient)) != null) {
-                    self.keepGradient(self);
-                    self.g_input.getMarkers(self.value, self);
-                }
 
-                if (self.options.keepMode) {
-                    self.keepGradient(self);
-                }
+                options = $.extend(self.defaults, options);
+
+                api.gradient = new Gradient(api, options);
             });
-        },
-        keepGradient: function(self) {
-            self.width = self.$markers.width();
-            self.isOpened = true;
-            self.$gradient.addClass(self.classes.enable);
-            self.api.isGradient = true;
-            self.g_control.makeGradient(self);
-            self.api.position();
-        },
-        g_input: {
-            init: function(self) {
-                this.bind(self);
-            },
-            bind: function(self) {
-                var itself = this;
-                self.api.$element.on('keyup', function(e) {
-                    if (!self.api.isGradient) {
-                        return;
-                    }
-
-                    if (e.keyCode === 27) {
-                        self.api.close();
-                    }else if (e.keyCode === 13) {
-                        if ((self.value = self.options.parse(self.api.$element.val())) != null) {
-                            itself.getMarkers(self.value, self);
-                            self.api.update({}, 'input');
-                            self.api.$element.focus();
-                        }
-                    }
-                });
-            },
-            getMarkers: function(value, self) {
-                var markers = value.markers;
-
-                self.$markers.children().remove();
-                self.markers = [];
-                self.count = 0;
-                self.g_wheel.setDegree(value.degree, self);
-                for (var i in markers) {
-                    self.api.color.from(markers[i]);
-                    percent = parseInt(markers[i].match(/[^\,\(]\)*\s+(\d{1,3})%/)[1]);
-                    self.g_panel.makeMarker(self.api.color, percent, self);
-                    self.api.set(self.api.color);
-                }
-            },
-        },
-        g_control: {
-            init: function(self) {
-                var itself = this;
-                this.bind(self);
-
-                self.api.$element.on('asColorInput::close', function() {
-                    if (self.api.isGradient) {
-                        itself.setGradient(self);
-                    }
-                    return false;
-                });
-            },
-            bind: function(self) {
-                var itself = this,
-                    api = self.api;
-                self.$trigger.on('click', function() {
-                    if (self.options.keepMode) {
-                        return false;
-                    }
-                    if (self.isOpened) {
-                        self.$gradient.removeClass(self.classes.enable);
-                        itself.setGradient(self);
-                        api.isGradient = false;
-                        api.set(api.originalColor);
-                    } else {
-                        self.width = self.$markers.width();
-                        self.$gradient.addClass(self.classes.enable);
-                        api.isGradient = true;
-                        itself.makeGradient(self);
-                        api.$element.focus();
-                    }
-                    api.position();
-                    self.isOpened = !self.isOpened;
-                    return false;
-                });
-
-                self.$cancel.on('click', function() {
-                    api.color.from('#000');
-                    api.update({});
-                    self.count = 0;
-                    itself.retrieve(self);
-                    return false;
-                });
-            },
-            setGradient: function(self) {
-                var itself = this;
-                // copy array with object element
-                this.origin = {};
-                this.origin.markers = [];
-                self.markers.map(function(marker) {
-                    var copy = {
-                        color: marker.color,
-                        percent: marker.percent
-                    };
-                    itself.origin.markers.push(copy);
-                });
-                this.origin.degree = self.degree;
-            },
-            makeGradient: function(self) {
-                var markers = self.markers,
-                    api = self.api,
-                    gradient = 'gradient(' + (self.degree ? self.degree : 0) + 'deg,',
-                    f1 = '',
-                    f2 = '',
-                    prefix = this.getPrefix();
-                // sort array by percent 
-                markers.sort(function(a, b) {
-                    return a.percent > b.percent;
-                });
-                markers.map(function(marker, key, markers) {
-                    gradient += marker.color + ' ' + marker.percent + '%,';
-                    if (key === (markers.length - 1)) {
-                        f1 += 'color-stop(' + marker.percent / 100 + ',' + marker.color + ')';
-                        f2 += marker.color + ' ' + marker.percent + '%';
-                    } else {
-                        f1 += 'color-stop(' + marker.percent / 100 + ',' + marker.color + '),';
-                        f2 += marker.color + ' ' + marker.percent + '%,';
-                    }
-                });
-                gradient = gradient.substring(0, gradient.length - 1);
-                gradient += ')';
-                api.gradient = prefix + 'linear-' + gradient;
-                api._trigger('gradientChange', gradient);
-
-                // enable value on input element
-                api.$element.val(gradient);
-
-                if (prefix === '-webkit-') {
-                    self.$panel[0].style.backgroundImage = prefix + 'gradient(linear, left top, right top, ' + f1 + ')';
-                }
-                self.$panel[0].style.backgroundImage = prefix + 'linear-gradient(left, ' + f2 + ')';
-
-                api.components.trigger.update(api);
-                
-                return gradient;
-            },
-            retrieve: function(self) {
-                self.markers.map(function(marker) {
-                    marker.$element.blur();
-                    marker.$element.remove();
-                });
-                self.markers = [];
-                self.g_panel.makeMarker('#fff', 0, self);
-                self.g_panel.makeMarker('#000', 100, self);
-                self.g_wheel.setDegree(0, self);
-                this.makeGradient(self);
-            },
-            getPrefix: function() {
-                var ua = window.navigator.userAgent;
-                var prefix = '';
-                if (/MSIE/g.test(ua)) {
-                    prefix = '-ms-';
-                } else if (/Firefox/g.test(ua)) {
-                    prefix = '-moz-';
-                } else if (/(WebKit)/i.test(ua)) {
-                    prefix = '-webkit-';
-                } else if (/Opera/g.test(ua)) {
-                    prefix = '-o-';
-                }
-                return prefix;
-            },
-        },
-        g_panel: {
-            init: function(self) {
-                this.makeMarker('#fff', 0, self);
-                this.makeMarker('#000', 100, self);
-                this.bind(self);
-
-                self.api.$element.on('asColorInput::change', function(event, color, name, pluginName, instance) {
-                    if (self.current && self.api.isGradient && !self.api.clear) {
-                        if (instance.color.value.a === 0) {
-                            instance.color.value.a = 1;
-                        }
-                        self.current.setColor(instance.color.toRGBA());
-                        self.g_control.makeGradient(self);
-                    }else if (self.api.clear) {
-                        self.count = 0;
-                        self.g_control.retrieve(self);
-                        self.api.gradient = '';
-                    }
-                });
-            },
-            bind: function(self) {
-                var itself = this;
-                // create new marker
-                self.$markers.on('mousedown.asColorInput', function(e) {
-                    var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                    if (rightclick) {
-                        return false;
-                    }
-                    var position = e.pageX - self.$markers.offset().left;
-                    var percent = Math.round((position / self.width) * 100);
-                    itself.makeMarker('#fff', percent, self);
-                    self.g_control.makeGradient(self);
-                    return false;
-                });
-            },
-            makeMarker: function(color, percent, self) {
-                var itself = this;
-                var $doc = self.$doc;
-                var Marker = function() {
-                    this.color = color;
-                    this.percent = percent;
-                    this._id = ++self.count;
-                    this.$element = $('<span class="' + self.classes.marker + '"><i></i></span>').attr('tabindex', 0).data('id', this._id);
-                    this.$element.appendTo(self.$markers);
-                    this.$element.on('mousedown.asColorInput', function(e) {
-                        var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                        if (rightclick) {
-                            return false;
-                        }
-                        itself.mousedown(e, this, self);
-                        return false;
-                    });
-                };
-                Marker.prototype.setColor = function(color) {
-                    this.color = color;
-                    this.$element.find('i').css({
-                        background: color
-                    });
-                };
-                Marker.prototype.setPercent = function(percent) {
-                    this.percent = percent;
-                    this.$element.css({
-                        left: percent + '%'
-                    });
-                };
-
-                var marker = new Marker();
-                marker.setPercent(percent);
-                marker.setColor(color);
-                self.markers.push(marker);
-
-                if (self.current !== null) {
-                    self.api.originalColor = self.current.color;
-                    self.api._trigger('apply');
-                }
-
-                self.$markers.children().removeClass(self.classes.active);
-                self.current = marker;
-                marker.$element.addClass(self.classes.active).focus();
-
-                marker.hasBinded = false;
-                marker.$element.on('focus', function() {
-                    if (!marker.hasBinded) {
-                        $doc.on('keydown.' + marker._id, function(e) {
-                            var key = e.keyCode || e.which;
-                            if (key === 46) {
-                                if (self.count <= 2) {
-                                    return;
-                                }
-                                itself.del(marker, self);
-                                self.g_control.makeGradient(self);
-                                self.$markers.children().eq(self.count - 1).addClass(self.classes.active).focus();
-                            }
-                        });
-                        
-                        marker.hasBinded = true;
-                        self.api.originalColor = self.current.color;
-                        self.api._trigger('apply');
-                    }
-                }).on('blur', function() {
-                    $doc.off('keydown.' + marker._id);
-                    marker.hasBinded = false;
-                });
-
-                return marker;
-            },
-            mousedown: function(e, dom, self) {
-                var itself = this,
-                    api = self.api;
-                // get current marker
-                var id = $(dom).data('id');
-                var instance;
-                $.each(self.markers, function(key, marker) {
-                    if (marker._id === id) {
-                        instance = marker;
-                    }
-                });
-                
-                if (self.current !== instance) {
-                    api.originalColor = self.current.color;
-                    self.current.$element.removeClass(self.classes.active);
-                    self.current = instance;
-                    instance.$element.addClass(self.classes.active);
-                    api._trigger('apply');
-                }
-
-                // get marker current position
-                var begining = $(dom).position().left,
-                    start = e.pageX,
-                    end;
-
-                api.set(instance.color);
-
-                this.mousemove = function(e) {
-                    end = e.pageX || start;
-                    var position = begining + end - start;
-                    itself.move(instance, position, self);
-                    return false;
-                };
-
-                this.mouseup = function() {
-                    $(document).off({
-                        mousemove: this.mousemove,
-                        mouseup: this.mouseup
-                    });
-
-                    return false;
-                };
-
-                $(document).on({
-                    mousemove: $.proxy(this.mousemove, this),
-                    mouseup: $.proxy(this.mouseup, this)
-                });
-                $(dom).focus();
-                return false;
-            },
-            move: function(marker, position, self) {
-                position = Math.max(0, Math.min(self.width, position));
-                var percent = Math.round((position / self.width) * 100);
-
-                marker.setPercent(percent);
-                self.g_control.makeGradient(self);
-            },
-            del: function(marker, self) {
-                self.count -= 1;
-                marker.$element.blur();
-                marker.$element.remove();
-                self.markers.splice(self.markers.indexOf(marker), 1);
-            },
-        },
-        g_wheel: {
-            init: function(self) {
-                var itself = this;
-                this.bind(self);
-
-                setTimeout(function() {
-                    itself.setDegree(0, self);
-                    self.initialized = true;
-                }, 0);
-            },
-            bind: function(self) {
-                var itself = this;
-                self.$wheel.on('mousedown.asColorInput', function(e) {
-                    var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                    if (rightclick) {
-                        return false;
-                    }
-                    itself.mousedown(e, self);
-                    return false;
-                });
-            },
-            mousedown: function(e, self) {
-                var offset = self.$wheel.offset();
-                var r = self.$wheel.width() / 2;
-                var startX = offset.left + r;
-                var startY = offset.top + r;
-                var $doc = self.$doc;
-                var itself = this;
-
-                this.r = r;
-
-                this.wheelMove = function(e) {
-                    var x = e.pageX - startX;
-                    var y = startY - e.pageY;
-                    var position = itself.getPosition(x, y);
-                    var deg = itself.calDegree(position.x, position.y);
-                    itself._setDegree(deg, self);
-                    var pos = itself.calPointer(deg, r);
-                    self.$pointer.css({
-                        left: pos.x,
-                        top: pos.y
-                    });
-                };
-                this.wheelMouseup = function() {
-                    $doc.off({
-                        mousemove: this.wheelMove,
-                        mouseup: this.wheelMouseup
-                    });
-                    return false;
-                };
-                $doc.on({
-                    mousemove: $.proxy(this.wheelMove, this),
-                    mouseup: $.proxy(this.wheelMouseup, this)
-                });
-
-                // set value first
-                this.wheelMove(e);
-            },
-            getPosition: function(a, b) {
-                var r = this.r;
-                var x = a / Math.sqrt(a * a + b * b) * r;
-                var y = b / Math.sqrt(a * a + b * b) * r;
-                return {
-                    x: x,
-                    y: y
-                };
-            },
-            calDegree: function(x, y) {
-                var deg = Math.round(Math.atan(Math.abs(y / x)) * (180 / Math.PI));
-                if (x <= 0 && y > 0) {
-                    return 180 - deg;
-                }
-                if (x <= 0 && y <= 0) {
-                    return deg + 180;
-                }
-                if (x > 0 && y <= 0) {
-                    return 360 - deg;
-                }
-                if (x > 0 && y > 0) {
-                    return deg;
-                }
-            },
-            _setDegree: function(deg, self) {
-                self.degree = deg;
-                self.$degree.val(deg);
-                if (self.initialized) {
-                    // avoid setting value on input element when init
-                    self.g_control.makeGradient(self);
-                }
-            },
-            setDegree: function(deg, self) {
-                if (self.degree === deg) {
-                    return false;
-                }
-                var r = this.r || self.$wheel.width() / 2;
-                var pos = this.calPointer(deg, r);
-                self.$pointer.css({
-                    left: pos.x,
-                    top: pos.y
-                });
-                this._setDegree(deg, self);
-            },
-            calPointer: function(deg, r) {
-                var x = Math.cos(deg * Math.PI / 180) * r;
-                var y = Math.sin(deg * Math.PI / 180) * r;
-                return {
-                    x: r + x,
-                    y: r - y
-                };
-            },
-        },
-        g_degree: {
-            init: function(self) {
-                this.bind(self);
-            },
-            bind: function(self) {
-                self.$degree.on('blur.asColorInput', function() {
-                    var deg = parseInt(this.value, 10);
-                    self.g_wheel.setDegree(deg, self);
-                    return false;
-                }).on('keydown.asColorInput', function(e) {
-                    var key = e.keyCode || e.which;
-                    if (key === 13) {
-                        $(this).blur();
-                        return false;
-                    }
-                });
-            }
-        },
-        get: function() {
-            var value = this.options.format(self.value);
-            return value;
-        },
-        destory: function() {
-            this.$element.off('click');
-            this.$element.remove();
         }
     });
-})(jQuery);
+})(jQuery, (function($) {
+    if ($.asGradient === undefined) {
+        // console.info('lost dependency lib of $.asGradient , please load it first !');
+        return false;
+    } else {
+        return $.asGradient;
+    }
+}(jQuery)));
