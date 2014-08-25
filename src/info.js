@@ -1,6 +1,8 @@
 // info
 
 (function($) {
+     "use strict";
+     
     $.asColorInput.registerComponent('info', {
         color: ['white', 'black', 'transparent'],
         init: function(api) {

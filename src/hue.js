@@ -1,6 +1,8 @@
 // hue
 
 (function($) {
+     "use strict";
+     
     $.asColorInput.registerComponent('hue', {
         size: 150,
         defaults: {

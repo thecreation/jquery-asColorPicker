@@ -1,6 +1,8 @@
 // preview
 
 (function($) {
+     "use strict";
+     
     $.asColorInput.registerComponent('preview', {
         init: function(api) {
             var self = this;

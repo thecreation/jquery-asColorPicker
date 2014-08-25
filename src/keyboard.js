@@ -1,5 +1,8 @@
 // keyboard
+
 (function(window, document, $, undefined) {
+     "use strict";
+
     var $doc = $(document);
     var keyboard = {
         keys: {

@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 stripBanners: true
             },
             dist: {
-                src: ['src/jquery-asColorInput-core.js', 'src/jquery-asColorInput-keyboard.js', 'src/jquery-asColorInput-alpha.js', 'src/jquery-asColorInput-buttons.js', 'src/jquery-asColorInput-hex.js', 'src/jquery-asColorInput-hue.js', 'src/jquery-asColorInput-info.js', 'src/jquery-asColorInput-palettes.js', 'src/jquery-asColorInput-preview.js', 'src/jquery-asColorInput-saturation.js', 'src/jquery-asColorInput-gradient.js'],
+                src: ['src/core.js', 'src/clear.js', 'src/keyboard.js', 'src/alpha.js', 'src/buttons.js', 'src/hex.js', 'src/hue.js', 'src/info.js', 'src/palettes.js', 'src/preview.js', 'src/saturation.js', 'src/gradient.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
 
@@ -29,52 +29,7 @@ module.exports = function(grunt) {
             dist: {
                 src: '<%= concat.dist.dest %>',
                 dest: 'dist/<%= pkg.name %>.min.js'
-            },
-            core: {
-                src: 'src/jquery-asColorInput-core.js',
-                dest: 'dist/jquery-asColorInput-core.min.js'
-            },
-            keyboard: {
-                src: 'src/jquery-asColorInput-keyboard.js',
-                dest: 'dist/jquery-asColorInput-keyboard.min.js'
-            },
-            alpha: {
-                src: 'src/jquery-asColorInput-alpha.js',
-                dest: 'dist/jquery-asColorInput-alpha.min.js'
-            },
-            buttons: {
-                src: 'src/jquery-asColorInput-buttons.js',
-                dest: 'dist/jquery-asColorInput-buttons.min.js'
-            },
-            hex: {
-                src: 'src/jquery-asColorInput-hex.js',
-                dest: 'dist/jquery-asColorInput-hex.min.js'
-            },
-            hue: {
-                src: 'src/jquery-asColorInput-hue.js',
-                dest: 'dist/jquery-asColorInput-hue.min.js'
-            },
-            info: {
-                src: 'src/jquery-asColorInput-info.js',
-                dest: 'dist/jquery-asColorInput-info.min.js'
-            },
-            palettes: {
-                src: 'src/jquery-asColorInput-palettes.js',
-                dest: 'dist/jquery-asColorInput-palettes.min.js'
-            },
-            preview: {
-                src: 'src/jquery-asColorInput-preview.js',
-                dest: 'dist/jquery-asColorInput-preview.min.js'
-            },
-            saturation: {
-                src: 'src/jquery-asColorInput-saturation.js',
-                dest: 'dist/jquery-asColorInput-saturation.min.js'
-            },
-            gradient: {
-                src: 'src/jquery-asColorInput-gradient.js',
-                dest: 'dist/jquery-asColorInput-gradient.min.js'
             }
-
         },
 
         jshint: {

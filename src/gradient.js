@@ -1,6 +1,6 @@
 // gradient
 
-(function($) {
+(function($, asGradient) {
     function getPrefix() {
         var ua = window.navigator.userAgent;
         var prefix = '';
@@ -53,16 +53,20 @@
             },
             bind: function() {
                 var namespace = api.namespace;
-                self.$wrap.on('click', '.' + namespace + '-gradient-trigger', function(){
-                    if (self.isOpened) {
-                        self.disable();
-                    } else {
-                        self.enable();
-                    }
-                    self.api.position();
-                    self.isOpened = !self.isOpened;
-                    return false;
-                });
+
+                if(self.options.switchable){
+                    self.$wrap.on('click', '.' + namespace + '-gradient-switch', function(){
+                        if (self.isOpened) {
+                            self.disable();
+                        } else {
+                            self.enable();
+                        }
+                        self.api.position();
+                        self.isOpened = !self.isOpened;
+                        return false;
+                    });
+                }
+                
                 self.$wrap.on('click', '.' + namespace + '-gradient-cancel', function(){
 
                 });
@@ -179,7 +183,7 @@
                 },
                 set: function(value){
                     self.gradient.angle(value);
-                    self.$gradient.trigger('update', {
+                    self.$gradient.switch('update', {
                         angle: value
                     });
                 },
@@ -224,7 +228,7 @@
                 },
                 set: function(value) {
                     self.gradient.angle(value);
-                    self.$gradient.trigger('update', {
+                    self.$gradient.switch('update', {
                         angle: value
                     });
                 }
@@ -242,7 +246,7 @@
             if(this._last){
                 this.gradient = this._last;
             } else {
-                var gradient = new $.asGradient();
+                var gradient = new asGradient();
                 this.gradient = gradient;
 
                 this.add(this.api.color.toString(), 0, 0);
@@ -250,7 +254,8 @@
                 // gradient.append(this.api.color.toString(), 0);
                 // gradient.append(this.api.color.toString(), 1);
             }
-            this.$gradient.trigger('update', this.gradient.value);
+            this.api.color = this.gradient;
+            this.$gradient.switch('update', this.gradient.value);
         },
         disable: function(){
             this.$gradient.removeClass(this.classes.enable);
@@ -259,7 +264,7 @@
         },
         add: function(color, position, index){
             this.gradient.insert(color, position, index);
-            this.$gradient.trigger('add', {
+            this.$gradient.switch('add', {
                 color: this.gradient.get(index).color,
                 position: position,
                 index: index
@@ -267,7 +272,7 @@
         },
         remove: function(){
             this.gradient.remove(index);
-            this.$gradient.trigger('remove', {
+            this.$gradient.switch('remove', {
                 index: index
             });
         }
@@ -279,7 +284,8 @@
         markers: [],
         current: null,
         defaults: {
-            triggerText: 'Gradient',
+            switchable: true,
+            switchText: 'Gradient',
             cancelText: 'Cancel',
             format: function(value) {
                 if (value) {
@@ -290,10 +296,14 @@
             },
             template: function(){
                 var namespace = this.api.namespace;
-                return '<div class="' + namespace + '-gradient-controll">' +
-                    '<a href="#" class="' + namespace + '-gradient-trigger">'+this.options.triggerText+'</a>' +
-                    '<a href="#" class="' + namespace + '-gradient-cancel">'+this.options.cancelText+'</a>' +
-                '</div>' +
+                var control = '<div class="' + namespace + '-gradient-control">';
+                if(this.options.switchable){
+                    control += '<a href="#" class="' + namespace + '-gradient-switch">'+this.options.switchText+'</a>';
+                }
+                control += '<a href="#" class="' + namespace + '-gradient-cancel">'+this.options.cancelText+'</a>' +
+                '</div>';
+
+                return control +
                 '<div class="' + namespace + '-gradient">' +
                     '<div class="' + namespace + '-gradient-preview">' +
                         '<div class="' + namespace + '-gradient-markers"></div>' +
@@ -307,16 +317,23 @@
         },
         init: function(api, options) {
             var self = this;
-            options = $.extend(this.defaults, options);
             
-
             api.$element.on('asColorInput::ready', function(event, instance) {
                 if (instance.options.mode !== 'gradient') {
                     return;
                 }
 
+                options = $.extend(self.defaults, options);
+
                 api.gradient = new Gradient(api, options);
             });
         }
     });
-})(jQuery);
+})(jQuery, (function($) {
+    if ($.asGradient === undefined) {
+        // console.info('lost dependency lib of $.asGradient , please load it first !');
+        return false;
+    } else {
+        return $.asGradient;
+    }
+}(jQuery));

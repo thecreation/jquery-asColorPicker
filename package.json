@@ -25,7 +25,6 @@
         "grunt-contrib-clean": "*",
         "grunt": "~0.4.5",
         "grunt-jsbeautifier": "*",
-        "grunt-recess": "*",
         "load-grunt-tasks": "*",
         "grunt-text-replace": "*",
         "grunt-contrib-copy": "*",

@@ -1,6 +1,8 @@
 // saturation
 
 (function($) {
+    "use strict";
+     
     $.asColorInput.registerComponent('saturation', {
         defaults: {},
         width: 0,

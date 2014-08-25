@@ -131,7 +131,7 @@
   background-image: url('../images/alpha.png');
 }
 .asColorInput-buttons a,
-.asColorInput-gradient-controll a {
+.asColorInput-gradient-control a {
   text-decoration: none;
   cursor: pointer;
 }
@@ -231,11 +231,11 @@
   margin-right: 6px;
 }
 .asColorInput-buttons,
-.asColorInput-gradient-controll {
+.asColorInput-gradient-control {
   float: right;
 }
 .asColorInput-buttons a,
-.asColorInput-gradient-controll a {
+.asColorInput-gradient-control a {
   margin-left: 5px;
 }
 .asColorInput-gradient {

@@ -1369,7 +1369,7 @@
             var self = this;
             this.options = $.extend(this.defaults, options);
 
-            var template = '<div class="' + api.namespace + '-gradient-controll">' +
+            var template = '<div class="' + api.namespace + '-gradient-control">' +
                     '<a href="#" class="' + api.namespace + '-gradient-trigger">'+this.options.gradientText+'</a>' +
                     '<a href="#" class="' + api.namespace + '-gradient-cancel">'+this.options.cancelText+'</a>' +
                 '</div>' +
@@ -1393,9 +1393,9 @@
             this.$doc = $(document);
 
             this.$template = $(template).appendTo(api.$dropdown);
-            this.$controll = self.$template.eq(0);
-            this.$trigger = this.$controll.find('.' + api.namespace + '-gradient-trigger');
-            this.$cancel = this.$controll.find('.' + api.namespace + '-gradient-cancel');
+            this.$control = self.$template.eq(0);
+            this.$trigger = this.$control.find('.' + api.namespace + '-gradient-trigger');
+            this.$cancel = this.$control.find('.' + api.namespace + '-gradient-cancel');
             this.$gradient = this.$template.eq(1);
             this.$panel = this.$gradient.find('.' + api.namespace + '-gradient-panel');
             this.$markers = this.$gradient.find('.' + api.namespace + '-gradient-markers');
@@ -1404,7 +1404,7 @@
             this.$degree = this.$gradient.find('.' + api.namespace + '-gradient-degree');
 
             this.g_input.init(this);
-            this.g_controll.init(this);
+            this.g_control.init(this);
             this.g_panel.init(this);
             this.g_wheel.init(this);
             this.g_degree.init(this);
@@ -1428,7 +1428,7 @@
             self.isOpened = true;
             self.$gradient.addClass(self.classes.enable);
             self.api.isGradient = true;
-            self.g_controll.makeGradient(self);
+            self.g_control.makeGradient(self);
             self.api.position();
         },
         g_input: {
@@ -1468,7 +1468,7 @@
                 }
             },
         },
-        g_controll: {
+        g_control: {
             init: function(self) {
                 var itself = this;
                 this.bind(self);
@@ -1602,10 +1602,10 @@
                             instance.color.value.a = 1;
                         }
                         self.current.setColor(instance.color.toRGBA());
-                        self.g_controll.makeGradient(self);
+                        self.g_control.makeGradient(self);
                     }else if (self.api.clear) {
                         self.count = 0;
-                        self.g_controll.retrieve(self);
+                        self.g_control.retrieve(self);
                         self.api.gradient = '';
                     }
                 });
@@ -1621,7 +1621,7 @@
                     var position = e.pageX - self.$markers.offset().left;
                     var percent = Math.round((position / self.width) * 100);
                     itself.makeMarker('#fff', percent, self);
-                    self.g_controll.makeGradient(self);
+                    self.g_control.makeGradient(self);
                     return false;
                 });
             },
@@ -1680,7 +1680,7 @@
                                     return;
                                 }
                                 itself.del(marker, self);
-                                self.g_controll.makeGradient(self);
+                                self.g_control.makeGradient(self);
                                 self.$markers.children().eq(self.count - 1).addClass(self.classes.active).focus();
                             }
                         });
@@ -1751,7 +1751,7 @@
                 var percent = Math.round((position / self.width) * 100);
 
                 marker.setPercent(percent);
-                self.g_controll.makeGradient(self);
+                self.g_control.makeGradient(self);
             },
             del: function(marker, self) {
                 self.count -= 1;
@@ -1847,7 +1847,7 @@
                 self.$degree.val(deg);
                 if (self.initialized) {
                     // avoid setting value on input element when init
-                    self.g_controll.makeGradient(self);
+                    self.g_control.makeGradient(self);
                 }
             },
             setDegree: function(deg, self) {

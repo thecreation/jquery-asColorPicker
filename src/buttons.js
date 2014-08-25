@@ -1,6 +1,8 @@
 // buttons
 
 (function($) {
+     "use strict";
+     
     $.asColorInput.registerComponent('buttons', {
         defaults: {
             apply: false,

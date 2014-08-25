@@ -25,7 +25,7 @@
         this.opened = false;
         this.firstOpen = true;
         this.disabled = false;
-        this.clear = false;
+        this.initialed = false;
 
         createId(this);
 
@@ -36,7 +36,6 @@
             wrap: this.namespace + '-wrap',
             dropdown: this.namespace + '-dropdown',
             input: this.namespace + '-input',
-            clear: this.namespace + '-clear',
             skin: this.namespace + '_' + this.options.skin,
             open: this.namespace + '_open',
             mask: this.namespace + '-mask',
@@ -44,20 +43,13 @@
             disabled: this.namespace + '_disabled',
             mode: this.namespace + '-mode_' + this.options.mode
         };
-
-        this.components = $.extend(true, {}, this.components);
-
-        this._comps = AsColorInput.modes[this.options.mode];
-
-        // color value and format
-        // here get init value from input elemnt
-        this.color = new Color(this.element.value, this.options.format);
-
         if (this.options.hideInput) {
             this.$element.addClass(this.classes.hideInput);
         }
 
-        this.updateInput();
+        this.components = $.extend(true, {}, this.components);
+
+        this._comps = AsColorInput.modes[this.options.mode];
 
         //save this.color  as a rgba value 
         this.originalColor = this.color.toRGBA();
@@ -71,25 +63,52 @@
         components: {},
         init: function() {
             var self = this;
-            this.$dropdown = $('<div class="' + this.classes.dropdown + '" data-mode="'+this.options.mode+'"></div>');
-            this.$element.wrap('<div class="' + this.classes.wrap + '"></div>').addClass(this.classes.input);
-            this.$clear = $('<a href="#" class="' + this.classes.clear + '">x</a>').insertAfter(this.$element);
-            this.$wrap = this.$element.parent();
-            this.$body = $('body');
+  
+            this.color = new Color(this.element.value, this.options.format, this.options.color);
 
-            this.$dropdown.data('asColorInput', this);
+            this._create();
 
             if (this.options.skin) {
                 this.$dropdown.addClass(this.classes.skin);
                 this.$element.parent().addClass(this.classes.skin);
             }
 
-            this.create();
-
             if(this.options.readonly){
                 this.$element.prop('readonly', true);
             }
             
+            this._bindEvent();
+
+            this.initialed = true;
+            this._trigger('ready');
+        },
+
+        _create: function() {
+            var self = this;
+
+            this.$dropdown = $('<div class="' + this.classes.dropdown + '" data-mode="'+this.options.mode+'"></div>');
+            this.$element.wrap('<div class="' + this.classes.wrap + '"></div>').addClass(this.classes.input);
+            
+            this.$wrap = this.$element.parent();
+            this.$body = $('body');
+
+            this.$dropdown.data('asColorInput', this);
+
+            this.components.trigger.init(this);
+            
+            $.each(this._comps, function(key, options) {
+                if (options === true) {
+                    options = {};
+                }
+                if (self.options.components[key] !== undefined) {
+                    options = $.extend(options, self.options.components[key]);
+                }
+                self.components[key] && self.components[key].init(self, options);
+            });
+
+            this._trigger('create');
+        },
+        _bindEvent: function() {
             this.$element.on({
                 'click.asColorInput': function() {
                     if (!self.opened) {
@@ -117,33 +136,6 @@
                     self.update({}, 'input');
                 }
             });
-            this.$clear.on('click', function() {
-                self.clear = true;
-                self.color.val('transparent');
-                self.update({});
-                self.$element.val('');
-                self.clear = false;
-                return false;
-            })
-
-            this._trigger('ready');
-        },
-        create: function() {
-            var self = this;
-            
-            this.components.trigger.init(this);
-            
-            $.each(this._comps, function(key, options) {
-                if (options === true) {
-                    options = {};
-                }
-                if (self.options.components[key] !== undefined) {
-                    options = $.extend(options, self.options.components[key]);
-                }
-                self.components[key] && self.components[key].init(self, options);
-            });
-
-            this._trigger('create');
         },
         _trigger: function(eventType) {
             var method_arguments = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1) : undefined,
@@ -167,8 +159,6 @@
                 this.options[onFunction].apply(this, method_arguments);
             }
         },
-        // update all component value except trigger component
-        // and set color to color object
         update: function(color, trigger) {
             var self = this;
 
@@ -177,7 +167,7 @@
                 self.color.set(color);
             }
 
-            this._trigger('change', this.get(), this.options.name, 'asColorInput');
+            this._trigger('change', this.val(), this.options.name, 'asColorInput');
 
             // update all components 
             $.each(this._comps, function(key, options) {
@@ -188,30 +178,7 @@
 
             this.components.trigger.update(this);
 
-            if (trigger !== 'input') {
-                if (!this.isGradient) {
-                    this.updateInput();
-                }
-            }
-        },
-        updateInput: function(){
-            var format = this.options.format;
-
-            if (format) {
-                if(this.options.reduceAlpha && this.color.value.a === 1){
-                    switch(format){
-                        case 'rgba':
-                            format = 'rgb';
-                            break;
-                        case 'hsla':
-                            format = 'hsl';
-                            break;
-                    }
-                }
-                this.$element.val(this.get(format));
-            } else {
-                this.$element.val(this.color.toString());
-            }
+            this.$element.val(this.color.toString());
         },
         opacity: function(data) {
             if (data) {
@@ -350,33 +317,27 @@
 
             return false;
         },
-        set: function(value) {
+        val: function(value) {
+            if (typeof value === 'undefined') {
+                return this.value.toString();
+            }
+
+            if (value) {
+                this.set(value);
+            } else {
+                this.clear();
+            }
+        },
+        set: function(value, update) {
             this.color.val(value);
-            this.update();
+
+            if (update !== false) {
+                this.update();
+            }
             return this;
         },
-        get: function(type) {
-            if (this.isGradient) {
-                return this.element.value;
-            }
-            if (type === undefined) {
-                return this.color.toString();
-            }
-            if (type === 'rgb') {
-                return this.color.toRGB();
-            }
-            if (type === 'rgba') {
-                return this.color.toRGBA();
-            }
-            if (type === 'hsl') {
-                return this.color.toHSL();
-            }
-            if (type === 'hsla') {
-                return this.color.toHSLA();
-            }
-            if (type === 'hex') {
-                return this.color.toHEX();
-            }
+        get: function() {
+            return this.color;
         },
         enable: function() {
             this.disabled = false;
@@ -407,7 +368,14 @@
         hideFireChange: true,
         keyboard: false,
         format: 'rgba',
-        reduceAlpha: true,
+        color: {
+            shortenHex: false,
+            hexUseName: false,
+            reduceAlpha: false,
+            nameDegradation: 'HEX',
+            invalidValue: '',
+            zeroAlphaAsTransparent: true
+        },
         mode: 'simple',
         components: {
             

@@ -1,6 +1,8 @@
 // palettes
 
 (function($) {
+     "use strict";
+     
     function noop() {
         return;
     }

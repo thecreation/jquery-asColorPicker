@@ -1,6 +1,8 @@
 // alpha
 
 (function($) {
+     "use strict";
+     
     $.asColorInput.registerComponent('alpha', {
         size: 150,
         defaults: {

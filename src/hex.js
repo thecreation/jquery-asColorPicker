@@ -1,6 +1,8 @@
 // hex
 
 (function($) {
+     "use strict";
+     
     $.asColorInput.registerComponent('hex', {
         init: function(api) {
             var template = '<input type="text" class="' + api.namespace + '-hex" />';
