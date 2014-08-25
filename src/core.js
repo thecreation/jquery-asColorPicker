@@ -121,7 +121,8 @@
                 },
                 'keyup.asColorInput': function() {
                     //self.val(self.$element.val());
-                }
+                },
+                'asColorInput::set': $.proxy(self._set, self)
             });
         },
         _trigger: function(eventType) {
@@ -145,14 +146,6 @@
             if (typeof this.options[onFunction] === 'function') {
                 this.options[onFunction].apply(this, method_arguments);
             }
-        },
-        update: function() {
-            var self = this;
-
-            this._trigger('update', this.color);
-            this._trigger('change', this.val(), this.options.name, 'asColorInput');
-
-            this.$element.val(this.color.toString());
         },
         opacity: function(v) {
             if (v) {
@@ -229,7 +222,7 @@
 
             if (this.firstOpen) {
                 this.firstOpen = false;
-
+                
                 this._trigger('firstOpen');
             }
             this._trigger('open');
@@ -280,10 +273,8 @@
             return false;
         },
         apply: function() {
-
-
-            this.close();
             this._trigger('apply');
+            this.close();
 
             return false;
         },
@@ -294,16 +285,27 @@
 
             this.set(value);
         },
+        _update: function() {
+            var self = this;
+
+            this._trigger('update', this.color);
+            this._trigger('change', this.val(), this.options.name, 'asColorInput');
+
+            this.$element.val(this.color.toString());
+        },
         set: function(value) {
+            this._trigger('set', value);
+
+            return this;
+        },
+        _set: function(e, value){
             if (typeof value === 'string') {
                 this.color.val(value);
             } else {
                 this.color.set(value);
             }
 
-            this.update();
-
-            return this;
+            this._update();
         },
         get: function() {
             return this.color;

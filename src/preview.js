@@ -10,20 +10,23 @@
             this.$preview = $(template).appendTo(api.$dropdown);
             this.$current = this.$preview.find('.' + api.namespace + '-preview-current div');
             this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous div');
+            
 
             api.$element.on('asColorInput::firstOpen', function() {
-                self.update(api.color);
-                self.$previous.css('backgroundColor', api.color.toRGBA());
-
                 api.$element.on('asColorInput::apply', function(event, api) {
                     self.$previous.css('backgroundColor', api.color.toRGBA());
                 });
 
                 self.$previous.on('click', function() {
-                    //api.set(api.originalColor);
-
+                    api.set(self.previewColor);
                     return false;
                 });
+            });
+
+            api.$element.on('asColorInput::open', function() {
+                self.previewColor = api.color.toRGBA();
+                self.update(api.color);
+                self.$previous.css('backgroundColor', api.color.toRGBA());
             });
 
             api.$element.on('asColorInput::update', function(e, color) {

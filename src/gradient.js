@@ -34,6 +34,7 @@
             active: api.namespace + '-gradient-marker_active'
         };
         this.isOpened = false;
+        this.isEnabled = false;
         this.initialized = false;
         this.current = null;
         this.$doc = $(document);
@@ -83,10 +84,10 @@
                 },
                 render: function() {
                     self.$preview.css({
-                        'background-image': self.gradient.toStringWithAngle('to right', getPrefix()),
+                        'background-image': self.value.toStringWithAngle('to right', getPrefix()),
                     });
                     self.$preview.css({
-                        'background-image': self.gradient.toStringWithAngle('to right'),
+                        'background-image': self.value.toStringWithAngle('to right'),
                     });
                 }
             },
@@ -133,7 +134,7 @@
                             $(document).on('keydown.asColorInput' + id, function(e) {
                                 var key = e.keyCode || e.which;
                                 if (key === 46 || key === 8) {
-                                    if (self.gradient.length <= 2) {
+                                    if (self.value.length <= 2) {
                                         return;
                                     }
 
@@ -206,7 +207,7 @@
                         id = $(marker).data('id');
                     }
 
-                    self.gradient.getById(id).setPosition(position);
+                    self.value.getById(id).setPosition(position);
 
                     self.$gradient.trigger('update', {
                         id: $(marker).data('id'),
@@ -292,7 +293,7 @@
                     }
                 },
                 set: function(value) {
-                    self.gradient.angle(value);
+                    self.value.angle(value);
                     self.$gradient.trigger('update', {
                         angle: value
                     });
@@ -337,7 +338,7 @@
                     });
                 },
                 set: function(value) {
-                    self.gradient.angle(value);
+                    self.value.angle(value);
                     self.$gradient.trigger('update', {
                         angle: value
                     });
@@ -352,20 +353,37 @@
         constructor: Gradient,
 
         enable: function() {
+            var self = this;
+            this.isEnabled = true;
+            this.api.$element.off('asColorInput::set');
+            this.api.$element.on('asColorInput::set', function(e, value){
+                self.value.getById(self.current).color.set(value);
+                self.$gradient.trigger('update', {});
+            });
+
             this.$gradient.addClass(this.classes.enable);
             this.markers.width = this.$markers.width();
 
             if (this._last) {
-                this.gradient = this._last;
+                this.value = this._last;
             } else {
                 var gradient = new asGradient();
-                this.gradient = gradient;
+                this.value = gradient;
 
                 this.add(this.api.color.toString(), 0, 0);
                 this.add(this.api.color.toString(), 1, 1);
             }
-            this.api.color = this.gradient;
-            this.$gradient.trigger('update', this.gradient.value);
+            this.api.color = this.value;
+            this.$gradient.trigger('update', this.value.value);
+        },
+        disable: function() {
+            this.isEnabled = false;
+            this.api.$element.off('asColorInput::set');
+            this.api.$element.on('asColorInput::set', $.proxy(this.api._set, this.api));
+
+            this.$gradient.removeClass(this.classes.enable);
+            this._last = this.value;
+            this.api.color.val(this.api.color.get(0).color.toString());
         },
         active: function(id) {
             if (this.current !== id) {
@@ -376,14 +394,9 @@
                 });
             }
         },
-        disable: function() {
-            this.$gradient.removeClass(this.classes.enable);
-            this._last = this.gradient;
-            this.api.color.val(this.api.color.get(0).color.toString());
-        },
         add: function(color, position) {
-            var stop = this.gradient.insert(color, position);
-            this.gradient.reorder();
+            var stop = this.value.insert(color, position);
+            this.value.reorder();
 
             this.$gradient.trigger('add', {
                 stop: stop
@@ -394,14 +407,14 @@
             return stop;
         },
         del: function(id) {
-            this.gradient.removeById(id);
-            this.gradient.reorder();
+            this.value.removeById(id);
+            this.value.reorder();
             this.$gradient.trigger('del', {
                 id: id
             });
         },
         setAngle: function(value) {
-            this.gradient.angle(value);
+            this.value.angle(value);
             this.$gradient.trigger('update', {
                 angle: value
             });
@@ -457,6 +470,7 @@
 
                 api.gradient = new Gradient(api, options);
             });
+            
         }
     });
 })(jQuery, (function($) {
