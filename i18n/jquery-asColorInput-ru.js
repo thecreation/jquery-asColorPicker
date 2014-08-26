@@ -6,5 +6,5 @@
         cancelText: "отмена",
         applyText: "выбрать"
     };
-    $.extend($.asColorInput.defaults.components.check, localization);
+    $.extend($.asColorInput.defaults.buttons, localization);
 })(jQuery);

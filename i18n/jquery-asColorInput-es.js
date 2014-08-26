@@ -6,5 +6,5 @@
         cancelText: "Cancelar",
         applyText: "Elegir"
     };
-    $.extend($.asColorInput.defaults.components.check, localization);
+    $.extend($.asColorInput.defaults.buttons, localization);
 })(jQuery);

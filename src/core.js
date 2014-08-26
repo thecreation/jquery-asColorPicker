@@ -8,8 +8,7 @@
 (function(window, document, $, Color, undefined) {
     "use strict";
 
-    var id = 0,
-        IE = !!/msie/i.exec(window.navigator.userAgent);
+    var id = 0;
 
     function createId(api) {
         api.id = id;
@@ -48,9 +47,8 @@
             this.$element.addClass(this.classes.hideInput);
         }
 
-        this.components = $.extend(true, {}, this.components);
-
-        this._comps = AsColorInput.modes[this.options.mode];
+        this.components = AsColorInput.modes[this.options.mode];
+        this._components = $.extend(true, {}, this._components);
 
         this._trigger('init');
         this.init();
@@ -58,10 +56,8 @@
 
     AsColorInput.prototype = {
         constructor: AsColorInput,
-        components: {},
+        _components: {},
         init: function() {
-            var self = this;
-
             this.color = new Color(this.element.value, this.options.format, this.options.color);
 
             this._create();
@@ -92,14 +88,18 @@
 
             this.$dropdown.data('asColorInput', this);
 
-            $.each(this._comps, function(key, options) {
+            var component;
+            $.each(this.components, function(key, options) {
                 if (options === true) {
                     options = {};
                 }
-                if (self.options.components[key] !== undefined) {
-                    options = $.extend(options, self.options.components[key]);
+                if (self.options[key] !== undefined) {
+                    options = $.extend(true, {}, options, self.options[key]);
                 }
-                self.components[key] && self.components[key].init(self, options);
+                if (self._components[key]) {
+                    component = self._components[key]();
+                    component.init(self, options);
+                }
             });
 
             this._trigger('create');
@@ -197,7 +197,7 @@
             }
 
             this.$mask = $('.' + self.classes.mask);
-            if (this.$mask.length == 0) {
+            if (this.$mask.length === 0) {
                 this.createMask();
             }
 
@@ -232,8 +232,6 @@
             this.$mask.attr("class", this.classes.mask);
             this.$mask.hide();
             this.$mask.appendTo(this.$body);
-
-            var self = this;
 
             this.$mask.on("mousedown touchstart click", function(e) {
                 var $dropdown = $("#asColorInput-dropdown"),
@@ -270,17 +268,11 @@
         cancel: function() {
             this.close();
 
-            this.color.val(this.originValue);
-            this._trigger('update', this.color);
-            this.$element.val(this.originValue);
-            
-            return false;
+            this.set(this.originValue);
         },
         apply: function() {
             this._trigger('apply', this.color);
             this.close();
-
-            return false;
         },
         val: function(value) {
             if (typeof value === 'undefined') {
@@ -290,8 +282,6 @@
             this.set(value);
         },
         _update: function() {
-            var self = this;
-
             this._trigger('update', this.color);
             this._updateInput();
         },
@@ -334,8 +324,8 @@
         }
     };
 
-    AsColorInput.registerComponent = function(component, methods) {
-        AsColorInput.prototype.components[component] = methods;
+    AsColorInput.registerComponent = function(component, method) {
+        AsColorInput.prototype._components[component] = method;
     };
 
     AsColorInput.localization = [];
@@ -351,13 +341,12 @@
         color: {
             shortenHex: false,
             hexUseName: false,
-            reduceAlpha: false,
+            reduceAlpha: true,
             nameDegradation: 'HEX',
             invalidValue: '',
             zeroAlphaAsTransparent: true
         },
         mode: 'simple',
-        components: {},
         onInit: null,
         onReady: null,
         onChange: null,
@@ -398,38 +387,6 @@
             gradient: true
         }
     };
-
-    AsColorInput.registerComponent('trigger', {
-        template: '<div class="asColorInput-trigger"><span></span></div>',
-        init: function(api) {
-            var template = '<div class="' + api.namespace + '-trigger"><span></span></div>';
-            api.$trigger = $(template);
-            this.$trigger_inner = api.$trigger.children('span');
-
-            api.$trigger.insertAfter(api.$element);
-            api.$trigger.on('click', function() {
-                if (!api.opened) {
-                    api.open();
-                } else {
-                    api.close();
-                }
-                return false;
-            });
-            var self = this;
-            api.$element.on('asColorInput::update', function(e, color) {
-                self.update(color);
-            });
-
-            this.update(api.color);
-        },
-        update: function(color) {
-            this.$trigger_inner[0].style.backgroundImage = '';
-            this.$trigger_inner.css('backgroundColor', color.toRGBA());
-        },
-        destroy: function(api) {
-            api.$trigger.remove();
-        }
-    });
 
     // Collection method.
     $.fn.asColorInput = function(options) {

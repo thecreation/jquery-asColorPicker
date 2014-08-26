@@ -21,6 +21,7 @@
         <script src="js/jquery-asColor.js"></script>
 		<script src="js/jquery-asGradient.js"></script>
         <script src="../src/core.js"></script>
+        <script src="../src/trigger.js"></script>
         <script src="../src/alpha.js"></script>
         <script src="../src/buttons.js"></script>
         <script src="../src/gradient.js"></script>
@@ -98,7 +99,7 @@ $(".example_gradient").asColorInput({
 });
         </code></pre>
         <div class="example">
-            <input type='text' class="example_gradient" data-mode="gradient" value="#000" style="width: 1000px" />                
+            <input type='text' class="example_gradient" data-mode="gradient" value="#000" style="width: 500px" />                
             <script>
                 $(document).ready(function() {
                     $(".example_gradient").asColorInput();
@@ -108,26 +109,22 @@ $(".example_gradient").asColorInput({
     </section>
 
     <section>
-        <h3>Mode: gradient</h3>
+        <h3>Mode: gradient without switchable</h3>
         <pre class="has-example"><code class="language-javascript">
 $(".example_gradient_2").asColorInput({
     mode: 'gradient',
-    components: {
-        gradient: {
-            switchable: false
-        }
+    gradient: {
+        switchable: false
     }
 });
         </code></pre>
         <div class="example">
-            <input type='text' class="example_gradient_2" data-mode="gradient" value="#000" style="width: 1000px" />                
+            <input type='text' class="example_gradient_2" data-mode="gradient" value="#000" style="width: 500px" />                
             <script>
                 $(document).ready(function() {
                     $(".example_gradient_2").asColorInput({
-                        components: {
-                            gradient: {
-                                switchable: false
-                            }
+                        gradient: {
+                            switchable: false
                         }
                     });
                 });
@@ -138,13 +135,28 @@ $(".example_gradient_2").asColorInput({
     <section>
         <h3>Mode: gradient with gradient value</h3>
         <pre class="has-example"><code class="language-javascript">
-$(".example_4_2").asColorInput();
+$(".example_gradient_value").asColorInput();
         </code></pre>
         <div class="example">
-            <input type='text' class="example_4_2" data-mode="gradient" value="linear-gradient(0deg,#ff0000 0%,rgba(25,11,111,1) 50%,rgba(205,240,86,1) 100%)" style="width: 500px" />                
+            <input type='text' class="example_gradient_value" data-mode="gradient" value="linear-gradient(0deg,#ff0000 0%,rgba(25,11,111,1) 50%,rgba(205,240,86,1) 100%)" style="width: 500px" />                
             <script>
                 $(document).ready(function() {
-                    $(".example_4_2").asColorInput();
+                    $(".example_gradient_value").asColorInput();
+                });
+            </script>
+        </div>
+    </section>
+
+    <section>
+        <h3>Mode: gradient with color value</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_gradient_color").asColorInput();
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_gradient_color" data-mode="gradient" value="rgb(50, 50, 50)" style="width: 500px" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_gradient_color").asColorInput();
                 });
             </script>
         </div>

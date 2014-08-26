@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 stripBanners: true
             },
             dist: {
-                src: ['src/core.js', 'src/clear.js', 'src/keyboard.js', 'src/alpha.js', 'src/buttons.js', 'src/hex.js', 'src/hue.js', 'src/info.js', 'src/palettes.js', 'src/preview.js', 'src/saturation.js', 'src/gradient.js'],
+                src: ['src/core.js', 'src/trigger.js', 'src/clear.js', 'src/keyboard.js', 'src/alpha.js', 'src/buttons.js', 'src/hex.js', 'src/hue.js', 'src/info.js', 'src/palettes.js', 'src/preview.js', 'src/saturation.js', 'src/gradient.js'],
                 dest: 'dist/<%= pkg.name %>.js'
             },
 
@@ -44,13 +44,7 @@ module.exports = function(grunt) {
                     jshintrc: 'src/.jshintrc'
                 },
                 src: ['src/**/*.js']
-            },
-            test: {
-                options: {
-                    jshintrc: 'test/.jshintrc'
-                },
-                src: ['test/**/*.js']
-            },
+            }
         },
 
         jsbeautifier: {
@@ -140,18 +134,15 @@ module.exports = function(grunt) {
     });
 
     // Default task.
-    grunt.registerTask('default', ['clean', 'dist']);
-    grunt.registerTask('dist', ['concat', 'uglify']);
-    grunt.registerTask('dev', ['concat']);
+    grunt.registerTask('default', ['js', 'dist']);
 
     grunt.registerTask('css', ['less', 'autoprefixer']);
-    grunt.registerTask('cp', ['copy']);
 
     grunt.registerTask('js', ['jsbeautifier', 'jshint']);
+    grunt.registerTask('dist', ['clean', 'concat', 'uglify']);
 
     grunt.registerTask('version', [
         'replace:bower',
         'replace:jquery'
     ]);
-
 };

@@ -1,11 +1,10 @@
-/*! asColorInput - v0.1.3 - 2014-08-26
+/*! asColorInput - v0.2.0 - 2014-08-27
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
     "use strict";
 
-    var id = 0,
-        IE = !!/msie/i.exec(window.navigator.userAgent);
+    var id = 0;
 
     function createId(api) {
         api.id = id;
@@ -44,9 +43,8 @@
             this.$element.addClass(this.classes.hideInput);
         }
 
-        this.components = $.extend(true, {}, this.components);
-
-        this._comps = AsColorInput.modes[this.options.mode];
+        this.components = AsColorInput.modes[this.options.mode];
+        this._components = $.extend(true, {}, this._components);
 
         this._trigger('init');
         this.init();
@@ -54,10 +52,8 @@
 
     AsColorInput.prototype = {
         constructor: AsColorInput,
-        components: {},
+        _components: {},
         init: function() {
-            var self = this;
-
             this.color = new Color(this.element.value, this.options.format, this.options.color);
 
             this._create();
@@ -88,14 +84,18 @@
 
             this.$dropdown.data('asColorInput', this);
 
-            $.each(this._comps, function(key, options) {
+            var component;
+            $.each(this.components, function(key, options) {
                 if (options === true) {
                     options = {};
                 }
-                if (self.options.components[key] !== undefined) {
-                    options = $.extend(options, self.options.components[key]);
+                if (self.options[key] !== undefined) {
+                    options = $.extend(true, {}, options, self.options[key]);
                 }
-                self.components[key] && self.components[key].init(self, options);
+                if (self._components[key]) {
+                    component = self._components[key]();
+                    component.init(self, options);
+                }
             });
 
             this._trigger('create');
@@ -193,7 +193,7 @@
             }
 
             this.$mask = $('.' + self.classes.mask);
-            if (this.$mask.length == 0) {
+            if (this.$mask.length === 0) {
                 this.createMask();
             }
 
@@ -228,8 +228,6 @@
             this.$mask.attr("class", this.classes.mask);
             this.$mask.hide();
             this.$mask.appendTo(this.$body);
-
-            var self = this;
 
             this.$mask.on("mousedown touchstart click", function(e) {
                 var $dropdown = $("#asColorInput-dropdown"),
@@ -266,17 +264,11 @@
         cancel: function() {
             this.close();
 
-            this.color.val(this.originValue);
-            this._trigger('update', this.color);
-            this.$element.val(this.originValue);
-            
-            return false;
+            this.set(this.originValue);
         },
         apply: function() {
             this._trigger('apply', this.color);
             this.close();
-
-            return false;
         },
         val: function(value) {
             if (typeof value === 'undefined') {
@@ -286,8 +278,6 @@
             this.set(value);
         },
         _update: function() {
-            var self = this;
-
             this._trigger('update', this.color);
             this._updateInput();
         },
@@ -330,8 +320,8 @@
         }
     };
 
-    AsColorInput.registerComponent = function(component, methods) {
-        AsColorInput.prototype.components[component] = methods;
+    AsColorInput.registerComponent = function(component, method) {
+        AsColorInput.prototype._components[component] = method;
     };
 
     AsColorInput.localization = [];
@@ -347,13 +337,12 @@
         color: {
             shortenHex: false,
             hexUseName: false,
-            reduceAlpha: false,
+            reduceAlpha: true,
             nameDegradation: 'HEX',
             invalidValue: '',
             zeroAlphaAsTransparent: true
         },
         mode: 'simple',
-        components: {},
         onInit: null,
         onReady: null,
         onChange: null,
@@ -395,38 +384,6 @@
         }
     };
 
-    AsColorInput.registerComponent('trigger', {
-        template: '<div class="asColorInput-trigger"><span></span></div>',
-        init: function(api) {
-            var template = '<div class="' + api.namespace + '-trigger"><span></span></div>';
-            api.$trigger = $(template);
-            this.$trigger_inner = api.$trigger.children('span');
-
-            api.$trigger.insertAfter(api.$element);
-            api.$trigger.on('click', function() {
-                if (!api.opened) {
-                    api.open();
-                } else {
-                    api.close();
-                }
-                return false;
-            });
-            var self = this;
-            api.$element.on('asColorInput::update', function(e, color) {
-                self.update(color);
-            });
-
-            this.update(api.color);
-        },
-        update: function(color) {
-            this.$trigger_inner[0].style.backgroundImage = '';
-            this.$trigger_inner.css('backgroundColor', color.toRGBA());
-        },
-        destroy: function(api) {
-            api.$trigger.remove();
-        }
-    });
-
     // Collection method.
     $.fn.asColorInput = function(options) {
         if (typeof options === 'string') {
@@ -456,31 +413,82 @@
     }
 }(jQuery))));
 
+// trigger
+
+(function($) {
+    "use strict";
+
+    $.asColorInput.registerComponent('trigger', function() {
+        return {
+            defaults: {
+                template: function(namespace) {
+                    return '<div class="' + namespace + '-trigger"><span></span></div>';
+                }
+            },
+            init: function(api, options) {
+                this.options = $.extend(this.defaults, options),
+                api.$trigger = $(this.options.template.call(this, api.namespace));
+                this.$trigger_inner = api.$trigger.children('span');
+
+                api.$trigger.insertAfter(api.$element);
+                api.$trigger.on('click', function() {
+                    if (!api.opened) {
+                        api.open();
+                    } else {
+                        api.close();
+                    }
+                    return false;
+                });
+                var self = this;
+                api.$element.on('asColorInput::update', function(e, color, gradient, instance) {
+                    if (typeof instance === 'undefined') {
+                        gradient = false;
+                    }
+                    self.update(color, gradient);
+                });
+
+                this.update(api.color);
+            },
+            update: function(color, gradient) {
+                if (gradient) {
+                    this.$trigger_inner.css('background', gradient.toString(true));
+                } else {
+                    this.$trigger_inner.css('background', color.toRGBA());
+                }
+            },
+            destroy: function(api) {
+                api.$trigger.remove();
+            }
+        };
+    });
+})(jQuery);
+
 // clear
 
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('clear', {
-        defaults: {
+    $.asColorInput.registerComponent('clear', function() {
+        return {
+            defaults: {
+                template: function(namespace) {
+                    return '<a href="#"' + namespace + '-clear"></a>';
+                }
+            },
+            init: function(api, options) {
+                this.options = $.extend(this.defaults, options);
+                this.$clear = $(this.options.template.call(this, api.namespace)).insertAfter(this.$element);
 
-        },
-        init: function(api, options) {
-            var self = this;
-
-            this.options = $.extend(this.defaults, options);
-            this.$clear = $('<a href="#"' + api.namespace + '-clear"></a>').insertAfter(this.$element);
-
-            this.$clear.on('click', function() {
-                api.clear();
-                return false;
-            });
-        }
+                this.$clear.on('click', function() {
+                    api.clear();
+                    return false;
+                });
+            }
+        };
     });
 })(jQuery);
 
 // keyboard
-
 (function(window, document, $, undefined) {
     "use strict";
 
@@ -540,217 +548,238 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('alpha', {
-        size: 150,
-        defaults: {
-            direction: 'vertical', // horizontal
-        },
-        data: {},
-        init: function(api, options) {
-            var self = this;
-
-            this.options = $.extend(this.defaults, options);
-            self.direction = this.options.direction;
-            this.api = api;
-
-            this.$alpha = $('<div class="' + api.namespace + '-alpha ' + api.namespace + '-alpha-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
-            this.$handle = this.$alpha.children('i');
-
-            api.$element.on('asColorInput::firstOpen', function(e) {
-                // init variable
-                if (self.direction === 'vertical') {
-                    self.size = self.$alpha.height();
-                } else {
-                    self.size = self.$alpha.width();
+    $.asColorInput.registerComponent('alpha', function() {
+        return {
+            size: 150,
+            defaults: {
+                direction: 'vertical', // horizontal
+                template: function(namespace) {
+                    return '<div class="' + namespace + '-alpha ' + namespace + '-alpha-' + this.direction + '"><i></i></div>';
                 }
-                self.step = self.size / 360;
+            },
+            data: {},
+            init: function(api, options) {
+                var self = this;
 
-                // bind events
-                self.bindEvents();
-                self.keyboard();
-            });
+                this.options = $.extend(this.defaults, options);
+                self.direction = this.options.direction;
+                this.api = api;
 
-            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
-                self.update(color);
-            });
-        },
-        bindEvents: function() {
-            var self = this;
-            this.$alpha.on('mousedown.asColorInput', function(e) {
-                var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                if (rightclick) {
+                this.$alpha = $(this.options.template.call(self, api.namespace)).appendTo(api.$dropdown);
+                this.$handle = this.$alpha.find('i');
+
+                api.$element.on('asColorInput::firstOpen', function() {
+                    // init variable
+                    if (self.direction === 'vertical') {
+                        self.size = self.$alpha.height();
+                    } else {
+                        self.size = self.$alpha.width();
+                    }
+                    self.step = self.size / 360;
+
+                    // bind events
+                    self.bindEvents();
+                    self.keyboard();
+                });
+
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                    self.update(color);
+                });
+            },
+            bindEvents: function() {
+                var self = this;
+                this.$alpha.on('mousedown.asColorInput', function(e) {
+                    var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                    if (rightclick) {
+                        return false;
+                    }
+                    $.proxy(self.mousedown, self)(e);
+                });
+            },
+            mousedown: function(e) {
+                var offset = this.$alpha.offset();
+                if (this.direction === 'vertical') {
+                    this.data.startY = e.pageY;
+                    this.data.top = e.pageY - offset.top;
+                    this.move(this.data.top);
+                } else {
+                    this.data.startX = e.pageX;
+                    this.data.left = e.pageX - offset.left;
+                    this.move(this.data.left);
+                }
+
+                this.mousemove = function(e) {
+                    var position;
+                    if (this.direction === 'vertical') {
+                        position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
+                    } else {
+                        position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
+                    }
+
+                    this.move(position);
+                    return false;
+                };
+
+                this.mouseup = function() {
+                    $(document).off({
+                        mousemove: this.mousemove,
+                        mouseup: this.mouseup
+                    });
+                    if (this.direction === 'vertical') {
+                        this.data.top = this.data.cach;
+                    } else {
+                        this.data.left = this.data.cach;
+                    }
+
+                    return false;
+                };
+
+                $(document).on({
+                    mousemove: $.proxy(this.mousemove, this),
+                    mouseup: $.proxy(this.mouseup, this)
+                });
+                return false;
+            },
+            move: function(position, alpha, update) {
+                position = Math.max(0, Math.min(this.size, position));
+                this.data.cach = position;
+                if (typeof alpha === 'undefined') {
+                    alpha = 1 - (position / this.size);
+                }
+                alpha = Math.max(0, Math.min(1, alpha));
+                if (this.direction === 'vertical') {
+                    this.$handle.css({
+                        top: position
+                    });
+                } else {
+                    this.$handle.css({
+                        left: position
+                    });
+                }
+
+                if (update !== false) {
+                    this.api.set({
+                        a: Math.round(alpha * 100) / 100
+                    });
+                }
+            },
+            moveLeft: function() {
+                var step = this.step,
+                    data = this.data;
+                data.left = Math.max(0, Math.min(this.width, data.left - step));
+                this.move(data.left);
+            },
+            moveRight: function() {
+                var step = this.step,
+                    data = this.data;
+                data.left = Math.max(0, Math.min(this.width, data.left + step));
+                this.move(data.left);
+            },
+            moveUp: function() {
+                var step = this.step,
+                    data = this.data;
+                data.top = Math.max(0, Math.min(this.width, data.top - step));
+                this.move(data.top);
+            },
+            moveDown: function() {
+                var step = this.step,
+                    data = this.data;
+                data.top = Math.max(0, Math.min(this.width, data.top + step));
+                this.move(data.top);
+            },
+            keyboard: function() {
+                var keyboard, self = this;
+                if (this.api._keyboard) {
+                    keyboard = $.extend(true, {}, this.api._keyboard);
+                } else {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(e);
-            });
-        },
-        mousedown: function(e) {
-            var offset = this.$alpha.offset();
-            if (this.direction === 'vertical') {
-                this.data.startY = e.pageY;
-                this.data.top = e.pageY - offset.top;
-                this.move(this.data.top);
-            } else {
-                this.data.startX = e.pageX;
-                this.data.left = e.pageX - offset.left;
-                this.move(this.data.left);
-            }
 
-            this.mousemove = function(e) {
-                var position;
-                if (this.direction === 'vertical') {
-                    position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
-                } else {
-                    position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
-                }
+                this.$alpha.attr('tabindex', '0').on('focus', function() {
+                    if (this.direction === 'vertical') {
+                        keyboard.attach({
+                            up: function() {
+                                self.moveUp();
+                            },
+                            down: function() {
+                                self.moveDown();
+                            }
+                        });
+                    } else {
+                        keyboard.attach({
+                            left: function() {
+                                self.moveLeft();
+                            },
+                            right: function() {
+                                self.moveRight();
+                            }
+                        });
+                    }
+                    return false;
+                }).on('blur', function() {
+                    keyboard.detach();
+                });
+            },
+            update: function(color) {
+                var position = this.size * (1 - color.value.a);
+                this.$alpha.css('backgroundColor', color.toHEX());
 
-                this.move(position);
-                return false;
-            };
-
-            this.mouseup = function() {
+                this.move(position, color.value.a, false);
+            },
+            destroy: function() {
                 $(document).off({
                     mousemove: this.mousemove,
                     mouseup: this.mouseup
                 });
-                if (this.direction === 'vertical') {
-                    this.data.top = this.data.cach;
-                } else {
-                    this.data.left = this.data.cach;
-                }
-
-                return false;
-            };
-
-            $(document).on({
-                mousemove: $.proxy(this.mousemove, this),
-                mouseup: $.proxy(this.mouseup, this)
-            });
-            return false;
-        },
-        move: function(position, alpha, update) {
-            position = Math.max(0, Math.min(this.size, position));
-            this.data.cach = position;
-            if (typeof alpha === 'undefined') {
-                alpha = 1 - (position / this.size);
             }
-            alpha = Math.max(0, Math.min(1, alpha));
-            if (this.direction === 'vertical') {
-                this.$handle.css({
-                    top: position
-                });
-            } else {
-                this.$handle.css({
-                    left: position
-                });
-            }
-
-            if (update !== false) {
-                this.api.set({
-                    a: Math.round(alpha * 100) / 100
-                });
-            }
-        },
-        moveLeft: function() {
-            var step = this.step,
-                data = this.data;
-            data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(data.left);
-        },
-        moveRight: function() {
-            var step = this.step,
-                data = this.data;
-            data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(data.left);
-        },
-        moveUp: function() {
-            var step = this.step,
-                data = this.data;
-            data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(data.top);
-        },
-        moveDown: function() {
-            var step = this.step,
-                data = this.data;
-            data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(data.top);
-        },
-        keyboard: function() {
-            var keyboard, self = this;
-            if (this.api._keyboard) {
-                keyboard = $.extend(true, {}, this.api._keyboard);
-            } else {
-                return false;
-            }
-
-            this.$alpha.attr('tabindex', '0').on('focus', function() {
-                if (this.direction === 'vertical') {
-                    keyboard.attach({
-                        up: function() {
-                            self.moveUp();
-                        },
-                        down: function() {
-                            self.moveDown();
-                        }
-                    });
-                } else {
-                    keyboard.attach({
-                        left: function() {
-                            self.moveLeft();
-                        },
-                        right: function() {
-                            self.moveRight();
-                        }
-                    });
-                }
-                return false;
-            }).on('blur', function() {
-                keyboard.detach();
-            });
-        },
-        update: function(color) {
-            var position = this.size * (1 - color.value.a);
-            this.$alpha.css('backgroundColor', color.toHEX());
-
-            this.move(position, color.value.a, false);
-        },
-        destroy: function() {
-            $(document).off({
-                mousemove: this.mousemove,
-                mouseup: this.mouseup
-            });
-        }
+        };
     });
 })(jQuery);
 
 // buttons
-
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('buttons', {
-        defaults: {
-            apply: false,
-            cancel: true,
-            applyText: 'apply',
-            cancelText: 'cancel'
-        },
-        init: function(api, options) {
-            var self = this;
-
-            this.options = $.extend(this.defaults, options);
-            this.$buttons = $('<div class="' + api.namespace + '-buttons"></div>').appendTo(api.$dropdown);
-
-            api.$element.on('asColorInput::firstOpen', function() {
-                if (self.options.apply) {
-                    self.$apply = $('<a href="#" alt="' + self.options.applyText + '" class="' + api.namespace + '-buttons-apply"></a>').text(self.options.applyText).appendTo(self.$buttons).on('click', $.proxy(api.apply, api));
+    $.asColorInput.registerComponent('buttons', function() {
+        return {
+            defaults: {
+                apply: false,
+                cancel: true,
+                applyText: 'apply',
+                cancelText: 'cancel',
+                template: function(namespace) {
+                    return '<div class="' + namespace + '-buttons"></div>';
+                },
+                applyTemplate: function(namespace) {
+                    return '<a href="#" alt="' + this.options.applyText + '" class="' + namespace + '-buttons-apply">' + this.options.applyText + '</a>';
+                },
+                cancelTemplate: function(namespace) {
+                    return '<a href="#" alt="' + this.options.cancelText + '" class="' + namespace + '-buttons-apply">' + this.options.cancelText + '</a>';
                 }
+            },
+            init: function(api, options) {
+                var self = this;
 
-                if (self.options.cancel) {
-                    self.$cancel = $('<a href="#" alt="' + self.options.cancelText + '" class="' + api.namespace + '-buttons-cancel"></a>').text(self.options.cancelText).appendTo(self.$buttons).on('click', $.proxy(api.cancel, api));
-                }
-            });
-        }
+                this.options = $.extend(this.defaults, options);
+                this.$buttons = $(this.options.template.call(this, api.namespace)).appendTo(api.$dropdown);
+
+                api.$element.on('asColorInput::firstOpen', function() {
+                    if (self.options.apply) {
+                        self.$apply = $(self.options.applyTemplate.call(self, api.namespace)).appendTo(self.$buttons).on('click', function() {
+                            api.apply();
+                            return false;
+                        });
+                    }
+
+                    if (self.options.cancel) {
+                        self.$cancel = $(self.options.cancelTemplate.call(self, api.namespace)).appendTo(self.$buttons).on('click', function() {
+                            api.cancel();
+                            return false;
+                        });
+                    }
+                });
+            }
+        };
     });
 })(jQuery);
 
@@ -759,23 +788,25 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('hex', {
-        init: function(api) {
-            var template = '<input type="text" class="' + api.namespace + '-hex" />';
-            this.$hex = $(template).appendTo(api.$dropdown);
+    $.asColorInput.registerComponent('hex', function() {
+        return {
+            init: function(api) {
+                var template = '<input type="text" class="' + api.namespace + '-hex" />';
+                this.$hex = $(template).appendTo(api.$dropdown);
 
-            this.$hex.on('change', function() {
-                api.set(this.value);
-            });
+                this.$hex.on('change', function() {
+                    api.set(this.value);
+                });
 
-            var self = this;
-            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
-                self.update(color);
-            });
-        },
-        update: function(color) {
-            this.$hex.val(color.toHEX());
-        },
+                var self = this;
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                    self.update(color);
+                });
+            },
+            update: function(color) {
+                this.$hex.val(color.toHEX());
+            }
+        };
     });
 })(jQuery);
 
@@ -783,184 +814,190 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('hue', {
-        size: 150,
-        defaults: {
-            direction: 'vertical', // horizontal
-        },
-        data: {},
-        init: function(api, options) {
-            var self = this;
-
-            this.options = $.extend(this.defaults, options);
-            this.direction = this.options.direction;
-            this.api = api;
-
-            this.$hue = $('<div class="' + api.namespace + '-hue ' + api.namespace + '-hue-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
-            this.$handle = this.$hue.children('i');
-
-            api.$element.on('asColorInput::firstOpen', function(e) {
-                // init variable
-                if (self.direction === 'vertical') {
-                    self.size = self.$hue.height();
-                } else {
-                    self.size = self.$hue.width();
+    $.asColorInput.registerComponent('hue', function() {
+        return {
+            size: 150,
+            defaults: {
+                direction: 'vertical', // horizontal
+                template: function() {
+                    var namespace = this.api.namespace;
+                    return '<div class="' + namespace + '-hue ' + namespace + '-hue-' + this.direction + '"><i></i></div>';
                 }
-                self.step = self.size / 360;
+            },
+            data: {},
+            init: function(api, options) {
+                var self = this;
 
-                // bind events
-                self.bindEvents(api);
-                self.keyboard(api);
-            });
+                this.options = $.extend(this.defaults, options);
+                this.direction = this.options.direction;
+                this.api = api;
 
-            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
-                self.update(color);
-            });
-        },
-        bindEvents: function() {
-            var self = this;
-            this.$hue.on('mousedown.asColorInput', function(e) {
-                var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                if (rightclick) {
+                this.$hue = $(this.options.template.call(self)).appendTo(api.$dropdown);
+                this.$handle = this.$hue.find('i');
+
+                api.$element.on('asColorInput::firstOpen', function() {
+                    // init variable
+                    if (self.direction === 'vertical') {
+                        self.size = self.$hue.height();
+                    } else {
+                        self.size = self.$hue.width();
+                    }
+                    self.step = self.size / 360;
+
+                    // bind events
+                    self.bindEvents(api);
+                    self.keyboard(api);
+                });
+
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                    self.update(color);
+                });
+            },
+            bindEvents: function() {
+                var self = this;
+                this.$hue.on('mousedown.asColorInput', function(e) {
+                    var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                    if (rightclick) {
+                        return false;
+                    }
+                    $.proxy(self.mousedown, self)(e);
+                });
+            },
+            mousedown: function(e) {
+                var offset = this.$hue.offset();
+                if (this.direction === 'vertical') {
+                    this.data.startY = e.pageY;
+                    this.data.top = e.pageY - offset.top;
+                    this.move(this.data.top);
+                } else {
+                    this.data.startX = e.pageX;
+                    this.data.left = e.pageX - offset.left;
+                    this.move(this.data.left);
+                }
+
+                this.mousemove = function(e) {
+                    var position;
+                    if (this.direction === 'vertical') {
+                        position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
+                    } else {
+                        position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
+                    }
+
+                    this.move(position);
+                    return false;
+                };
+
+                this.mouseup = function() {
+                    $(document).off({
+                        mousemove: this.mousemove,
+                        mouseup: this.mouseup
+                    });
+                    if (this.direction === 'vertical') {
+                        this.data.top = this.data.cach;
+                    } else {
+                        this.data.left = this.data.cach;
+                    }
+
+                    return false;
+                };
+
+                $(document).on({
+                    mousemove: $.proxy(this.mousemove, this),
+                    mouseup: $.proxy(this.mouseup, this)
+                });
+
+                return false;
+            },
+            move: function(position, hub, update) {
+                position = Math.max(0, Math.min(this.size, position));
+                this.data.cach = position;
+                if (typeof hub === 'undefined') {
+                    hub = (1 - position / this.size) * 360;
+                }
+                hub = Math.max(0, Math.min(360, hub));
+                if (this.direction === 'vertical') {
+                    this.$handle.css({
+                        top: position
+                    });
+                } else {
+                    this.$handle.css({
+                        left: position
+                    });
+                }
+                if (update !== false) {
+                    this.api.set({
+                        h: hub
+                    });
+                }
+            },
+            moveLeft: function() {
+                var step = this.step,
+                    data = this.data;
+                data.left = Math.max(0, Math.min(this.width, data.left - step));
+                this.move(data.left);
+            },
+            moveRight: function() {
+                var step = this.step,
+                    data = this.data;
+                data.left = Math.max(0, Math.min(this.width, data.left + step));
+                this.move(data.left);
+            },
+            moveUp: function() {
+                var step = this.step,
+                    data = this.data;
+                data.top = Math.max(0, Math.min(this.width, data.top - step));
+                this.move(data.top);
+            },
+            moveDown: function() {
+                var step = this.step,
+                    data = this.data;
+                data.top = Math.max(0, Math.min(this.width, data.top + step));
+                this.move(data.top);
+            },
+            keyboard: function() {
+                var keyboard, self = this;
+                if (this.api._keyboard) {
+                    keyboard = $.extend(true, {}, this.api._keyboard);
+                } else {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(e);
-            });
-        },
-        mousedown: function(e) {
-            var offset = this.$hue.offset();
-            if (this.direction === 'vertical') {
-                this.data.startY = e.pageY;
-                this.data.top = e.pageY - offset.top;
-                this.move(this.data.top);
-            } else {
-                this.data.startX = e.pageX;
-                this.data.left = e.pageX - offset.left;
-                this.move(this.data.left);
-            }
 
-            this.mousemove = function(e) {
-                var position;
-                if (this.direction === 'vertical') {
-                    position = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
-                } else {
-                    position = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
-                }
-
-                this.move(position);
-                return false;
-            };
-
-            this.mouseup = function() {
+                this.$hue.attr('tabindex', '0').on('focus', function() {
+                    if (this.direction === 'vertical') {
+                        keyboard.attach({
+                            up: function() {
+                                self.moveUp();
+                            },
+                            down: function() {
+                                self.moveDown();
+                            }
+                        });
+                    } else {
+                        keyboard.attach({
+                            left: function() {
+                                self.moveLeft();
+                            },
+                            right: function() {
+                                self.moveRight();
+                            }
+                        });
+                    }
+                    return false;
+                }).on('blur', function() {
+                    keyboard.detach();
+                });
+            },
+            update: function(color) {
+                var position = (color.value.h === 0) ? 0 : this.size * (1 - color.value.h / 360);
+                this.move(position, color.value.h, false);
+            },
+            destroy: function() {
                 $(document).off({
                     mousemove: this.mousemove,
                     mouseup: this.mouseup
                 });
-                if (this.direction === 'vertical') {
-                    this.data.top = this.data.cach;
-                } else {
-                    this.data.left = this.data.cach;
-                }
-
-                return false;
-            };
-
-            $(document).on({
-                mousemove: $.proxy(this.mousemove, this),
-                mouseup: $.proxy(this.mouseup, this)
-            });
-
-            return false;
-        },
-        move: function(position, hub, update) {
-            position = Math.max(0, Math.min(this.size, position));
-            this.data.cach = position;
-            if (typeof hub === 'undefined') {
-                hub = (1 - position / this.size) * 360;
             }
-            hub = Math.max(0, Math.min(360, hub));
-            if (this.direction === 'vertical') {
-                this.$handle.css({
-                    top: position
-                });
-            } else {
-                this.$handle.css({
-                    left: position
-                });
-            }
-            if (update !== false) {
-                this.api.set({
-                    h: hub
-                });
-            }
-        },
-        moveLeft: function() {
-            var step = this.step,
-                data = this.data;
-            data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(data.left);
-        },
-        moveRight: function() {
-            var step = this.step,
-                data = this.data;
-            data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(data.left);
-        },
-        moveUp: function() {
-            var step = this.step,
-                data = this.data;
-            data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(data.top);
-        },
-        moveDown: function() {
-            var step = this.step,
-                data = this.data;
-            data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(data.top);
-        },
-        keyboard: function() {
-            var keyboard, self = this;
-            if (this.api._keyboard) {
-                keyboard = $.extend(true, {}, this.api._keyboard);
-            } else {
-                return false;
-            }
-
-            this.$hue.attr('tabindex', '0').on('focus', function() {
-                if (this.direction === 'vertical') {
-                    keyboard.attach({
-                        up: function() {
-                            self.moveUp();
-                        },
-                        down: function() {
-                            self.moveDown();
-                        }
-                    });
-                } else {
-                    keyboard.attach({
-                        left: function() {
-                            self.moveLeft();
-                        },
-                        right: function() {
-                            self.moveRight();
-                        }
-                    });
-                }
-                return false;
-            }).on('blur', function() {
-                keyboard.detach();
-            });
-        },
-        update: function(color) {
-            var position = (color.value.h === 0) ? 0 : this.size * (1 - color.value.h / 360);
-            this.move(position, color.value.h, false);
-        },
-        destroy: function() {
-            $(document).off({
-                mousemove: this.mousemove,
-                mouseup: this.mouseup
-            });
-        }
+        };
     });
 })(jQuery);
 
@@ -969,58 +1006,60 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('info', {
-        color: ['white', 'black', 'transparent'],
-        init: function(api) {
-            var template = '<ul class="' + api.namespace + '-info">' + '<li><label>R:<input type="text" data-type="r"/></label></li>' + '<li><label>G:<input type="text" data-type="g"/></label></li>' + '<li><label>B:<input type="text" data-type="b"/></label></li>' + '<li><label>A:<input type="text" data-type="a"/></label></li>' + '</ul>';
-            this.$info = $(template).appendTo(api.$dropdown);
-            this.$r = this.$info.find('[data-type="r"]');
-            this.$g = this.$info.find('[data-type="g"]');
-            this.$b = this.$info.find('[data-type="b"]');
-            this.$a = this.$info.find('[data-type="a"]');
+    $.asColorInput.registerComponent('info', function() {
+        return {
+            color: ['white', 'black', 'transparent'],
+            init: function(api) {
+                var template = '<ul class="' + api.namespace + '-info">' + '<li><label>R:<input type="text" data-type="r"/></label></li>' + '<li><label>G:<input type="text" data-type="g"/></label></li>' + '<li><label>B:<input type="text" data-type="b"/></label></li>' + '<li><label>A:<input type="text" data-type="a"/></label></li>' + '</ul>';
+                this.$info = $(template).appendTo(api.$dropdown);
+                this.$r = this.$info.find('[data-type="r"]');
+                this.$g = this.$info.find('[data-type="g"]');
+                this.$b = this.$info.find('[data-type="b"]');
+                this.$a = this.$info.find('[data-type="a"]');
 
-            this.$info.delegate('input', 'keyup update change', function(e) {
-                var val;
-                var type = $(e.target).data('type');
-                switch (type) {
-                    case 'r':
-                    case 'g':
-                    case 'b':
-                        val = parseInt(this.value, 10);
-                        if (val > 255) {
-                            val = 255;
-                        } else if (val < 0) {
-                            val = 0;
-                        }
-                        break;
-                    case 'a':
-                        val = parseFloat(this.value, 10);
-                        if (val > 1) {
-                            val = 1;
-                        } else if (val < 0) {
-                            val = 0;
-                        }
-                        break;
-                }
-                if (isNaN(val)) {
-                    val = 0;
-                }
-                var color = {};
-                color[type] = val;
-                api.set(color);
-            });
+                this.$info.delegate('input', 'keyup update change', function(e) {
+                    var val;
+                    var type = $(e.target).data('type');
+                    switch (type) {
+                        case 'r':
+                        case 'g':
+                        case 'b':
+                            val = parseInt(this.value, 10);
+                            if (val > 255) {
+                                val = 255;
+                            } else if (val < 0) {
+                                val = 0;
+                            }
+                            break;
+                        case 'a':
+                            val = parseFloat(this.value, 10);
+                            if (val > 1) {
+                                val = 1;
+                            } else if (val < 0) {
+                                val = 0;
+                            }
+                            break;
+                    }
+                    if (isNaN(val)) {
+                        val = 0;
+                    }
+                    var color = {};
+                    color[type] = val;
+                    api.set(color);
+                });
 
-            var self = this;
-            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
-                self.update(color);
-            });
-        },
-        update: function(color) {
-            this.$r.val(color.value.r);
-            this.$g.val(color.value.g);
-            this.$b.val(color.value.b);
-            this.$a.val(color.value.a);
-        },
+                var self = this;
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                    self.update(color);
+                });
+            },
+            update: function(color) {
+                this.$r.val(color.value.r);
+                this.$g.val(color.value.g);
+                this.$b.val(color.value.b);
+                this.$a.val(color.value.a);
+            }
+        };
     });
 })(jQuery);
 
@@ -1036,83 +1075,88 @@
         window.localStorage = noop;
     }
 
-    $.asColorInput.registerComponent('palettes', {
-        colors: [],
-        defaults: {
-            colors: ['white', 'black', 'red', 'blue', 'yellow'],
-            max: 10,
-            localStorage: false
-        },
-        init: function(api, options) {
-            var self = this, colors, asColor = new $.asColor();
+    $.asColorInput.registerComponent('palettes', function() {
+        return {
+            defaults: {
+                template: function(namespace) {
+                    return '<ul class="' + namespace + '-palettes"></ul>';
+                },
+                item: function(namespace, color) {
+                    return '<li data-color="' + color + '"><span style="background-color:' + color + '" /></li>';
+                },
+                colors: ['white', 'black', 'red', 'blue', 'yellow'],
+                max: 10,
+                localStorage: true
+            },
+            init: function(api, options) {
+                var self = this,
+                    colors, asColor = new $.asColor();
 
-            this.options = $.extend(true, {}, this.defaults, options);
-
-            if (this.options.localStorage) {
-                var localKey = api.namespace + '_palettes_' + api.id;
-                colors = this.getLocal(localKey);
-                if (!colors) {
+                this.options = $.extend(true, {}, this.defaults, options);
+                this.colors = [];
+                if (this.options.localStorage) {
+                    var localKey = api.namespace + '_palettes_' + api.id;
+                    colors = this.getLocal(localKey);
+                    if (!colors) {
+                        colors = this.options.colors;
+                        this.setLocal(localKey, colors);
+                    }
+                } else {
                     colors = this.options.colors;
-                    this.setLocal(localKey, colors);
-                }
-            } else {
-                colors = this.options.colors;
-            }
-
-            for(var i in colors){
-                this.colors.push(asColor.val(colors[i]).toRGBA());
-            }
-
-            var list = '';
-            $.each(this.colors, function(i, color) {
-                list += self.getItem(color);
-            });
-
-            this.$palettes = $('<ul class="' + api.namespace + '-palettes"></ul>').html(list).appendTo(api.$dropdown);
-
-            this.$palettes.delegate('li', 'click', function(e) {
-                var color = $(this).data('color');
-                api.set(color);
-
-                e.preventDefault();
-                e.stopPropagation();
-            });
-
-            api.$element.on('asColorInput::apply', function(e, color) {
-                if(typeof color.toRGBA !== 'function'){
-                    color = color.get().color;
                 }
 
-                var rgba = color.toRGBA();
-                if($.inArray(rgba, self.colors) === -1){
-                    if (self.colors.length >= self.options.max) {
-                        self.colors.shift();
-                        self.$palettes.find('li').eq(0).remove();
+                for (var i in colors) {
+                    this.colors.push(asColor.val(colors[i]).toRGBA());
+                }
+
+                var list = '';
+                $.each(this.colors, function(i, color) {
+                    list += self.options.item(api.namespace, color);
+                });
+
+                this.$palettes = $(this.options.template.call(this, api.namespace)).html(list).appendTo(api.$dropdown);
+
+                this.$palettes.delegate('li', 'click', function(e) {
+                    var color = $(this).data('color');
+                    api.set(color);
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                api.$element.on('asColorInput::apply', function(e, color) {
+                    if (typeof color.toRGBA !== 'function') {
+                        color = color.get().color;
                     }
 
-                    self.colors.push(rgba);
+                    var rgba = color.toRGBA();
+                    if ($.inArray(rgba, self.colors) === -1) {
+                        if (self.colors.length >= self.options.max) {
+                            self.colors.shift();
+                            self.$palettes.find('li').eq(0).remove();
+                        }
 
-                    self.$palettes.append(self.getItem(rgba));
+                        self.colors.push(rgba);
 
-                    if(self.options.localStorage) {
-                        self.setLocal(localKey, self.colors);
+                        self.$palettes.append(self.options.item(api.namespace, color));
+
+                        if (self.options.localStorage) {
+                            self.setLocal(localKey, self.colors);
+                        }
                     }
-                }
-            });
-        },
-        getItem: function(color) {
-            return '<li data-color="' + color + '"><span style="background-color:' + color + '" /></li>';
-        },
-        setLocal: function(key, value) {
-            var jsonValue = JSON.stringify(value);
+                });
+            },
+            setLocal: function(key, value) {
+                var jsonValue = JSON.stringify(value);
 
-            localStorage[key] = jsonValue;
-        },
-        getLocal: function(key) {
-            var value = localStorage[key];
+                localStorage[key] = jsonValue;
+            },
+            getLocal: function(key) {
+                var value = localStorage[key];
 
-            return value ? JSON.parse(value) : value;
-        }
+                return value ? JSON.parse(value) : value;
+            }
+        };
     });
 })(jQuery);
 
@@ -1121,36 +1165,48 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('preview', {
-        init: function(api) {
-            var self = this;
-            var template = '<ul class="' + api.namespace + '-preview"><li class="' + api.namespace + '-preview-current"><span /></li><li class="' + api.namespace + '-preview-previous"><span /></li></ul>';
-            this.$preview = $(template).appendTo(api.$dropdown);
-            this.$current = this.$preview.find('.' + api.namespace + '-preview-current span');
-            this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous span');
+    $.asColorInput.registerComponent('preview', function() {
+        return {
+            defaults: {
+                template: function(namespace) {
+                    return '<ul class="' + namespace + '-preview"><li class="' + namespace + '-preview-current"><span /></li><li class="' + namespace + '-preview-previous"><span /></li></ul>';
+                }
+            },
+            init: function(api, options) {
+                var self = this;
+                this.options = $.extend(this.defaults, options);
+                this.$preview = $(this.options.template.call(self, api.namespace)).appendTo(api.$dropdown);
+                this.$current = this.$preview.find('.' + api.namespace + '-preview-current span');
+                this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous span');
 
-            api.$element.on('asColorInput::firstOpen', function(e, color) {
-                self.$previous.on('click', function() {
-                    api.set($(this).data('color'));
-                    return false;
+                api.$element.on('asColorInput::firstOpen', function() {
+                    self.$previous.on('click', function() {
+                        api.set($(this).data('color'));
+                        return false;
+                    });
                 });
-            });
 
-            api.$element.on('asColorInput::setup', function(e, color) {
-                self.updateCurrent(color);
-                self.updatePreview(color);
-            });
-            api.$element.on('asColorInput::update', function(e, color) {
-                self.updateCurrent(color);
-            });
-        },
-        updateCurrent: function(color) {
-            this.$current.css('backgroundColor', color.toRGBA());
-        },
-        updatePreview: function(color) {
-            this.$previous.css('backgroundColor', color.toRGBA());
-            this.$previous.data('color', color.toRGBA());
-        }
+                api.$element.on('asColorInput::setup', function(e, color) {
+                    self.updateCurrent(color);
+                    self.updatePreview(color);
+                });
+                api.$element.on('asColorInput::update', function(e, color) {
+                    self.updateCurrent(color);
+                });
+            },
+            updateCurrent: function(color) {
+                this.$current.css('backgroundColor', color.toRGBA());
+            },
+            updatePreview: function(color) {
+                this.$previous.css('backgroundColor', color.toRGBA());
+                this.$previous.data('color', {
+                    r: color.value.r,
+                    g: color.value.g,
+                    b: color.value.b,
+                    a: color.value.a
+                });
+            }
+        };
     });
 })(jQuery);
 
@@ -1159,204 +1215,246 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('saturation', {
-        defaults: {},
-        width: 0,
-        height: 0,
-        size: 6,
-        data: {},
-        init: function(api, options) {
-            var self = this;
-            var template = '<div class="' + api.namespace + '-saturation"><i><b></b></i></div>';
-            this.options = $.extend(this.defaults, options),
-            this.api = api;
+    $.asColorInput.registerComponent('saturation', function() {
+        return {
+            defaults: {
+                template: function(namespace) {
+                    return '<div class="' + namespace + '-saturation"><i><b></b></i></div>';
+                }
+            },
+            width: 0,
+            height: 0,
+            size: 6,
+            data: {},
+            init: function(api, options) {
+                var self = this;
+                this.options = $.extend(this.defaults, options),
+                this.api = api;
 
-            //build element and add component to picker
-            this.$saturation = $(template).appendTo(api.$dropdown);
-            this.$handle = this.$saturation.children('i');
+                //build element and add component to picker
+                this.$saturation = $(this.options.template.call(self, api.namespace)).appendTo(api.$dropdown);
+                this.$handle = this.$saturation.find('i');
 
-            api.$element.on('asColorInput::firstOpen', function(e, color) {
-                // init variable
-                self.width = self.$saturation.width();
-                self.height = self.$saturation.height();
-                self.step = {
-                    left: self.width / 20,
-                    top: self.height / 20
+                api.$element.on('asColorInput::firstOpen', function() {
+                    // init variable
+                    self.width = self.$saturation.width();
+                    self.height = self.$saturation.height();
+                    self.step = {
+                        left: self.width / 20,
+                        top: self.height / 20
+                    };
+                    self.size = self.$handle.width() / 2;
+
+                    // bind events
+                    self.bindEvents();
+                    self.keyboard(api);
+                });
+
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                    self.update(color);
+                });
+
+            },
+            bindEvents: function() {
+                var self = this;
+
+                this.$saturation.on('mousedown.asColorInput', function(e) {
+                    var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
+                    if (rightclick) {
+                        return false;
+                    }
+                    self.mousedown(e);
+                });
+            },
+            mousedown: function(e) {
+                var offset = this.$saturation.offset();
+
+                this.data.startY = e.pageY;
+                this.data.startX = e.pageX;
+                this.data.top = e.pageY - offset.top;
+                this.data.left = e.pageX - offset.left;
+                this.data.cach = {};
+
+                this.move(this.data.left, this.data.top);
+
+                this.mousemove = function(e) {
+                    var x = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
+                    var y = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
+                    this.move(x, y);
+                    return false;
                 };
-                self.size = self.$handle.width() / 2;
 
-                // bind events
-                self.bindEvents();
-                self.keyboard(api);
-            });
+                this.mouseup = function() {
+                    $(document).off({
+                        mousemove: this.mousemove,
+                        mouseup: this.mouseup
+                    });
+                    this.data.left = this.data.cach.left;
+                    this.data.top = this.data.cach.top;
 
-            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
-                self.update(color);
-            });
+                    return false;
+                };
 
-        },
-        bindEvents: function() {
-            var self = this;
+                $(document).on({
+                    mousemove: $.proxy(this.mousemove, this),
+                    mouseup: $.proxy(this.mouseup, this)
+                });
 
-            this.$saturation.on('mousedown.asColorInput', function(e) {
-                var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
-                if (rightclick) {
+                return false;
+            },
+            move: function(x, y, update) {
+                y = Math.max(0, Math.min(this.height, y));
+                x = Math.max(0, Math.min(this.width, x));
+
+                if (this.data.cach === undefined) {
+                    this.data.cach = {};
+                }
+                this.data.cach.left = x;
+                this.data.cach.top = y;
+
+                this.$handle.css({
+                    top: y - this.size,
+                    left: x - this.size
+                });
+
+                if (update !== false) {
+                    this.api.set({
+                        s: x / this.width,
+                        v: 1 - (y / this.height)
+                    });
+                }
+            },
+            update: function(color) {
+                if (color.value.h === undefined) {
+                    color.value.h = 0;
+                }
+                this.$saturation.css('backgroundColor', $.asColor.HSLToHEX({
+                    h: color.value.h,
+                    s: 1,
+                    l: 0.5
+                }));
+
+                var x = color.value.s * this.width;
+                var y = (1 - color.value.v) * this.height;
+
+                this.move(x, y, false);
+            },
+            moveLeft: function() {
+                var step = this.step.left,
+                    data = this.data;
+                data.left = Math.max(0, Math.min(this.width, data.left - step));
+                this.move(data.left, data.top);
+            },
+            moveRight: function() {
+                var step = this.step.left,
+                    data = this.data;
+                data.left = Math.max(0, Math.min(this.width, data.left + step));
+                this.move(data.left, data.top);
+            },
+            moveUp: function() {
+                var step = this.step.top,
+                    data = this.data;
+                data.top = Math.max(0, Math.min(this.width, data.top - step));
+                this.move(data.left, data.top);
+            },
+            moveDown: function() {
+                var step = this.step.top,
+                    data = this.data;
+                data.top = Math.max(0, Math.min(this.width, data.top + step));
+                this.move(data.left, data.top);
+            },
+            keyboard: function() {
+                var keyboard, self = this;
+                if (this.api._keyboard) {
+                    keyboard = $.extend(true, {}, this.api._keyboard);
+                } else {
                     return false;
                 }
-                $.proxy(self.mousedown, self)(e);
-            });
-        },
-        mousedown: function(e) {
-            var offset = this.$saturation.offset();
 
-            this.data.startY = e.pageY;
-            this.data.startX = e.pageX;
-            this.data.top = e.pageY - offset.top;
-            this.data.left = e.pageX - offset.left;
-            this.data.cach = {};
-
-            this.move(this.data.left, this.data.top);
-
-            this.mousemove = function(e) {
-                var x = this.data.left + (e.pageX || this.data.startX) - this.data.startX;
-                var y = this.data.top + (e.pageY || this.data.startY) - this.data.startY;
-                this.move(x, y);
-                return false;
-            };
-
-            this.mouseup = function() {
+                this.$saturation.attr('tabindex', '0').on('focus', function() {
+                    keyboard.attach({
+                        left: function() {
+                            self.moveLeft();
+                        },
+                        right: function() {
+                            self.moveRight();
+                        },
+                        up: function() {
+                            self.moveUp();
+                        },
+                        down: function() {
+                            self.moveDown();
+                        }
+                    });
+                    return false;
+                }).on('blur', function() {
+                    keyboard.detach();
+                });
+            },
+            destroy: function() {
                 $(document).off({
                     mousemove: this.mousemove,
                     mouseup: this.mouseup
                 });
-                this.data.left = this.data.cach.left;
-                this.data.top = this.data.cach.top;
-
-                return false;
-            };
-
-            $(document).on({
-                mousemove: $.proxy(this.mousemove, this),
-                mouseup: $.proxy(this.mouseup, this)
-            });
-
-            return false;
-        },
-        move: function(x, y, update) {
-            y = Math.max(0, Math.min(this.height, y));
-            x = Math.max(0, Math.min(this.width, x));
-
-            if (this.data.cach === undefined) {
-                this.data.cach = {};
             }
-            this.data.cach.left = x;
-            this.data.cach.top = y;
-
-            this.$handle.css({
-                top: y - this.size,
-                left: x - this.size
-            });
-
-            if (update !== false) {
-                this.api.set({
-                    s: x / this.width,
-                    v: 1 - (y / this.height)
-                });
-            }
-        },
-        update: function(color) {
-            if (color.value.h === undefined) {
-                color.value.h = 0;
-            }
-            this.$saturation.css('backgroundColor', $.asColor.HSLToHEX({
-                h: color.value.h,
-                s: 1,
-                l: 0.5
-            }));
-
-            var x = color.value.s * this.width;
-            var y = (1 - color.value.v) * this.height;
-
-            this.move(x, y, false);
-        },
-        moveLeft: function() {
-            var step = this.step.left,
-                data = this.data;
-            data.left = Math.max(0, Math.min(this.width, data.left - step));
-            this.move(data.left, data.top);
-        },
-        moveRight: function() {
-            var step = this.step.left,
-                data = this.data;
-            data.left = Math.max(0, Math.min(this.width, data.left + step));
-            this.move(data.left, data.top);
-        },
-        moveUp: function() {
-            var step = this.step.top,
-                data = this.data;
-            data.top = Math.max(0, Math.min(this.width, data.top - step));
-            this.move(data.left, data.top);
-        },
-        moveDown: function() {
-            var step = this.step.top,
-                data = this.data;
-            data.top = Math.max(0, Math.min(this.width, data.top + step));
-            this.move(data.left, data.top);
-        },
-        keyboard: function() {
-            var keyboard, self = this;
-            if (this.api._keyboard) {
-                keyboard = $.extend(true, {}, this.api._keyboard);
-            } else {
-                return false;
-            }
-
-            this.$saturation.attr('tabindex', '0').on('focus', function() {
-                keyboard.attach({
-                    left: function() {
-                        self.moveLeft();
-                    },
-                    right: function() {
-                        self.moveRight();
-                    },
-                    up: function() {
-                        self.moveUp();
-                    },
-                    down: function() {
-                        self.moveDown();
-                    }
-                });
-                return false;
-            }).on('blur', function() {
-                keyboard.detach();
-            });
-        },
-        destroy: function() {
-            $(document).off({
-                mousemove: this.mousemove,
-                mouseup: this.mouseup
-            });
-        }
+        };
     });
 })(jQuery);
 
 // gradient
 
 (function($, asGradient) {
-    function getPrefix() {
-        var ua = window.navigator.userAgent;
-        var prefix = '';
-        if (/MSIE/g.test(ua)) {
-            prefix = '-ms-';
-        } else if (/Firefox/g.test(ua)) {
-            prefix = '-moz-';
-        } else if (/(WebKit)/i.test(ua)) {
-            prefix = '-webkit-';
-        } else if (/Opera/g.test(ua)) {
-            prefix = '-o-';
-        }
-        return prefix;
-    }
+    $.asColorInput.registerComponent('gradient', function() {
+        return {
+            defaults: {
+                switchable: true,
+                switchText: 'Gradient',
+                cancelText: 'Cancel',
+                settings: {
+                    forceStandard: true,
+                    angleUseKeyword: true,
+                    emptyString: '',
+                    degradationFormat: false,
+                    cleanPosition: false,
+                    forceColorFormat: 'rgba', // rgb, rgba, hsl, hsla, hex
+                },
+                template: function() {
+                    var namespace = this.api.namespace;
+                    var control = '<div class="' + namespace + '-gradient-control">';
+                    if (this.options.switchable) {
+                        control += '<a href="#" class="' + namespace + '-gradient-switch">' + this.options.switchText + '</a>';
+                    }
+                    control += '<a href="#" class="' + namespace + '-gradient-cancel">' + this.options.cancelText + '</a>' +
+                        '</div>';
+
+                    return control +
+                        '<div class="' + namespace + '-gradient">' +
+                        '<div class="' + namespace + '-gradient-preview">' +
+                        '<ul class="' + namespace + '-gradient-markers"></ul>' +
+                        '</div>' +
+                        '<div class="' + namespace + '-gradient-wheel">' +
+                        '<i></i>' +
+                        '</div>' +
+                        '<input class="' + namespace + '-gradient-angle" type="text" value="" size="3" />' +
+                        '</div>';
+                }
+            },
+            init: function(api, options) {
+                var self = this;
+
+                api.$element.on('asColorInput::ready', function(event, instance) {
+                    if (instance.options.mode !== 'gradient') {
+                        return;
+                    }
+
+                    self.defaults.settings.color = api.options.color;
+                    options = $.extend(true, self.defaults, options);
+
+                    api.gradient = new Gradient(api, options);
+                });
+            }
+        };
+    });
 
     function conventToPercentage(n) {
         if (n < 0) {
@@ -1376,10 +1474,10 @@
             active: api.namespace + '-gradient-marker_active',
             focus: api.namespace + '-gradient_focus'
         };
-        this.isOpened = false;
         this.isEnabled = false;
         this.initialized = false;
         this.current = null;
+        this.value = new asGradient(this.options.settings);
         this.$doc = $(document);
 
         var self = this;
@@ -1399,54 +1497,106 @@
                 if (self.options.switchable === false) {
                     self.enable();
                 } else {
-                    if (asGradient.matchString(self.api.element.value)) {
+                    if (asGradient.matchString(api.element.value)) {
                         self.enable();
                     }
                 }
+                this.initialized = true;
             },
             bind: function() {
                 var namespace = api.namespace;
 
                 self.$gradient.on('update', function() {
+                    var current = self.value.getById(self.current);
+
+                    if (current) {
+                        api._trigger('update', current.color, self.value);
+                    }
                     api._updateInput();
                 });
 
                 self.$gradient.on('add', function(e, data) {
                     if (data.stop) {
                         self.active(data.stop.id);
+                        api._trigger('update', data.stop.color, self.value);
+                        api._updateInput();
                     }
                 });
 
                 if (self.options.switchable) {
                     self.$wrap.on('click', '.' + namespace + '-gradient-switch', function() {
-                        if (self.isOpened) {
+                        if (self.isEnabled) {
                             self.disable();
                         } else {
                             self.enable();
                         }
-                        self.api.position();
-                        self.isOpened = !self.isOpened;
+
                         return false;
                     });
                 }
 
                 self.$wrap.on('click', '.' + namespace + '-gradient-cancel', function() {
-                    self.api.cancel();
+                    if (self.options.switchable === false || asGradient.matchString(api.originValue)) {
+                        self.overrideCore();
+                    }
+
+                    api.cancel();
+
                     return false;
                 });
+            },
+            overrideCore: function() {
+                api.set = function(value) {
+                    if (typeof value === 'string') {
+                        if (self.options.switchable === false || asGradient.matchString(value)) {
+                            self.enable();
+                            self.val(value);
+
+                            api.color = self.value;
+                            self.$gradient.trigger('update', self.value.value);
+                        } else {
+                            self.disable();
+                            api.val(value);
+                        }
+                    } else {
+                        var current = self.value.getById(self.current);
+
+                        if (current) {
+                            current.color.val(value)
+                            api._trigger('update', current.color, self.value);
+                        }
+
+                        self.$gradient.trigger('update', {
+                            id: self.current,
+                            stop: current
+                        });
+                    }
+                };
+
+                api._setup = function() {
+                    var current = self.value.getById(self.current);
+
+                    api._trigger('setup', current.color);
+                };
+            },
+            revertCore: function() {
+                api.set = $.proxy(api._set, api);
+                api._setup = function() {
+                    api._trigger('setup', api.color);
+                };
             },
             preview: {
                 init: function() {
                     var that = this;
                     self.$preview = self.$gradient.find('.' + api.namespace + '-gradient-preview');
 
-                    self.$gradient.on('add del update', function(e) {
+                    self.$gradient.on('add del update empty', function() {
                         that.render();
                     });
                 },
                 render: function() {
                     self.$preview.css({
-                        'background-image': self.value.toStringWithAngle('to right', getPrefix()),
+                        'background-image': self.value.toStringWithAngle('to right', true),
                     });
                     self.$preview.css({
                         'background-image': self.value.toStringWithAngle('to right'),
@@ -1458,6 +1608,7 @@
                 init: function() {
                     self.$markers = self.$gradient.find('.' + api.namespace + '-gradient-markers').attr('tabindex', 0);
                     var that = this;
+
                     self.$gradient.on('add', function(e, data) {
                         that.add(data.stop);
                     });
@@ -1474,6 +1625,10 @@
                         if (data.stop) {
                             that.update(data.stop.id, data.stop.color);
                         }
+                    });
+
+                    self.$gradient.on('empty', function() {
+                        that.empty();
                     });
 
                     self.$markers.on('mousedown.asColorInput', function(e) {
@@ -1496,27 +1651,29 @@
                         return false;
                     });
 
-                    $(document).on('keydown.asColorInput', function(e) {
-                        if(self.api.opened && self.$markers.is('.'+self.classes.focus)){
-                            
+                    self.$doc.on('keydown.asColorInput', function(e) {
+                        if (self.api.opened && self.$markers.is('.' + self.classes.focus)) {
+
                             var key = e.keyCode || e.which;
                             if (key === 46 || key === 8) {
                                 if (self.value.length <= 2) {
-                                    return;
+                                    return false;
                                 }
 
-                                return self.del(self.current);
+                                self.del(self.current);
+
+                                return false;
                             }
                         }
                     });
-                    self.$markers.on('focus.asColorInput', function(e){
+
+                    self.$markers.on('focus.asColorInput', function() {
                         self.$markers.addClass(self.classes.focus);
-                    }).on('blur.asColorInput', function(e){
+                    }).on('blur.asColorInput', function() {
                         self.$markers.removeClass(self.classes.focus);
                     });
 
-
-                    self.$markers.on('click', 'li', function(e) {
+                    self.$markers.on('click', 'li', function() {
                         var id = $(this).data('id');
                         self.active(id);
                     });
@@ -1532,10 +1689,13 @@
                 add: function(stop) {
                     $('<li data-id="' + stop.id + '" style="left:' + conventToPercentage(stop.position) + '" class="' + self.classes.marker + '"><span style="background-color: ' + stop.color.toHEX() + '"></span><i style="background-color: ' + stop.color.toHEX() + '"></i></li>').appendTo(self.$markers);
                 },
+                empty: function() {
+                    self.$markers.html('');
+                },
                 del: function(id) {
                     var $marker = this.getMarker(id);
                     var $to = $marker.prev();
-                    if($to.length === 0){
+                    if ($to.length === 0) {
                         $to = $marker.next();
                     }
 
@@ -1574,7 +1734,7 @@
                         return false;
                     };
 
-                    $(document).on({
+                    self.$doc.on({
                         mousemove: $.proxy(this.mousemove, this),
                         mouseup: $.proxy(this.mouseup, this)
                     });
@@ -1701,7 +1861,6 @@
             },
             angle: {
                 init: function() {
-                    var that = this;
                     self.$angle = self.$gradient.find('.' + api.namespace + '-gradient-angle');
 
                     self.$angle.on('blur.asColorInput', function() {
@@ -1737,27 +1896,11 @@
         constructor: Gradient,
 
         enable: function() {
-            var self = this;
+            if (this.isEnabled === true) {
+                return;
+            }
             this.isEnabled = true;
-            this.api.set = function(value) {
-                var current = self.value.getById(self.current);
-
-                if (current) {
-                    current.color.val(value)
-                    self.api._trigger('update', current.color);
-                }
-
-                self.$gradient.trigger('update', {
-                    id: self.current,
-                    stop: current
-                });
-            };
-
-            this.api._setup = function() {
-                var current = self.value.getById(self.current);
-
-                self.api._trigger('setup', current.color);
-            };
+            this.overrideCore();
 
             this.$gradient.addClass(this.classes.enable);
             this.markers.width = this.$markers.width();
@@ -1765,40 +1908,53 @@
             if (!asGradient.matchString(this.api.element.value) && this._last) {
                 this.value = this._last;
             } else {
-                var gradient = new asGradient(this.api.element.value, this.options.settings);
-                this.value = gradient;
-
-                if (gradient.length === 0) {
-                    gradient.append(this.api.color.toString(), 0);
-                }
-                if (gradient.length === 1) {
-                    gradient.append(this.api.color.toString(), 1);
-                }
-
-                var stop;
-                for (var i = 0; i < gradient.length; i++) {
-                    stop = gradient.get(i);
-                    if (stop) {
-                        this.$gradient.trigger('add', {
-                            stop: stop
-                        });
-                    }
-                }
+                this.val(this.api.element.value);
             }
             this.api.color = this.value;
             this.$gradient.trigger('update', this.value.value);
+
+            if (this.api.opened) {
+                this.api.position();
+            }
+        },
+        val: function(string) {
+            this.empty();
+            this.value.val(string);
+
+            if (this.value.length < 2) {
+                if (this.value.length === 0) {
+                    this.value.append(string, 0);
+                }
+                if (this.value.length === 1) {
+                    this.value.append(string, 1);
+                }
+            }
+
+            var stop;
+            for (var i = 0; i < this.value.length; i++) {
+                stop = this.value.get(i);
+                if (stop) {
+                    this.$gradient.trigger('add', {
+                        stop: stop
+                    });
+                }
+            }
         },
         disable: function() {
+            if (this.isEnabled === false) {
+                return;
+            }
             this.isEnabled = false;
-            var self = this;
-            this.api.set = $.proxy(this.api.set, this.api);
-            this.api._setup = function() {
-                self.api._trigger('setup', self.api.color);
-            };
+            this.revertCore();
 
             this.$gradient.removeClass(this.classes.enable);
             this._last = this.value;
-            this.api.color.val(this.api.color.get(0).color.toString());
+            this.api.color = this.api.color.getCurrent().color;
+            this.api.set(this.api.color.value);
+
+            if (this.api.opened) {
+                this.api.position();
+            }
         },
         active: function(id) {
             if (this.current !== id) {
@@ -1810,7 +1966,11 @@
                 });
             }
         },
-        add: function(color, position, update) {
+        empty: function() {
+            this.value.empty();
+            this.$gradient.trigger('empty');
+        },
+        add: function(color, position) {
             var stop = this.value.insert(color, position);
             this.value.reorder();
 
@@ -1821,7 +1981,7 @@
             return stop;
         },
         del: function(id) {
-            if(this.value.length <= 2){
+            if (this.value.length <= 2) {
                 return;
             }
             this.value.removeById(id);
@@ -1837,61 +1997,6 @@
             });
         }
     };
-
-    $.asColorInput.registerComponent('gradient', {
-        angle: 1,
-        count: 0,
-        markers: [],
-        current: null,
-        defaults: {
-            switchable: true,
-            switchText: 'Gradient',
-            cancelText: 'Cancel',
-            settings: {
-                forceStandard: true,
-                angleUseKeyword: true,
-                emptyString: '',
-                degradationFormat: false,
-                cleanPosition: false,
-                forceColorFormat: false, // rgb, rgba, hsl, hsla, hex
-            },
-            template: function() {
-                var namespace = this.api.namespace;
-                var control = '<div class="' + namespace + '-gradient-control">';
-                if (this.options.switchable) {
-                    control += '<a href="#" class="' + namespace + '-gradient-switch">' + this.options.switchText + '</a>';
-                }
-                control += '<a href="#" class="' + namespace + '-gradient-cancel">' + this.options.cancelText + '</a>' +
-                    '</div>';
-
-                return control +
-                    '<div class="' + namespace + '-gradient">' +
-                    '<div class="' + namespace + '-gradient-preview">' +
-                    '<ul class="' + namespace + '-gradient-markers"></ul>' +
-                    '</div>' +
-                    '<div class="' + namespace + '-gradient-wheel">' +
-                    '<i></i>' +
-                    '</div>' +
-                    '<input class="' + namespace + '-gradient-angle" type="text" value="" size="3" />' +
-                    '</div>';
-            }
-        },
-        init: function(api, options) {
-            var self = this;
-
-            api.$element.on('asColorInput::ready', function(event, instance) {
-                if (instance.options.mode !== 'gradient') {
-                    return;
-                }
-
-                self.defaults.settings.color = api.options.color;
-                options = $.extend(true, self.defaults, options);
-
-                api.gradient = new Gradient(api, options);
-            });
-
-        }
-    });
 })(jQuery, (function($) {
     if ($.asGradient === undefined) {
         // console.info('lost dependency lib of $.asGradient , please load it first !');

@@ -3,20 +3,22 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('clear', {
-        defaults: {
+    $.asColorInput.registerComponent('clear', function() {
+        return {
+            defaults: {
+                template: function(namespace) {
+                    return '<a href="#"' + namespace + '-clear"></a>';
+                }
+            },
+            init: function(api, options) {
+                this.options = $.extend(this.defaults, options);
+                this.$clear = $(this.options.template.call(this, api.namespace)).insertAfter(this.$element);
 
-        },
-        init: function(api, options) {
-            var self = this;
-
-            this.options = $.extend(this.defaults, options);
-            this.$clear = $('<a href="#"' + api.namespace + '-clear"></a>').insertAfter(this.$element);
-
-            this.$clear.on('click', function() {
-                api.clear();
-                return false;
-            });
-        }
+                this.$clear.on('click', function() {
+                    api.clear();
+                    return false;
+                });
+            }
+        };
     });
 })(jQuery);
