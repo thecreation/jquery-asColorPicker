@@ -52,9 +52,27 @@
                 this.wheel.init();
 
                 this.bind();
+
+                if (self.options.switchable === false) {
+                    self.enable();
+                } else {
+                    if (asGradient.matchString(self.api.element.value)) {
+                        self.enable();
+                    }
+                }
             },
             bind: function() {
                 var namespace = api.namespace;
+
+                self.$gradient.on('update', function() {
+                    api._updateInput();
+                });
+
+                self.$gradient.on('add', function(e, data) {
+                    if (data.stop) {
+                        self.active(data.stop.id);
+                    }
+                });
 
                 if (self.options.switchable) {
                     self.$wrap.on('click', '.' + namespace + '-gradient-switch', function() {
@@ -70,7 +88,8 @@
                 }
 
                 self.$wrap.on('click', '.' + namespace + '-gradient-cancel', function() {
-
+                    self.api.cancel();
+                    return false;
                 });
             },
             preview: {
@@ -106,6 +125,12 @@
 
                     self.$gradient.on('del', function(e, data) {
                         that.del(data.id);
+                    });
+
+                    self.$gradient.on('update', function(e, data) {
+                        if (data.stop) {
+                            that.update(data.stop.id, data.stop.color);
+                        }
                     });
 
                     self.$markers.on('mousedown.asColorInput', function(e) {
@@ -154,18 +179,27 @@
                         self.active(id);
                     });
                 },
+                update: function(id, color) {
+                    var $marker = this.getMarker(id);
+                    $marker.css('background', color.toString());
+                    $marker.find('i').css('background', color.toString());
+                },
+                getMarker: function(id) {
+                    return self.$markers.find('[data-id="' + id + '"]');
+                },
                 add: function(color, position, id) {
                     $('<span data-id="' + id + '" style="background: ' + color + '; left:' + conventToPercentage(position) + '" class="' + self.classes.marker + '"><i style="background: ' + color + '"></i></span>').attr('tabindex', 0).appendTo(self.$markers);
                 },
                 del: function(id) {
-                    self.$markers.find('[data-id="' + id + '"]').remove();
+                    this.getMarker(id).remove();
                 },
                 active: function(id) {
-                    var $marker = self.$markers.find('[data-id="' + id + '"]');
-
                     self.$markers.children().removeClass(self.classes.active);
+
+                    var $marker = this.getMarker(id);
                     $marker.addClass(self.classes.active);
 
+                    // self.api._trigger('apply', self.value.getById(id).color);
                     $marker.focus();
                 },
                 mousedown: function(marker, e) {
@@ -195,7 +229,8 @@
                         mousemove: $.proxy(this.mousemove, this),
                         mouseup: $.proxy(this.mouseup, this)
                     });
-                    $(marker).focus();
+
+                    self.active(id);
                     return false;
                 },
                 move: function(marker, position, id) {
@@ -355,31 +390,62 @@
         enable: function() {
             var self = this;
             this.isEnabled = true;
-            this.api.$element.off('asColorInput::set');
-            this.api.$element.on('asColorInput::set', function(e, value){
-                self.value.getById(self.current).color.set(value);
-                self.$gradient.trigger('update', {});
-            });
+            this.api.set = function(value) {
+                var current = self.value.getById(self.current);
+
+                if (current) {
+                    current.color.val(value)
+                    self.api._trigger('update', current.color);
+                }
+
+                self.$gradient.trigger('update', {
+                    id: self.current,
+                    stop: current
+                });
+            };
+
+            this.api._setup = function() {
+                var current = self.value.getById(self.current);
+
+                self.api._trigger('setup', current.color);
+            };
 
             this.$gradient.addClass(this.classes.enable);
             this.markers.width = this.$markers.width();
 
-            if (this._last) {
+            if (!asGradient.matchString(this.api.element.value) && this._last) {
                 this.value = this._last;
             } else {
-                var gradient = new asGradient();
+                var gradient = new asGradient(this.api.element.value, this.options.settings);
                 this.value = gradient;
 
-                this.add(this.api.color.toString(), 0, 0);
-                this.add(this.api.color.toString(), 1, 1);
+                if (gradient.length === 0) {
+                    gradient.append(this.api.color.toString(), 0);
+                }
+                if (gradient.length === 1) {
+                    gradient.append(this.api.color.toString(), 1);
+                }
+
+                var stop;
+                for (var i = 0; i < gradient.length; i++) {
+                    stop = gradient.get(i);
+                    if (stop) {
+                        this.$gradient.trigger('add', {
+                            stop: stop
+                        });
+                    }
+                }
             }
             this.api.color = this.value;
             this.$gradient.trigger('update', this.value.value);
         },
         disable: function() {
             this.isEnabled = false;
-            this.api.$element.off('asColorInput::set');
-            this.api.$element.on('asColorInput::set', $.proxy(this.api._set, this.api));
+            var self = this;
+            this.api.set = $.proxy(this.api.set, this.api);
+            this.api._setup = function() {
+                self.api._trigger('setup', self.api.color);
+            };
 
             this.$gradient.removeClass(this.classes.enable);
             this._last = this.value;
@@ -394,15 +460,13 @@
                 });
             }
         },
-        add: function(color, position) {
+        add: function(color, position, update) {
             var stop = this.value.insert(color, position);
             this.value.reorder();
 
             this.$gradient.trigger('add', {
                 stop: stop
             });
-
-            this.active(stop.id);
 
             return stop;
         },
@@ -430,12 +494,13 @@
             switchable: true,
             switchText: 'Gradient',
             cancelText: 'Cancel',
-            format: function(value) {
-                if (value) {
-                    return value;
-                } else {
-                    return;
-                }
+            settings: {
+                forceStandard: true,
+                angleUseKeyword: true,
+                emptyString: '',
+                degradationFormat: false,
+                cleanPosition: false,
+                forceColorFormat: false, // rgb, rgba, hsl, hsla, hex
             },
             template: function() {
                 var namespace = this.api.namespace;
@@ -466,11 +531,12 @@
                     return;
                 }
 
-                options = $.extend(self.defaults, options);
+                self.defaults.settings.color = api.options.color;
+                options = $.extend(true, self.defaults, options);
 
                 api.gradient = new Gradient(api, options);
             });
-            
+
         }
     });
 })(jQuery, (function($) {

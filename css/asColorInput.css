@@ -70,8 +70,12 @@
   *display: inline;
   *zoom: 1;
 }
-.asColorInput-preview li div {
+.asColorInput-preview li span {
+  display: block;
   height: 100%;
+}
+.asColorInput-preview-previous {
+  cursor: pointer;
 }
 .asColorInput-palettes ul {
   display: block;
@@ -93,7 +97,8 @@
   overflow: hidden;
   cursor: pointer;
 }
-.asColorInput-palettes li div {
+.asColorInput-palettes li span {
+  display: block;
   height: 100%;
 }
 .asColorInput-saturation {

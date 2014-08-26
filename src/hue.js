@@ -1,5 +1,4 @@
 // hue
-
 (function($) {
     "use strict";
 
@@ -19,7 +18,7 @@
             this.$hue = $('<div class="' + api.namespace + '-hue ' + api.namespace + '-hue-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
             this.$handle = this.$hue.children('i');
 
-            api.$element.on('asColorInput::firstOpen', function() {
+            api.$element.on('asColorInput::firstOpen', function(e) {
                 // init variable
                 if (self.direction === 'vertical') {
                     self.size = self.$hue.height();
@@ -28,18 +27,14 @@
                 }
                 self.step = self.size / 360;
 
-                // update
-                self.update(api.color);
-
                 // bind events
                 self.bindEvents(api);
                 self.keyboard(api);
             });
 
-            api.$element.on('asColorInput::update', function(e, color) {
+            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
                 self.update(color);
             });
-
         },
         bindEvents: function() {
             var self = this;

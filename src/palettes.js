@@ -46,24 +46,24 @@
                 e.stopPropagation();
             });
 
-            api.$element.on('asColorInput::apply', function(event, api) {
-                if (self.options.colors.indexOf(api.originalColor) !== -1) {
-                    return;
-                }
-                if (self.options.colors.length >= self.options.max) {
-                    self.options.colors.shift();
-                    self.$palettes.find('li').eq(0).remove();
-                }
-                self.options.colors.push(api.originalColor);
-                self.$palettes.append(self.getItem(api.originalColor));
+            api.$element.on('asColorInput::apply', function(e, color) {
+                // if (self.options.colors.indexOf(api.originalColor) !== -1) {
+                //     return;
+                // }
+                // if (self.options.colors.length >= self.options.max) {
+                //     self.options.colors.shift();
+                //     self.$palettes.find('li').eq(0).remove();
+                // }
+                // self.options.colors.push(api.originalColor);
+                // self.$palettes.append(self.getItem(api.originalColor));
 
-                if (self.options.localStorage) {
-                    self.setLocalItem(storeKey, self.options.colors);
-                }
+                // if (self.options.localStorage) {
+                //     self.setLocalItem(storeKey, self.options.colors);
+                // }
             });
         },
         getItem: function(color) {
-            return '<li data-color="' + color + '"><div style="background-color:' + color + '" /></li>';
+            return '<li data-color="' + color + '"><span style="background-color:' + color + '" /></li>';
         },
         setLocalItem: function(key, value) {
             var jsonValue = JSON.stringify(value);

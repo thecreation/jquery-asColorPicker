@@ -26,6 +26,7 @@
         this.firstOpen = true;
         this.disabled = false;
         this.initialed = false;
+        this.originValue = this.element.value;
 
         createId(this);
 
@@ -121,8 +122,7 @@
                 },
                 'keyup.asColorInput': function() {
                     //self.val(self.$element.val());
-                },
-                'asColorInput::set': $.proxy(self._set, self)
+                }
             });
         },
         _trigger: function(eventType) {
@@ -189,9 +189,9 @@
             if (this.disabled) {
                 return;
             }
+            this.originValue = this.element.value;
 
             var self = this;
-
             if (this.$dropdown[0] !== this.$body.children().last()[0]) {
                 this.$dropdown.detach().appendTo(this.$body);
             }
@@ -222,9 +222,9 @@
 
             if (this.firstOpen) {
                 this.firstOpen = false;
-                
                 this._trigger('firstOpen');
             }
+            this._setup();
             this._trigger('open');
         },
         createMask: function() {
@@ -270,10 +270,14 @@
         cancel: function() {
             this.close();
 
+            this.color.val(this.originValue);
+            this._trigger('update', this.color);
+            this.$element.val(this.originValue);
+            
             return false;
         },
         apply: function() {
-            this._trigger('apply');
+            this._trigger('apply', this.color);
             this.close();
 
             return false;
@@ -289,16 +293,18 @@
             var self = this;
 
             this._trigger('update', this.color);
-            this._trigger('change', this.val(), this.options.name, 'asColorInput');
+            this._updateInput();
+        },
+        _updateInput: function() {
+            var value = this.color.toString();
+            this._trigger('change', value, this.options.name, 'asColorInput');
 
-            this.$element.val(this.color.toString());
+            this.$element.val(value);
         },
         set: function(value) {
-            this._trigger('set', value);
-
-            return this;
+            return this._set(value);
         },
-        _set: function(e, value){
+        _set: function(value) {
             if (typeof value === 'string') {
                 this.color.val(value);
             } else {
@@ -306,6 +312,9 @@
             }
 
             this._update();
+        },
+        _setup: function() {
+            this._trigger('setup', this.color);
         },
         get: function() {
             return this.color;
@@ -348,9 +357,7 @@
             zeroAlphaAsTransparent: true
         },
         mode: 'simple',
-        components: {
-
-        },
+        components: {},
         onInit: null,
         onReady: null,
         onChange: null,

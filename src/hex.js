@@ -13,11 +13,9 @@
             });
 
             var self = this;
-            api.$element.on('asColorInput::update', function(e, color) {
+            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
                 self.update(color);
             });
-
-            this.update(api.color);
         },
         update: function(color) {
             this.$hex.val(color.toHEX());

@@ -19,7 +19,7 @@
             this.$alpha = $('<div class="' + api.namespace + '-alpha ' + api.namespace + '-alpha-' + this.direction + '"><i></i></div>').appendTo(api.$dropdown);
             this.$handle = this.$alpha.children('i');
 
-            api.$element.on('asColorInput::firstOpen', function() {
+            api.$element.on('asColorInput::firstOpen', function(e) {
                 // init variable
                 if (self.direction === 'vertical') {
                     self.size = self.$alpha.height();
@@ -28,15 +28,12 @@
                 }
                 self.step = self.size / 360;
 
-                // update
-                self.update(api.color);
-
                 // bind events
                 self.bindEvents();
                 self.keyboard();
             });
 
-            api.$element.on('asColorInput::update', function(e, color) {
+            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
                 self.update(color);
             });
         },

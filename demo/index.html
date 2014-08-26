@@ -44,13 +44,13 @@
     <section>
         <h3>Default</h3>
         <pre class="has-example"><code class="language-javascript">
-$(".example_1").asColorInput();
+$(".example_default").asColorInput();
         </code></pre>
         <div class="example">
-            <input type='text' class="example_1" value="#000" />                
+            <input type='text' class="example_default" value="#000" />                
             <script>
                 $(document).ready(function() {
-                    $(".example_1").asColorInput();
+                    $(".example_default").asColorInput();
                 });
             </script>
         </div>
@@ -59,13 +59,15 @@ $(".example_1").asColorInput();
     <section>
         <h3>Mode: palettes</h3>
         <pre class="has-example"><code class="language-javascript">
-$(".example_2").asColorInput();
+$(".example_palettes").asColorInput({
+    mode: 'palettes'
+});
         </code></pre>
         <div class="example">
-            <input type='text' class="example_2" data-mode="palettes" value="#000" />                
+            <input type='text' class="example_palettes" data-mode="palettes" value="#000" />                
             <script>
                 $(document).ready(function() {
-                    $(".example_2").asColorInput();
+                    $(".example_palettes").asColorInput();
                 });
             </script>
         </div>
@@ -74,13 +76,15 @@ $(".example_2").asColorInput();
     <section>
         <h3>Mode: complex</h3>
         <pre class="has-example"><code class="language-javascript">
-$(".example_3").asColorInput();
+$(".example_complex").asColorInput({
+    mode: 'complex'
+});
         </code></pre>
         <div class="example">
-            <input type='text' class="example_3" data-mode="complex" value="#000" />                
+            <input type='text' class="example_complex" data-mode="complex" value="#000" />                
             <script>
                 $(document).ready(function() {
-                    $(".example_3").asColorInput();
+                    $(".example_complex").asColorInput();
                 });
             </script>
         </div>
@@ -89,13 +93,43 @@ $(".example_3").asColorInput();
     <section>
         <h3>Mode: gradient</h3>
         <pre class="has-example"><code class="language-javascript">
-$(".example_4").asColorInput();
+$(".example_gradient").asColorInput({
+    mode: 'gradient'
+});
         </code></pre>
         <div class="example">
-            <input type='text' class="example_4" data-mode="gradient" value="#000" style="width: 1000px" />                
+            <input type='text' class="example_gradient" data-mode="gradient" value="#000" style="width: 1000px" />                
             <script>
                 $(document).ready(function() {
-                    $(".example_4").asColorInput();
+                    $(".example_gradient").asColorInput();
+                });
+            </script>
+        </div>
+    </section>
+
+    <section>
+        <h3>Mode: gradient</h3>
+        <pre class="has-example"><code class="language-javascript">
+$(".example_gradient_2").asColorInput({
+    mode: 'gradient',
+    components: {
+        gradient: {
+            switchable: false
+        }
+    }
+});
+        </code></pre>
+        <div class="example">
+            <input type='text' class="example_gradient_2" data-mode="gradient" value="#000" style="width: 1000px" />                
+            <script>
+                $(document).ready(function() {
+                    $(".example_gradient_2").asColorInput({
+                        components: {
+                            gradient: {
+                                switchable: false
+                            }
+                        }
+                    });
                 });
             </script>
         </div>
@@ -107,7 +141,7 @@ $(".example_4").asColorInput();
 $(".example_4_2").asColorInput();
         </code></pre>
         <div class="example">
-            <input type='text' class="example_4_2" data-mode="gradient" value="gradient(0deg,#ff0000 0%,rgba(25,11,111,1) 50%,rgba(205,240,86,1) 100%)" style="width: 500px" />                
+            <input type='text' class="example_4_2" data-mode="gradient" value="linear-gradient(0deg,#ff0000 0%,rgba(25,11,111,1) 50%,rgba(205,240,86,1) 100%)" style="width: 500px" />                
             <script>
                 $(document).ready(function() {
                     $(".example_4_2").asColorInput();

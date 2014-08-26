@@ -1,4 +1,4 @@
-/*! asGradient - v0.2.0 - 2014-08-25
+/*! asGradient - v0.2.0 - 2014-08-26
 * https://github.com/amazingSurge/asGradient
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -294,7 +294,6 @@
     Gradient.matchString = function(string) {
         var matched = Gradient.parseString(string);
         if(matched && matched.value && matched.value.stops && matched.value.stops.length > 1){
-            console.dir(matched);
             return true;
         }
         return false;

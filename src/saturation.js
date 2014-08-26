@@ -19,7 +19,7 @@
             this.$saturation = $(template).appendTo(api.$dropdown);
             this.$handle = this.$saturation.children('i');
 
-            api.$element.on('asColorInput::firstOpen', function() {
+            api.$element.on('asColorInput::firstOpen', function(e, color) {
                 // init variable
                 self.width = self.$saturation.width();
                 self.height = self.$saturation.height();
@@ -29,17 +29,15 @@
                 };
                 self.size = self.$handle.width() / 2;
 
-                // update
-                self.update(api.color);
-
                 // bind events
                 self.bindEvents();
                 self.keyboard(api);
             });
 
-            api.$element.on('asColorInput::update', function(e, color) {
+            api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
                 self.update(color);
             });
+
         },
         bindEvents: function() {
             var self = this;
