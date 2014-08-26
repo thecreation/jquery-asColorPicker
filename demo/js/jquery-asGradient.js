@@ -219,6 +219,19 @@
             }
             return false;
         },
+        getCurrent: function(){
+            return this.value.stops[this.current];
+        },
+        setCurrentById: function(id){
+            var index = 0;
+            for(var i in this.value.stops){
+                if(this.value.stops[i].id !== id){
+                    index ++;
+                } else {
+                    this.current = index;
+                }
+            }
+        },
         get: function(index) {
             if (typeof index === 'undefined') {
                 index = this.current;

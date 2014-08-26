@@ -22,6 +22,7 @@
         this.firstOpen = true;
         this.disabled = false;
         this.initialed = false;
+        this.originValue = this.element.value;
 
         createId(this);
 
@@ -184,6 +185,7 @@
             if (this.disabled) {
                 return;
             }
+            this.originValue = this.element.value;
 
             var self = this;
             if (this.$dropdown[0] !== this.$body.children().last()[0]) {
@@ -264,6 +266,10 @@
         cancel: function() {
             this.close();
 
+            this.color.val(this.originValue);
+            this._trigger('update', this.color);
+            this.$element.val(this.originValue);
+            
             return false;
         },
         apply: function() {
@@ -1031,35 +1037,41 @@
     }
 
     $.asColorInput.registerComponent('palettes', {
+        colors: [],
         defaults: {
-            colors: ['#fff', '#ffff00', '#f00', '#0f0', '#0ff', '#000'],
+            colors: ['white', 'black', 'red', 'blue', 'yellow'],
             max: 10,
-            localStorage: true
+            localStorage: false
         },
         init: function(api, options) {
-            var self = this;
+            var self = this, colors, asColor = new $.asColor();
 
             this.options = $.extend(true, {}, this.defaults, options);
 
-            // load colors from local storage
             if (this.options.localStorage) {
-                var storeKey = api.namespace + '_palettes_' + api.id;
-                var storeValue = this.getLocalItem(storeKey);
-                if (storeValue) {
-                    this.options.colors = storeValue;
+                var localKey = api.namespace + '_palettes_' + api.id;
+                colors = this.getLocal(localKey);
+                if (!colors) {
+                    colors = this.options.colors;
+                    this.setLocal(localKey, colors);
                 }
+            } else {
+                colors = this.options.colors;
+            }
+
+            for(var i in colors){
+                this.colors.push(asColor.val(colors[i]).toRGBA());
             }
 
             var list = '';
-            $.each(this.options.colors, function(index, value) {
-                list += self.getItem(value);
+            $.each(this.colors, function(i, color) {
+                list += self.getItem(color);
             });
 
             this.$palettes = $('<ul class="' + api.namespace + '-palettes"></ul>').html(list).appendTo(api.$dropdown);
 
             this.$palettes.delegate('li', 'click', function(e) {
                 var color = $(this).data('color');
-
                 api.set(color);
 
                 e.preventDefault();
@@ -1067,30 +1079,36 @@
             });
 
             api.$element.on('asColorInput::apply', function(e, color) {
-                // if (self.options.colors.indexOf(api.originalColor) !== -1) {
-                //     return;
-                // }
-                // if (self.options.colors.length >= self.options.max) {
-                //     self.options.colors.shift();
-                //     self.$palettes.find('li').eq(0).remove();
-                // }
-                // self.options.colors.push(api.originalColor);
-                // self.$palettes.append(self.getItem(api.originalColor));
+                if(typeof color.toRGBA !== 'function'){
+                    color = color.get().color;
+                }
 
-                // if (self.options.localStorage) {
-                //     self.setLocalItem(storeKey, self.options.colors);
-                // }
+                var rgba = color.toRGBA();
+                if($.inArray(rgba, self.colors) === -1){
+                    if (self.colors.length >= self.options.max) {
+                        self.colors.shift();
+                        self.$palettes.find('li').eq(0).remove();
+                    }
+
+                    self.colors.push(rgba);
+
+                    self.$palettes.append(self.getItem(rgba));
+
+                    if(self.options.localStorage) {
+                        self.setLocal(localKey, self.colors);
+                    }
+                }
             });
         },
         getItem: function(color) {
             return '<li data-color="' + color + '"><span style="background-color:' + color + '" /></li>';
         },
-        setLocalItem: function(key, value) {
+        setLocal: function(key, value) {
             var jsonValue = JSON.stringify(value);
 
             localStorage[key] = jsonValue;
         },
-        getLocalItem: function(key) {
+        getLocal: function(key) {
             var value = localStorage[key];
 
             return value ? JSON.parse(value) : value;
@@ -1355,7 +1373,8 @@
         this.classes = {
             enable: api.namespace + '-gradient_enable',
             marker: api.namespace + '-gradient-marker',
-            active: api.namespace + '-gradient-marker_active'
+            active: api.namespace + '-gradient-marker_active',
+            focus: api.namespace + '-gradient_focus'
         };
         this.isOpened = false;
         this.isEnabled = false;
@@ -1412,7 +1431,8 @@
                 }
 
                 self.$wrap.on('click', '.' + namespace + '-gradient-cancel', function() {
-
+                    self.api.cancel();
+                    return false;
                 });
             },
             preview: {
@@ -1436,10 +1456,10 @@
             markers: {
                 width: 160,
                 init: function() {
-                    self.$markers = self.$gradient.find('.' + api.namespace + '-gradient-markers');
+                    self.$markers = self.$gradient.find('.' + api.namespace + '-gradient-markers').attr('tabindex', 0);
                     var that = this;
                     self.$gradient.on('add', function(e, data) {
-                        that.add(data.stop.color.toString(), data.stop.position, data.stop.id);
+                        that.add(data.stop);
                     });
 
                     self.$gradient.on('active', function(e, data) {
@@ -1467,7 +1487,7 @@
                         return false;
                     });
 
-                    self.$markers.on('mousedown.asColorInput', 'span', function(e) {
+                    self.$markers.on('mousedown.asColorInput', 'li', function(e) {
                         var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                         if (rightclick) {
                             return false;
@@ -1476,45 +1496,51 @@
                         return false;
                     });
 
-                    self.$markers.on('focus.asColorInput', 'span', function(e) {
-                        if (!$(this).isBinded) {
-                            var id = $(this).data('id');
-                            $(document).on('keydown.asColorInput' + id, function(e) {
-                                var key = e.keyCode || e.which;
-                                if (key === 46 || key === 8) {
-                                    if (self.value.length <= 2) {
-                                        return;
-                                    }
-
-                                    return self.del(id);
+                    $(document).on('keydown.asColorInput', function(e) {
+                        if(self.api.opened && self.$markers.is('.'+self.classes.focus)){
+                            
+                            var key = e.keyCode || e.which;
+                            if (key === 46 || key === 8) {
+                                if (self.value.length <= 2) {
+                                    return;
                                 }
-                            });
 
-                            $(this).isBinded = true;
+                                return self.del(self.current);
+                            }
                         }
-                    }).on('blur', 'span', function() {
-                        $(document).off('keydown.asColorInput' + $(this).data('id'));
-                        $(this).isBinded = false;
+                    });
+                    self.$markers.on('focus.asColorInput', function(e){
+                        self.$markers.addClass(self.classes.focus);
+                    }).on('blur.asColorInput', function(e){
+                        self.$markers.removeClass(self.classes.focus);
                     });
 
-                    self.$markers.on('click', 'span', function(e) {
+
+                    self.$markers.on('click', 'li', function(e) {
                         var id = $(this).data('id');
                         self.active(id);
                     });
                 },
-                update: function(id, color) {
-                    var $marker = this.getMarker(id);
-                    $marker.css('background', color.toString());
-                    $marker.find('i').css('background', color.toString());
-                },
                 getMarker: function(id) {
                     return self.$markers.find('[data-id="' + id + '"]');
                 },
-                add: function(color, position, id) {
-                    $('<span data-id="' + id + '" style="background: ' + color + '; left:' + conventToPercentage(position) + '" class="' + self.classes.marker + '"><i style="background: ' + color + '"></i></span>').attr('tabindex', 0).appendTo(self.$markers);
+                update: function(id, color) {
+                    var $marker = this.getMarker(id);
+                    $marker.find('span').css('background-color', color.toHEX());
+                    $marker.find('i').css('background-color', color.toHEX());
+                },
+                add: function(stop) {
+                    $('<li data-id="' + stop.id + '" style="left:' + conventToPercentage(stop.position) + '" class="' + self.classes.marker + '"><span style="background-color: ' + stop.color.toHEX() + '"></span><i style="background-color: ' + stop.color.toHEX() + '"></i></li>').appendTo(self.$markers);
                 },
                 del: function(id) {
-                    this.getMarker(id).remove();
+                    var $marker = this.getMarker(id);
+                    var $to = $marker.prev();
+                    if($to.length === 0){
+                        $to = $marker.next();
+                    }
+
+                    self.active($to.data('id'));
+                    $marker.remove();
                 },
                 active: function(id) {
                     self.$markers.children().removeClass(self.classes.active);
@@ -1522,8 +1548,8 @@
                     var $marker = this.getMarker(id);
                     $marker.addClass(self.classes.active);
 
+                    self.$markers.focus();
                     // self.api._trigger('apply', self.value.getById(id).color);
-                    $marker.focus();
                 },
                 mousedown: function(marker, e) {
                     var that = this,
@@ -1777,6 +1803,7 @@
         active: function(id) {
             if (this.current !== id) {
                 this.current = id;
+                this.value.setCurrentById(id);
 
                 this.$gradient.trigger('active', {
                     id: id
@@ -1794,6 +1821,9 @@
             return stop;
         },
         del: function(id) {
+            if(this.value.length <= 2){
+                return;
+            }
             this.value.removeById(id);
             this.value.reorder();
             this.$gradient.trigger('del', {
@@ -1837,7 +1867,7 @@
                 return control +
                     '<div class="' + namespace + '-gradient">' +
                     '<div class="' + namespace + '-gradient-preview">' +
-                    '<div class="' + namespace + '-gradient-markers"></div>' +
+                    '<ul class="' + namespace + '-gradient-markers"></ul>' +
                     '</div>' +
                     '<div class="' + namespace + '-gradient-wheel">' +
                     '<i></i>' +
