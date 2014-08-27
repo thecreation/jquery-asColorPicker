@@ -1,4 +1,4 @@
-/*! asColor - v0.2.0 - 2014-08-22
+/*! asColor - v0.2.1 - 2014-08-27
 * https://github.com/amazingSurge/asColor
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, undefined) {
@@ -53,17 +53,18 @@
         var CSS_NUMBER = '[-\\+]?\\d*\\.\\d+%?';
         var CSS_UNIT = '(?:' + CSS_NUMBER + ')|(?:' + CSS_INTEGER + ')';
 
-        var PERMISSIVE_MATCH3 = '[\\s|\\(]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')\\s*\\)?';
-        var PERMISSIVE_MATCH4 = '[\\s|\\(]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')\\s*\\)?';
+        var PERMISSIVE_MATCH3 = '[\\s|\\(]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')\\s*\\)';
+        var PERMISSIVE_MATCH4 = '[\\s|\\(]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')[,|\\s]+(' + CSS_UNIT + ')\\s*\\)';
 
         return {
             RGB: {
-                match: new RegExp('rgb' + PERMISSIVE_MATCH3, 'i'),
+                match: new RegExp('^rgb' + PERMISSIVE_MATCH3 +'$', 'i'),
                 parse: function(result) {
                     return {
                         r: isPercentage(result[1]) ? conventPercentageToRgb(result[1]) : parseInt(result[1], 10),
                         g: isPercentage(result[2]) ? conventPercentageToRgb(result[2]) : parseInt(result[2], 10),
-                        b: isPercentage(result[3]) ? conventPercentageToRgb(result[3]) : parseInt(result[3], 10)
+                        b: isPercentage(result[3]) ? conventPercentageToRgb(result[3]) : parseInt(result[3], 10),
+                        a: 1
                     };
                 },
                 to: function(color) {
@@ -71,7 +72,7 @@
                 }
             },
             RGBA: {
-                match: new RegExp('rgba' + PERMISSIVE_MATCH4, 'i'),
+                match: new RegExp('^rgba' + PERMISSIVE_MATCH4 +'$', 'i'),
                 parse: function(result) {
                     return {
                         r: isPercentage(result[1]) ? conventPercentageToRgb(result[1]) : parseInt(result[1], 10),
@@ -85,12 +86,13 @@
                 }
             },
             HSL: {
-                match: new RegExp('hsl' + PERMISSIVE_MATCH3, 'i'),
+                match: new RegExp('^hsl' + PERMISSIVE_MATCH3 +'$', 'i'),
                 parse: function(result) {
                     var hsl = {
                         h: ((result[1] % 360) + 360) % 360,
                         s: isPercentage(result[2]) ? convertPercentageToFloat(result[2]) : parseFloat(result[2], 10),
-                        l: isPercentage(result[3]) ? convertPercentageToFloat(result[3]) : parseFloat(result[3], 10)
+                        l: isPercentage(result[3]) ? convertPercentageToFloat(result[3]) : parseFloat(result[3], 10),
+                        a: 1
                     };
 
                     return AsColor.HSLToRGB(hsl);
@@ -101,7 +103,7 @@
                 }
             },
             HSLA: {
-                match: new RegExp('hsla' + PERMISSIVE_MATCH4, 'i'),
+                match: new RegExp('^hsla' + PERMISSIVE_MATCH4 +'$', 'i'),
                 parse: function(result) {
                     var hsla = {
                         h: ((result[1] % 360) + 360) % 360,
@@ -118,11 +120,15 @@
                 }
             },
             HEX: {
-                match: /^#([a-f0-9]{6}|[a-f0-9]{3})/i,
+                match: /^#([a-f0-9]{6}|[a-f0-9]{3})$/i,
                 parse: function(result) {
-                    var hex = result[1];
-
-                    return AsColor.HEXtoRGB(hex);
+                    var hex = result[1], rgb = AsColor.HEXtoRGB(hex);
+                    return {
+                        r: rgb.r,
+                        g: rgb.g,
+                        b: rgb.b,
+                        a: 1
+                    };
                 },
                 to: function(color, instance) {
                     var hex = [color.r.toString(16), color.g.toString(16), color.b.toString(16)];
@@ -147,7 +153,7 @@
                 }
             },
             TRANSPARENT: {
-                match: /transparent/i,
+                match: /^transparent$/i,
                 parse: function() {
                     return {
                         r: 0,
@@ -163,7 +169,15 @@
             NAME: {
                 match: /^\w+$/i,
                 parse: function(result) {
-                    return AsColor.NAMEtoRGB(result[0]);
+                    var rgb = AsColor.NAMEtoRGB(result[0]);
+                    if(rgb) {
+                        return {
+                            r: rgb.r,
+                            g: rgb.g,
+                            b: rgb.b,
+                            a: 1
+                        };
+                    }
                 },
                 to: function(color, instance) {
                     return AsColor.RGBtoNAME(color, instance ? instance.options.nameDegradation : undefined);
@@ -172,10 +186,15 @@
         };
     })();
 
-    var AsColor = $.asColor = function(string, format, options) {
-        if (typeof format === 'object') {
-            options = format;
-            format = undefined;
+    var AsColor = $.asColor = function(string, options) {
+        if (typeof string === 'object' && typeof options === 'undefined') {
+            options = string;
+            string = undefined;
+        }
+        if(typeof options === 'string'){
+            options = {
+                format: options
+            };
         }
         this.options = $.extend(true, {}, AsColor.defaults, options);
         this.value = {
@@ -187,21 +206,18 @@
             v: 0,
             a: 1
         };
-        this._format = 'HEX';
+        this._format = false;
+        this._matchFormat = 'HEX';
         this._valid = true;
 
-        this.init(string, format);
+        this.init(string);
     };
 
     AsColor.prototype = {
         constructor: AsColor,
-        init: function(string, format) {
-            if (typeof format !== 'undefined') {
-                this.format(format);
-                this.fromString(string);
-            } else {
-                this.fromString(string, true);
-            }
+        init: function(string) {
+            this.format(this.options.format);         
+            this.fromString(string);
         },
         isValid: function() {
             return this._valid;
@@ -228,6 +244,9 @@
                 this.value.a = value;
             }
         },
+        matchString: function(string){
+            return AsColor.matchString(string);
+        },
         fromString: function(string, updateFormat) {
             if (typeof string === 'string') {
                 string = $.trim(string);
@@ -241,6 +260,7 @@
                         if (rgb) {
                             this.set(rgb);
                             this._valid = true;
+                            this._matchFormat = i;
                             if (updateFormat === true) {
                                 this.format(i);
                             }
@@ -257,8 +277,14 @@
                 if (format !== 'TRANSPARENT') {
                     this._format = format;
                 }
+            } else if(format === false) {
+                this._format = false;
             } else {
-                return this._format;
+                if(this._format === false){
+                    return this._matchFormat;
+                } else {
+                    return this._format;
+                }
             }
         },
         toRGBA: function() {
@@ -299,7 +325,13 @@
                 return CssColorStrings.TRANSPARENT.to(value, this);
             }
 
-            var format = this._format;
+            var format;
+            if(this._format === false){
+                format = this._matchFormat;
+            } else {
+                format = this._format;
+            }
+
             if (this.options.reduceAlpha && value.a === 1) {
                 switch (format) {
                     case 'RGBA':
@@ -308,6 +340,15 @@
                     case 'HSLA':
                         format = 'HSL';
                         break;
+                }
+            }
+
+            if (value.a !== 1 && format!=='RGBA' && format !=='HSLA' && this.options.alphaConvert){
+                if(typeof this.options.alphaConvert === 'string'){
+                    format = this.options.alphaConvert;
+                }
+                if(typeof this.options.alphaConvert[format] !== 'undefined'){
+                    format = this.options.alphaConvert[format];
                 }
             }
             return CssColorStrings[format].to(value, this);
@@ -545,10 +586,35 @@
             return CssColorStrings[degradation.toUpperCase()].to(rgb);
         }
     };
+
+    AsColor.matchString = function(string){
+        if (typeof string === 'string') {
+            string = $.trim(string);
+            var matched = null,
+                rgb;
+            for (var i in CssColorStrings) {
+                if ((matched = CssColorStrings[i].match.exec(string)) != null) {
+                    rgb = CssColorStrings[i].parse(matched);
+
+                    if (rgb) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    };
     AsColor.defaults = {
+        format: false,
         shortenHex: false,
         hexUseName: false,
         reduceAlpha: false,
+        alphaConvert: { // or false will disable convert
+            'RGB': 'RGBA',
+            'HSL': 'HSLA',
+            'HEX': 'RGBA',
+            'NAME': 'RGBA',
+        },
         nameDegradation: 'HEX',
         invalidValue: '',
         zeroAlphaAsTransparent: true

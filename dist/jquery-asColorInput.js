@@ -1,4 +1,4 @@
-/*! asColorInput - v0.2.0 - 2014-08-27
+/*! asColorInput - v0.3.0 - 2014-08-27
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -54,7 +54,7 @@
         constructor: AsColorInput,
         _components: {},
         init: function() {
-            this.color = new Color(this.element.value, this.options.format, this.options.color);
+            this.color = new Color(this.element.value, this.options.color);
 
             this._create();
 
@@ -113,10 +113,13 @@
                     if (e.keyCode === 9) {
                         self.close();
                     } else if (e.keyCode === 13) {
-                        self.val(self.$element.val());
+                        self.val(self.element.value);
                     }
                 },
                 'keyup.asColorInput': function() {
+                    if (self.color.matchString(self.element.value)) {
+                        self.val(self.element.value);
+                    }
                     //self.val(self.$element.val());
                 }
             });
@@ -284,7 +287,6 @@
         _updateInput: function() {
             var value = this.color.toString();
             this._trigger('change', value, this.options.name, 'asColorInput');
-
             this.$element.val(value);
         },
         set: function(value) {
@@ -333,8 +335,14 @@
         hideInput: false,
         hideFireChange: true,
         keyboard: false,
-        format: 'rgba',
         color: {
+            format: false,
+            alphaConvert: { // or false will disable convert
+                'RGB': 'RGBA',
+                'HSL': 'HSLA',
+                'HEX': 'RGBA',
+                'NAME': 'RGBA',
+            },
             shortenHex: false,
             hexUseName: false,
             reduceAlpha: true,
@@ -1497,7 +1505,7 @@
                 if (self.options.switchable === false) {
                     self.enable();
                 } else {
-                    if (asGradient.matchString(api.element.value)) {
+                    if (this.value.matchString(api.element.value)) {
                         self.enable();
                     }
                 }
@@ -1512,16 +1520,19 @@
                     if (current) {
                         api._trigger('update', current.color, self.value);
                     }
-                    api._updateInput();
-                });
 
-                self.$gradient.on('add', function(e, data) {
-                    if (data.stop) {
-                        self.active(data.stop.id);
-                        api._trigger('update', data.stop.color, self.value);
+                    if (api.element.value !== self.value.toString()) {
                         api._updateInput();
                     }
                 });
+
+                // self.$gradient.on('add', function(e, data) {
+                //     if (data.stop) {
+                //         self.active(data.stop.id);
+                //         api._trigger('update', data.stop.color, self.value);
+                //         api._updateInput();
+                //     }
+                // });
 
                 if (self.options.switchable) {
                     self.$wrap.on('click', '.' + namespace + '-gradient-switch', function() {
@@ -1738,7 +1749,6 @@
                         mousemove: $.proxy(this.mousemove, this),
                         mouseup: $.proxy(this.mouseup, this)
                     });
-
                     self.active(id);
                     return false;
                 },
@@ -1939,6 +1949,8 @@
                     });
                 }
             }
+
+            this.active(stop.id);
         },
         disable: function() {
             if (this.isEnabled === false) {
@@ -1978,6 +1990,11 @@
                 stop: stop
             });
 
+            this.active(stop.id);
+
+            this.$gradient.trigger('update', {
+                stop: stop
+            });
             return stop;
         },
         del: function(id) {
@@ -1989,6 +2006,8 @@
             this.$gradient.trigger('del', {
                 id: id
             });
+
+            this.$gradient.trigger('update', {});
         },
         setAngle: function(value) {
             this.value.angle(value);

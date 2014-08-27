@@ -121,7 +121,7 @@ module.exports = function(grunt) {
                         'jquery-asColor/dist/*.js',
                         'jquery-asGradient/dist/*.js'
                     ],
-                    dest: 'demo/js/'
+                    dest: 'libs/'
                 }]
             }
         }

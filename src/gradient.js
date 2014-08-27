@@ -94,7 +94,7 @@
                 if (self.options.switchable === false) {
                     self.enable();
                 } else {
-                    if (asGradient.matchString(api.element.value)) {
+                    if (this.value.matchString(api.element.value)) {
                         self.enable();
                     }
                 }
@@ -109,16 +109,19 @@
                     if (current) {
                         api._trigger('update', current.color, self.value);
                     }
-                    api._updateInput();
-                });
 
-                self.$gradient.on('add', function(e, data) {
-                    if (data.stop) {
-                        self.active(data.stop.id);
-                        api._trigger('update', data.stop.color, self.value);
+                    if (api.element.value !== self.value.toString()) {
                         api._updateInput();
                     }
                 });
+
+                // self.$gradient.on('add', function(e, data) {
+                //     if (data.stop) {
+                //         self.active(data.stop.id);
+                //         api._trigger('update', data.stop.color, self.value);
+                //         api._updateInput();
+                //     }
+                // });
 
                 if (self.options.switchable) {
                     self.$wrap.on('click', '.' + namespace + '-gradient-switch', function() {
@@ -335,7 +338,6 @@
                         mousemove: $.proxy(this.mousemove, this),
                         mouseup: $.proxy(this.mouseup, this)
                     });
-
                     self.active(id);
                     return false;
                 },
@@ -536,6 +538,8 @@
                     });
                 }
             }
+
+            this.active(stop.id);
         },
         disable: function() {
             if (this.isEnabled === false) {
@@ -575,6 +579,11 @@
                 stop: stop
             });
 
+            this.active(stop.id);
+
+            this.$gradient.trigger('update', {
+                stop: stop
+            });
             return stop;
         },
         del: function(id) {
@@ -586,6 +595,8 @@
             this.$gradient.trigger('del', {
                 id: id
             });
+
+            this.$gradient.trigger('update', {});
         },
         setAngle: function(value) {
             this.value.angle(value);

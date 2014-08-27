@@ -1,4 +1,4 @@
-/*! asGradient - v0.2.0 - 2014-08-27
+/*! asGradient - v0.2.1 - 2014-08-27
 * https://github.com/amazingSurge/asGradient
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -307,6 +307,9 @@
                 prefix = getPrefix();
             }
             return GradientTypes[this.type()].to(this.value, this, prefix);
+        },
+        matchString: function(string){
+            return Gradient.matchString(string);
         },
         toStringWithAngle: function(angle, prefix){
             var value = $.extend(true, {}, this.value);
