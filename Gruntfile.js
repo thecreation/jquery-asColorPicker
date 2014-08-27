@@ -118,8 +118,8 @@ module.exports = function(grunt) {
                     flatten: true,
                     cwd: 'bower_components/',
                     src: [
-                        'jquery-asColor/dist/*.js',
-                        'jquery-asGradient/dist/*.js'
+                        'jquery-asColor/dist/jquery-asColor.js',
+                        'jquery-asGradient/dist/jquery-asGradient.js'
                     ],
                     dest: 'libs/'
                 }]
