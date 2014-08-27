@@ -118,6 +118,7 @@
                         self.close();
                     } else if (e.keyCode === 13) {
                         self.val(self.element.value);
+                        self.close();
                     }
                 },
                 'keyup.asColorInput': function() {

@@ -114,6 +114,7 @@
                         self.close();
                     } else if (e.keyCode === 13) {
                         self.val(self.element.value);
+                        self.close();
                     }
                 },
                 'keyup.asColorInput': function() {
@@ -1431,7 +1432,7 @@
                     emptyString: '',
                     degradationFormat: false,
                     cleanPosition: false,
-                    forceColorFormat: 'rgba', // rgb, rgba, hsl, hsla, hex
+                    forceColorFormat: 'rgb', // rgb, rgba, hsl, hsla, hex
                 },
                 template: function() {
                     var namespace = this.api.namespace;
@@ -1935,8 +1936,12 @@
             }
         },
         val: function(string) {
+            if (this.value.toString() === string) {
+                return;
+            }
             this.empty();
             this.value.val(string);
+            this.value.reorder();
 
             if (this.value.length < 2) {
                 if (this.value.length === 0) {
