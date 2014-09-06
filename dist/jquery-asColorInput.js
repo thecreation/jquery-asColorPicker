@@ -1,4 +1,4 @@
-/*! asColorInput - v0.3.0 - 2014-09-04
+/*! asColorInput - v0.3.0 - 2014-09-06
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -126,14 +126,9 @@
             });
         },
         _trigger: function(eventType) {
-            var method_arguments = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1) : undefined,
-                data;
-            if (method_arguments) {
-                data = method_arguments;
-                data.push(this);
-            } else {
-                data = this;
-            }
+            var method_arguments = Array.prototype.slice.call(arguments, 1),
+                data = method_arguments.concat([this]);
+
             // event
             this.$element.trigger('asColorInput::' + eventType, data);
             this.$element.trigger(eventType + '.asColorInput', data);
@@ -181,10 +176,6 @@
                 left: left
             });
         },
-
-        /*
-         *  Public Method
-         */
         open: function() {
             if (this.disabled) {
                 return;
@@ -401,11 +392,11 @@
     $.fn.asColorInput = function(options) {
         if (typeof options === 'string') {
             var method = options;
-            var method_arguments = arguments.length > 1 ? Array.prototype.slice.call(arguments, 1) : [];
+            var method_arguments = Array.prototype.slice.call(arguments, 1);
 
             if (/^\_/.test(method)) {
                 return false;
-            } else if ((/^(get)$/.test(method))) {
+            } else if ((/^(get)$/.test(method)) || (method === 'val' && method_arguments.length === 0)) {
                 var api = this.first().data('asColorInput');
                 if (api && typeof api[method] === 'function') {
                     return api[method].apply(api, method_arguments);
