@@ -37,7 +37,7 @@
                     self.keyboard();
                 });
 
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, api, color) {
                     self.update(color);
                 });
             },

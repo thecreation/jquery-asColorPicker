@@ -59,7 +59,7 @@
                     e.stopPropagation();
                 });
 
-                api.$element.on('asColorInput::apply', function(e, color) {
+                api.$element.on('asColorInput::apply', function(e, api, color) {
                     if (typeof color.toRGBA !== 'function') {
                         color = color.get().color;
                     }

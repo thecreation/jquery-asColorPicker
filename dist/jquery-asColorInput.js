@@ -1,4 +1,4 @@
-/*! asColorInput - v0.3.0 - 2014-09-06
+/*! asColorInput - v0.3.0 - 2014-09-30
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -452,7 +452,7 @@
                     return false;
                 });
                 var self = this;
-                api.$element.on('asColorInput::update', function(e, color, gradient, instance) {
+                api.$element.on('asColorInput::update', function(e, api, color, gradient, instance) {
                     if (typeof instance === 'undefined') {
                         gradient = false;
                     }
@@ -597,7 +597,7 @@
                     self.keyboard();
                 });
 
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, api, color) {
                     self.update(color);
                 });
             },
@@ -814,7 +814,7 @@
                 });
 
                 var self = this;
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, api, color) {
                     self.update(color);
                 });
             },
@@ -864,7 +864,7 @@
                     self.keyboard(api);
                 });
 
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, api, color) {
                     self.update(color);
                 });
             },
@@ -1139,7 +1139,7 @@
                     e.stopPropagation();
                 });
 
-                api.$element.on('asColorInput::apply', function(e, color) {
+                api.$element.on('asColorInput::apply', function(e, api, color) {
                     if (typeof color.toRGBA !== 'function') {
                         color = color.get().color;
                     }
@@ -1201,11 +1201,11 @@
                     });
                 });
 
-                api.$element.on('asColorInput::setup', function(e, color) {
+                api.$element.on('asColorInput::setup', function(e, api, color) {
                     self.updateCurrent(color);
                     self.updatePreview(color);
                 });
-                api.$element.on('asColorInput::update', function(e, color) {
+                api.$element.on('asColorInput::update', function(e, api, color) {
                     self.updateCurrent(color);
                 });
             },
@@ -1265,7 +1265,7 @@
                     self.keyboard(api);
                 });
 
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                api.$element.on('asColorInput::update asColorInput::setup', function(e, api, color) {
                     self.update(color);
                 });
 

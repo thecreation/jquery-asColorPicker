@@ -24,11 +24,11 @@
                     });
                 });
 
-                api.$element.on('asColorInput::setup', function(e, color) {
+                api.$element.on('asColorInput::setup', function(e, api, color) {
                     self.updateCurrent(color);
                     self.updatePreview(color);
                 });
-                api.$element.on('asColorInput::update', function(e, color) {
+                api.$element.on('asColorInput::update', function(e, api, color) {
                     self.updateCurrent(color);
                 });
             },
