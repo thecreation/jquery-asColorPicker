@@ -26,6 +26,7 @@
         this.disabled = false;
         this.initialed = false;
         this.originValue = this.element.value;
+        this.isEmpty = false;
 
         createId(this);
 
@@ -281,10 +282,18 @@
         },
         _updateInput: function() {
             var value = this.color.toString();
+            if (this.isEmpty) {
+                value = '';
+            }
             this._trigger('change', value, this.options.name, 'asColorInput');
             this.$element.val(value);
         },
         set: function(value) {
+            if (value !== '') {
+                this.isEmpty = false;
+            } else {
+                this.isEmpty = true;
+            }
             return this._set(value);
         },
         _set: function(value) {

@@ -1,4 +1,4 @@
-/*! asColorInput - v0.3.0 - 2014-09-30
+/*! asColorInput - v0.3.0 - 2014-10-15
 * https://github.com/amazingSurge/jquery-asColorInput
 * Copyright (c) 2014 amazingSurge; Licensed GPL */
 (function(window, document, $, Color, undefined) {
@@ -22,6 +22,7 @@
         this.disabled = false;
         this.initialed = false;
         this.originValue = this.element.value;
+        this.isEmpty = false;
 
         createId(this);
 
@@ -277,10 +278,18 @@
         },
         _updateInput: function() {
             var value = this.color.toString();
+            if (this.isEmpty) {
+                value = '';
+            }
             this._trigger('change', value, this.options.name, 'asColorInput');
             this.$element.val(value);
         },
         set: function(value) {
+            if (value !== '') {
+                this.isEmpty = false;
+            } else {
+                this.isEmpty = true;
+            }
             return this._set(value);
         },
         _set: function(value) {
@@ -1565,13 +1574,20 @@
             },
             overrideCore: function() {
                 api.set = function(value) {
+                    if (value !== '') {
+                        api.isEmpty = false;
+                    } else {
+                        api.isEmpty = true;
+                    }
                     if (typeof value === 'string') {
                         if (self.options.switchable === false || asGradient.matchString(value)) {
-                            self.enable();
-                            self.val(value);
-
-                            api.color = self.value;
-                            self.$gradient.trigger('update', self.value.value);
+                            if (self.isEnabled) {
+                                self.val(value);
+                                api.color = self.value;
+                                self.$gradient.trigger('update', self.value.value);
+                            } else {
+                                self.enable(value);
+                            }
                         } else {
                             self.disable();
                             api.val(value);
@@ -1912,22 +1928,35 @@
     Gradient.prototype = {
         constructor: Gradient,
 
-        enable: function() {
+        enable: function(value) {
             if (this.isEnabled === true) {
                 return;
             }
             this.isEnabled = true;
             this.overrideCore();
 
+
+
             this.$gradient.addClass(this.classes.enable);
             this.markers.width = this.$markers.width();
 
-            if (!asGradient.matchString(this.api.element.value) && this._last) {
+            if (typeof value === 'undefined') {
+                value = this.api.element.value;
+            }
+
+            if (value !== '') {
+                this.api.isEmpty = false;
+            } else {
+                this.api.isEmpty = true;
+            }
+
+            if (!asGradient.matchString(value) && this._last) {
                 this.value = this._last;
             } else {
-                this.val(this.api.element.value);
+                this.val(value);
             }
             this.api.color = this.value;
+
             this.$gradient.trigger('update', this.value.value);
 
             if (this.api.opened) {
@@ -1935,7 +1964,8 @@
             }
         },
         val: function(string) {
-            if (this.value.toString() === string) {
+            console.info(string);
+            if (string !== '' && this.value.toString() === string) {
                 return;
             }
             this.empty();
@@ -1943,11 +1973,17 @@
             this.value.reorder();
 
             if (this.value.length < 2) {
+                var fill = string;
+
+                if (!$.asColor.matchString(string)) {
+                    fill = 'rgba(0,0,0,1)';
+                }
+
                 if (this.value.length === 0) {
-                    this.value.append(string, 0);
+                    this.value.append(fill, 0);
                 }
                 if (this.value.length === 1) {
-                    this.value.append(string, 1);
+                    this.value.append(fill, 1);
                 }
             }
 
