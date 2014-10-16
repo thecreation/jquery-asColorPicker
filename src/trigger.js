@@ -25,8 +25,8 @@
                     return false;
                 });
                 var self = this;
-                api.$element.on('asColorInput::update', function(e, api, color, gradient, instance) {
-                    if (typeof instance === 'undefined') {
+                api.$element.on('asColorInput::update', function(e, api, color, gradient) {
+                    if (typeof gradient === 'undefined') {
                         gradient = false;
                     }
                     self.update(color, gradient);

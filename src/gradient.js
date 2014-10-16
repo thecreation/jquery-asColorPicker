@@ -349,6 +349,7 @@
                     return false;
                 },
                 move: function(marker, position, id) {
+                    self.api.isEmpty = false;
                     position = Math.max(0, Math.min(1, position));
                     $(marker).css({
                         left: conventToPercentage(position)
@@ -402,6 +403,7 @@
 
                         var position = that.getPosition(x, y);
                         var angle = that.calAngle(position.x, position.y);
+                        self.api.isEmpty = false;
                         self.setAngle(angle);
                     };
                     this.wheelMouseup = function() {
@@ -475,6 +477,7 @@
                     }).on('keydown.asColorInput', function(e) {
                         var key = e.keyCode || e.which;
                         if (key === 13) {
+                            self.api.isEmpty = false;
                             $(this).blur();
                             return false;
                         }
@@ -508,7 +511,7 @@
             this.isEnabled = true;
             this.overrideCore();
 
-
+            
 
             this.$gradient.addClass(this.classes.enable);
             this.markers.width = this.$markers.width();
@@ -517,7 +520,7 @@
                 value = this.api.element.value;
             }
 
-            if (value !== '') {
+            if(value !== ''){
                 this.api.isEmpty = false;
             } else {
                 this.api.isEmpty = true;
@@ -537,7 +540,6 @@
             }
         },
         val: function(string) {
-            console.info(string);
             if (string !== '' && this.value.toString() === string) {
                 return;
             }
@@ -604,6 +606,7 @@
         },
         add: function(color, position) {
             var stop = this.value.insert(color, position);
+            this.api.isEmpty = false;
             this.value.reorder();
 
             this.$gradient.trigger('add', {
