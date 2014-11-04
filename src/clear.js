@@ -3,7 +3,7 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('clear', function() {
+    $.asColorPicker.registerComponent('clear', function() {
         return {
             defaults: {
                 template: function(namespace) {

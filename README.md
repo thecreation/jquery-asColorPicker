@@ -1,7 +1,7 @@
-# jQuery asColorInput
+# jQuery asColorPicker
 
 The powerful jQuery plugin that for color picker. 
-Download: <a href="https://github.com/amazingSurge/jquery-asColorInput/archive/master.zip">jquery-asColorInput-master.zip</a>
+Download: <a href="https://github.com/amazingSurge/jquery-asColorPicker/archive/master.zip">jquery-asColorPicker-master.zip</a>
 
 ***
 
@@ -23,10 +23,10 @@ Import this libraries:
 * jQuery
 * jquery-asColor.js
 * jquery-asGradient.js
-* jquery-asColorInput.min.js
+* jquery-asColorPicker.min.js
 
 And CSS:
-* asColorInput.css 
+* asColorPicker.css 
 
 Create base html element:
 ```html
@@ -37,12 +37,12 @@ Create base html element:
 
 Initialize tabs:
 ```javascript
-$(".color").asColorInput();
+$(".color").asColorPicker();
 ```
 
 Or initialize tabs with custom settings:
 ```javascript
-$(".color").asColorInput({
+$(".color").asColorPicker({
 	hideInput: false,
 });
 ```
@@ -53,7 +53,7 @@ $(".color").asColorInput({
 {   
 
     // Optional property, Set a namespace for css class
-    namespace: 'asColorInput',
+    namespace: 'asColorPicker',
     
     //Optional property, choose the loaded skin
     skin: null,
@@ -64,16 +64,16 @@ $(".color").asColorInput({
     //Optional property, if true , it will remove trigger components, and show color panel on the page when page loaded.
     flat: true,
 
-    //Optional property, if true, open keyboard function, note you need load jquery-asColorInput-keyboard.js file first 
+    //Optional property, if true, open keyboard function, note you need load jquery-asColorPicker-keyboard.js file first 
     keyboard: false,
 
     //Optional property, trigger when color change 
     onChange: function() {},
 
-    //Optional property, trigger when open asColorInput pancel, flat type will never trigger this event
+    //Optional property, trigger when open asColorPicker pancel, flat type will never trigger this event
     onShow: function() {},
 
-    //Optional property, trigger when close asColorInput pancel, flat type will never trigger this event
+    //Optional property, trigger when close asColorPicker pancel, flat type will never trigger this event
     onClose: function() {},
 
     //Optional property, trigger when init
@@ -89,50 +89,50 @@ $(".color").asColorInput({
 
 ## Public methods
 
-jquery asColorInput has different methods , we can use it as below :
+jquery asColorPicker has different methods , we can use it as below :
 ```javascript
-// show asColorInput panel
-$(".asColorInput").asColorInput("show");
+// show asColorPicker panel
+$(".asColorPicker").asColorPicker("show");
 
-// close asColorInput panel
-$(".asColorInput").asColorInput("close");
+// close asColorPicker panel
+$(".asColorPicker").asColorPicker("close");
 
 // apply selected color
-$(".asColorInput").asColorInput("apply");
+$(".asColorPicker").asColorPicker("apply");
 
 // cancel selceted color
-$(".asColorInput").asColorInput("cancel");
+$(".asColorPicker").asColorPicker("cancel");
 
-// set asColorInput to specified color
-$(".asColorInput").asColorInput("set", '#fff');
+// set asColorPicker to specified color
+$(".asColorPicker").asColorPicker("set", '#fff');
 
 // get selected color
-$("asColorInput").asColorInput("get");
+$("asColorPicker").asColorPicker("get");
 
-// enable asColorInput
-$("asColorInput").asColorInput("enable");
+// enable asColorPicker
+$("asColorPicker").asColorPicker("enable");
 
-// disable asColorInput
-$("asColorInput").asColorInput("disable");
+// disable asColorPicker
+$("asColorPicker").asColorPicker("disable");
 
-// destroy asColorInput
-$("asColorInput").asColorInput("destroy");
+// destroy asColorPicker
+$("asColorPicker").asColorPicker("destroy");
 
 ```
 
 ## Event
 
-* <code>asColorInput::show</code>: trigger when show asColorInput pancel, flat type will never trigger this event
-* <code>asColorInput::close</code>: trigger when close asColorInput pancel, flat type will never trigger this event
-* <code>asColorInput::apply</code>: trigger when a color is applied
-* <code>asColorInput::init</code>: trigger when init
-* <code>asColorInput::ready</code>: trigger after init event
-* <code>asColorInput::change</code>: trigger when color change
+* <code>asColorPicker::show</code>: trigger when show asColorPicker pancel, flat type will never trigger this event
+* <code>asColorPicker::close</code>: trigger when close asColorPicker pancel, flat type will never trigger this event
+* <code>asColorPicker::apply</code>: trigger when a color is applied
+* <code>asColorPicker::init</code>: trigger when init
+* <code>asColorPicker::ready</code>: trigger after init event
+* <code>asColorPicker::change</code>: trigger when color change
 
 how to use event:
 ```javascript
-$(document).on('asColorInput::init', function(event,instance) {
-    // instance means current asColorInput instance 
+$(document).on('asColorPicker::init', function(event,instance) {
+    // instance means current asColorPicker instance 
     // some stuff
 });
 ```
@@ -141,4 +141,4 @@ $(document).on('asColorInput::init', function(event,instance) {
 [amazingSurge](http://amazingSurge.com)
 
 ## License
-jQuery-asColorInput plugin is released under the <a href="https://github.com/amazingSurge/jquery-asColorInput/blob/master/LICENCE.GPL" target="_blank">GPL licence</a>.
+jQuery-asColorPicker plugin is released under the <a href="https://github.com/amazingSurge/jquery-asColorPicker/blob/master/LICENCE.GPL" target="_blank">GPL licence</a>.

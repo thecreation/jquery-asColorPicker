@@ -46,7 +46,7 @@
             $doc.unbind('keydown', keyboard.press);
         }
     };
-    $doc.on('asColorInput::init', function(event, instance) {
+    $doc.on('asColorPicker::init', function(event, instance) {
         if (instance.options.keyboard === true) {
             instance._keyboard = keyboard;
         }

@@ -76,7 +76,7 @@ module.exports = function(grunt) {
         less: {
             dist: {
                 files: {
-                    'css/asColorInput.css': ['less/jquery-asColorInput.less']
+                    'css/asColorPicker.css': ['less/jquery-asColorPicker.less']
                 }
             }
         },
@@ -103,7 +103,7 @@ module.exports = function(grunt) {
                 }]
             },
             jquery: {
-                src: ['asColorInput.jquery.json'],
+                src: ['asColorPicker.jquery.json'],
                 overwrite: true, // overwrite matched source files
                 replacements: [{
                     from: /("version": ")([0-9\.]+)(")/g,

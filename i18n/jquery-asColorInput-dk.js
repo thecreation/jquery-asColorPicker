@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // Danish (dk) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["dk"] = {
+    var localization = $.asColorPicker.localization["dk"] = {
         cancelText: "annuller",
         applyText: "Vælg"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

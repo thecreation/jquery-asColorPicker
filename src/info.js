@@ -3,7 +3,7 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('info', function() {
+    $.asColorPicker.registerComponent('info', function() {
         return {
             color: ['white', 'black', 'transparent'],
             init: function(api) {
@@ -46,7 +46,7 @@
                 });
 
                 var self = this;
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, color) {
+                api.$element.on('asColorPicker::update asColorPicker::setup', function(e, color) {
                     self.update(color);
                 });
             },

@@ -3,7 +3,7 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('preview', function() {
+    $.asColorPicker.registerComponent('preview', function() {
         return {
             defaults: {
                 template: function(namespace) {
@@ -17,18 +17,18 @@
                 this.$current = this.$preview.find('.' + api.namespace + '-preview-current span');
                 this.$previous = this.$preview.find('.' + api.namespace + '-preview-previous span');
 
-                api.$element.on('asColorInput::firstOpen', function() {
+                api.$element.on('asColorPicker::firstOpen', function() {
                     self.$previous.on('click', function() {
                         api.set($(this).data('color'));
                         return false;
                     });
                 });
 
-                api.$element.on('asColorInput::setup', function(e, api, color) {
+                api.$element.on('asColorPicker::setup', function(e, api, color) {
                     self.updateCurrent(color);
                     self.updatePreview(color);
                 });
-                api.$element.on('asColorInput::update', function(e, api, color) {
+                api.$element.on('asColorPicker::update', function(e, api, color) {
                     self.updateCurrent(color);
                 });
             },

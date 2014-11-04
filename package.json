@@ -1,21 +1,21 @@
 {
-    "name": "jquery-asColorInput",
-    "title": "asColorInput",
-    "description": "a jquery asColorInput",
+    "name": "jquery-asColorPicker",
+    "title": "asColorPicker",
+    "description": "a jquery asColorPicker",
     "version": "0.3.1",
-    "homepage": "https://github.com/amazingSurge/jquery-asColorInput",
+    "homepage": "https://github.com/amazingSurge/jquery-asColorPicker",
     "author": {
         "name": "amazingSurge",
         "email": "amazingSurge@gmail.com"
     },
     "repository": {
         "type": "git",
-        "url": "git://github.com/amazingSurge/jquery-asColorInput.git"
+        "url": "git://github.com/amazingSurge/jquery-asColorPicker.git"
     },
-    "bugs": "https://github.com/amazingSurge/jquery-asColorInput/issues",
+    "bugs": "https://github.com/amazingSurge/jquery-asColorPicker/issues",
     "licenses": [{
         "type": "GPL",
-        "url": "https://github.com/amazingSurge/jquery-asColorInput/blob/master/LICENSE-GPL"
+        "url": "https://github.com/amazingSurge/jquery-asColorPicker/blob/master/LICENSE-GPL"
     }],
     "devDependencies": {
         "grunt-contrib-jshint": "*",

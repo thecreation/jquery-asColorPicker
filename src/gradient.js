@@ -1,7 +1,7 @@
 // gradient
 
 (function($, asGradient) {
-    $.asColorInput.registerComponent('gradient', function() {
+    $.asColorPicker.registerComponent('gradient', function() {
         return {
             defaults: {
                 switchable: true,
@@ -39,7 +39,7 @@
             init: function(api, options) {
                 var self = this;
 
-                api.$element.on('asColorInput::ready', function(event, instance) {
+                api.$element.on('asColorPicker::ready', function(event, instance) {
                     if (instance.options.mode !== 'gradient') {
                         return;
                     }
@@ -238,7 +238,7 @@
                         that.empty();
                     });
 
-                    self.$markers.on('mousedown.asColorInput', function(e) {
+                    self.$markers.on('mousedown.asColorPicker', function(e) {
                         var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                         if (rightclick) {
                             return false;
@@ -249,7 +249,7 @@
                         return false;
                     });
 
-                    self.$markers.on('mousedown.asColorInput', 'li', function(e) {
+                    self.$markers.on('mousedown.asColorPicker', 'li', function(e) {
                         var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                         if (rightclick) {
                             return false;
@@ -258,7 +258,7 @@
                         return false;
                     });
 
-                    self.$doc.on('keydown.asColorInput', function(e) {
+                    self.$doc.on('keydown.asColorPicker', function(e) {
                         if (self.api.opened && self.$markers.is('.' + self.classes.focus)) {
 
                             var key = e.keyCode || e.which;
@@ -274,9 +274,9 @@
                         }
                     });
 
-                    self.$markers.on('focus.asColorInput', function() {
+                    self.$markers.on('focus.asColorPicker', function() {
                         self.$markers.addClass(self.classes.focus);
-                    }).on('blur.asColorInput', function() {
+                    }).on('blur.asColorPicker', function() {
                         self.$markers.removeClass(self.classes.focus);
                     });
 
@@ -378,7 +378,7 @@
                         }
                     });
 
-                    self.$wheel.on('mousedown.asColorInput', function(e) {
+                    self.$wheel.on('mousedown.asColorPicker', function(e) {
                         var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                         if (rightclick) {
                             return false;
@@ -471,10 +471,10 @@
                 init: function() {
                     self.$angle = self.$gradient.find('.' + api.namespace + '-gradient-angle');
 
-                    self.$angle.on('blur.asColorInput', function() {
+                    self.$angle.on('blur.asColorPicker', function() {
                         self.setAngle(this.value);
                         return false;
-                    }).on('keydown.asColorInput', function(e) {
+                    }).on('keydown.asColorPicker', function(e) {
                         var key = e.keyCode || e.which;
                         if (key === 13) {
                             self.api.isEmpty = false;
@@ -511,7 +511,7 @@
             this.isEnabled = true;
             this.overrideCore();
 
-            
+
 
             this.$gradient.addClass(this.classes.enable);
             this.markers.width = this.$markers.width();
@@ -520,7 +520,7 @@
                 value = this.api.element.value;
             }
 
-            if(value !== ''){
+            if (value !== '') {
                 this.api.isEmpty = false;
             } else {
                 this.api.isEmpty = true;

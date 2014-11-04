@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // Swedish (sv) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["sv"] = {
+    var localization = $.asColorPicker.localization["sv"] = {
         cancelText: "Avbryt",
         applyText: "Välj"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

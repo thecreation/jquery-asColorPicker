@@ -3,7 +3,7 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('trigger', function() {
+    $.asColorPicker.registerComponent('trigger', function() {
         return {
             defaults: {
                 template: function(namespace) {
@@ -12,7 +12,7 @@
             },
             init: function(api, options) {
                 this.options = $.extend(this.defaults, options),
-                api.$trigger = $(this.options.template.call(this, api.namespace));
+                    api.$trigger = $(this.options.template.call(this, api.namespace));
                 this.$trigger_inner = api.$trigger.children('span');
 
                 api.$trigger.insertAfter(api.$element);
@@ -25,7 +25,7 @@
                     return false;
                 });
                 var self = this;
-                api.$element.on('asColorInput::update', function(e, api, color, gradient) {
+                api.$element.on('asColorPicker::update', function(e, api, color, gradient) {
                     if (typeof gradient === 'undefined') {
                         gradient = false;
                     }

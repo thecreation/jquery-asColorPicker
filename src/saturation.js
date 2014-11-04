@@ -3,7 +3,7 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('saturation', function() {
+    $.asColorPicker.registerComponent('saturation', function() {
         return {
             defaults: {
                 template: function(namespace) {
@@ -17,13 +17,13 @@
             init: function(api, options) {
                 var self = this;
                 this.options = $.extend(this.defaults, options),
-                this.api = api;
+                    this.api = api;
 
                 //build element and add component to picker
                 this.$saturation = $(this.options.template.call(self, api.namespace)).appendTo(api.$dropdown);
                 this.$handle = this.$saturation.find('i');
 
-                api.$element.on('asColorInput::firstOpen', function() {
+                api.$element.on('asColorPicker::firstOpen', function() {
                     // init variable
                     self.width = self.$saturation.width();
                     self.height = self.$saturation.height();
@@ -38,7 +38,7 @@
                     self.keyboard(api);
                 });
 
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, api, color) {
+                api.$element.on('asColorPicker::update asColorPicker::setup', function(e, api, color) {
                     self.update(color);
                 });
 
@@ -46,7 +46,7 @@
             bindEvents: function() {
                 var self = this;
 
-                this.$saturation.on('mousedown.asColorInput', function(e) {
+                this.$saturation.on('mousedown.asColorPicker', function(e) {
                     var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                     if (rightclick) {
                         return false;

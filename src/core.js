@@ -1,6 +1,6 @@
 /*
- * jquery-asColorInput
- * https://github.com/amazingSurge/jquery-asColorInput
+ * jquery-asColorPicker
+ * https://github.com/amazingSurge/jquery-asColorPicker
  *
  * Copyright (c) 2014 AmazingSurge
  * Licensed under the GPL license.
@@ -16,7 +16,7 @@
     }
 
     // Constructor
-    var AsColorInput = $.asColorInput = function(element, options) {
+    var AsColorInput = $.asColorPicker = function(element, options) {
         this.element = element;
         this.$element = $(element);
 
@@ -87,7 +87,7 @@
             this.$wrap = this.$element.parent();
             this.$body = $('body');
 
-            this.$dropdown.data('asColorInput', this);
+            this.$dropdown.data('asColorPicker', this);
 
             var component;
             $.each(this.components, function(key, options) {
@@ -108,13 +108,13 @@
         _bindEvent: function() {
             var self = this;
             this.$element.on({
-                'click.asColorInput': function() {
+                'click.asColorPicker': function() {
                     if (!self.opened) {
                         self.open();
                     }
                     return false;
                 },
-                'keydown.asColorInput': function(e) {
+                'keydown.asColorPicker': function(e) {
                     if (e.keyCode === 9) {
                         self.close();
                     } else if (e.keyCode === 13) {
@@ -122,7 +122,7 @@
                         self.close();
                     }
                 },
-                'keyup.asColorInput': function() {
+                'keyup.asColorPicker': function() {
                     if (self.color.matchString(self.element.value)) {
                         self.val(self.element.value);
                     }
@@ -135,7 +135,7 @@
                 data = [this].concat(method_arguments);
 
             // event
-            this.$element.trigger('asColorInput::' + eventType, data);
+            this.$element.trigger('asColorPicker::' + eventType, data);
 
             // callback
             eventType = eventType.replace(/\b\w+\b/g, function(word) {
@@ -201,15 +201,15 @@
                 this.$dropdown.before(this.$mask);
             }
 
-            $("#asColorInput-dropdown").removeAttr("id");
-            this.$dropdown.attr("id", "asColorInput-dropdown");
+            $("#asColorPicker-dropdown").removeAttr("id");
+            this.$dropdown.attr("id", "asColorPicker-dropdown");
 
             // show the mask
             this.$mask.show();
 
             this.position();
 
-            $(window).on('resize.asColorInput', $.proxy(this.position, this));
+            $(window).on('resize.asColorPicker', $.proxy(this.position, this));
 
             this.$dropdown.addClass(this.classes.open);
 
@@ -229,10 +229,10 @@
             this.$mask.appendTo(this.$body);
 
             this.$mask.on("mousedown touchstart click", function(e) {
-                var $dropdown = $("#asColorInput-dropdown"),
+                var $dropdown = $("#asColorPicker-dropdown"),
                     self;
                 if ($dropdown.length > 0) {
-                    self = $dropdown.data("asColorInput");
+                    self = $dropdown.data("asColorPicker");
                     if (self.opened) {
                         if (self.options.hideFireChange) {
                             self.apply();
@@ -253,7 +253,7 @@
 
             this.$dropdown.removeClass(this.classes.open);
 
-            $(window).off('resize.asColorInput');
+            $(window).off('resize.asColorPicker');
 
             this._trigger('close');
         },
@@ -285,7 +285,7 @@
             if (this.isEmpty) {
                 value = '';
             }
-            this._trigger('change', value, this.options.name, 'asColorInput');
+            this._trigger('change', value, this.options.name, 'asColorPicker');
             this.$element.val(value);
         },
         set: function(value) {
@@ -333,7 +333,7 @@
     AsColorInput.localization = [];
 
     AsColorInput.defaults = {
-        namespace: 'asColorInput',
+        namespace: 'asColorPicker',
         readonly: false,
         skin: null,
         hideInput: false,
@@ -401,7 +401,7 @@
     };
 
     // Collection method.
-    $.fn.asColorInput = function(options) {
+    $.fn.asColorPicker = function(options) {
         if (typeof options === 'string') {
             var method = options;
             var method_arguments = Array.prototype.slice.call(arguments, 1);
@@ -409,13 +409,13 @@
             if (/^\_/.test(method)) {
                 return false;
             } else if ((/^(get)$/.test(method)) || (method === 'val' && method_arguments.length === 0)) {
-                var api = this.first().data('asColorInput');
+                var api = this.first().data('asColorPicker');
                 if (api && typeof api[method] === 'function') {
                     return api[method].apply(api, method_arguments);
                 }
             } else {
                 return this.each(function() {
-                    var api = $.data(this, 'asColorInput');
+                    var api = $.data(this, 'asColorPicker');
                     if (api && typeof api[method] === 'function') {
                         api[method].apply(api, method_arguments);
                     }
@@ -423,8 +423,8 @@
             }
         } else {
             return this.each(function() {
-                if (!$.data(this, 'asColorInput')) {
-                    $.data(this, 'asColorInput', new AsColorInput(this, options));
+                if (!$.data(this, 'asColorPicker')) {
+                    $.data(this, 'asColorPicker', new AsColorInput(this, options));
                 }
             });
         }

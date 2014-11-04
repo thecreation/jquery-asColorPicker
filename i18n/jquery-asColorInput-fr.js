@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // French (fr) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["fr"] = {
+    var localization = $.asColorPicker.localization["fr"] = {
         cancelText: "Annuler",
         applyText: "Valider"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

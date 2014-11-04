@@ -3,7 +3,7 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('hex', function() {
+    $.asColorPicker.registerComponent('hex', function() {
         return {
             init: function(api) {
                 var template = '<input type="text" class="' + api.namespace + '-hex" />';
@@ -14,7 +14,7 @@
                 });
 
                 var self = this;
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, api, color) {
+                api.$element.on('asColorPicker::update asColorPicker::setup', function(e, api, color) {
                     self.update(color);
                 });
             },

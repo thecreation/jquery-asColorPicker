@@ -10,7 +10,7 @@
         window.localStorage = noop;
     }
 
-    $.asColorInput.registerComponent('palettes', function() {
+    $.asColorPicker.registerComponent('palettes', function() {
         return {
             defaults: {
                 template: function(namespace) {
@@ -59,7 +59,7 @@
                     e.stopPropagation();
                 });
 
-                api.$element.on('asColorInput::apply', function(e, api, color) {
+                api.$element.on('asColorPicker::apply', function(e, api, color) {
                     if (typeof color.toRGBA !== 'function') {
                         color = color.get().color;
                     }

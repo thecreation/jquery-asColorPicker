@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // Spanish (es) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["es"] = {
+    var localization = $.asColorPicker.localization["es"] = {
         cancelText: "Cancelar",
         applyText: "Elegir"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

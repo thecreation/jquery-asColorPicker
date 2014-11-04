@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // German (de) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["de"] = {
+    var localization = $.asColorPicker.localization["de"] = {
         cancelText: "Abbrechen",
         applyText: "Wählen"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

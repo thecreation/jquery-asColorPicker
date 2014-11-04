@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // Turkish (tr) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["tr"] = {
+    var localization = $.asColorPicker.localization["tr"] = {
         cancelText: "Avbryt",
         applyText: "Välj"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

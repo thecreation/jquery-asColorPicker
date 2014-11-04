@@ -3,7 +3,7 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('alpha', function() {
+    $.asColorPicker.registerComponent('alpha', function() {
         return {
             size: 150,
             defaults: {
@@ -23,7 +23,7 @@
                 this.$alpha = $(this.options.template.call(self, api.namespace)).appendTo(api.$dropdown);
                 this.$handle = this.$alpha.find('i');
 
-                api.$element.on('asColorInput::firstOpen', function() {
+                api.$element.on('asColorPicker::firstOpen', function() {
                     // init variable
                     if (self.direction === 'vertical') {
                         self.size = self.$alpha.height();
@@ -37,13 +37,13 @@
                     self.keyboard();
                 });
 
-                api.$element.on('asColorInput::update asColorInput::setup', function(e, api, color) {
+                api.$element.on('asColorPicker::update asColorPicker::setup', function(e, api, color) {
                     self.update(color);
                 });
             },
             bindEvents: function() {
                 var self = this;
-                this.$alpha.on('mousedown.asColorInput', function(e) {
+                this.$alpha.on('mousedown.asColorPicker', function(e) {
                     var rightclick = (e.which) ? (e.which === 3) : (e.button === 2);
                     if (rightclick) {
                         return false;

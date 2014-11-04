@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // Japanese (ja) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["ja"] = {
+    var localization = $.asColorPicker.localization["ja"] = {
         cancelText: "中止",
         applyText: "選択"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

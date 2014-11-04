@@ -2,7 +2,7 @@
 (function($) {
     "use strict";
 
-    $.asColorInput.registerComponent('buttons', function() {
+    $.asColorPicker.registerComponent('buttons', function() {
         return {
             defaults: {
                 apply: false,
@@ -25,7 +25,7 @@
                 this.options = $.extend(this.defaults, options);
                 this.$buttons = $(this.options.template.call(this, api.namespace)).appendTo(api.$dropdown);
 
-                api.$element.on('asColorInput::firstOpen', function() {
+                api.$element.on('asColorPicker::firstOpen', function() {
                     if (self.options.apply) {
                         self.$apply = $(self.options.applyTemplate.call(self, api.namespace)).appendTo(self.$buttons).on('click', function() {
                             api.apply();

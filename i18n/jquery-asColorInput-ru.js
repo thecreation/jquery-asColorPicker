@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // Russian (ru) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["ru"] = {
+    var localization = $.asColorPicker.localization["ru"] = {
         cancelText: "отмена",
         applyText: "выбрать"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

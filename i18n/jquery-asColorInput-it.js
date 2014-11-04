@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // Italian (it) localization
 
 (function ($) {
-    var localization = $.asColorInput.localization["it"] = {
+    var localization = $.asColorPicker.localization["it"] = {
         cancelText: "annulla",
         applyText: "scegli"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);

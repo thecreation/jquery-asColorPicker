@@ -1,10 +1,10 @@
-// asColorInput
+// asColorPicker
 // Finnish (fi) localization
 
 (function($) {
-    var localization = $.asColorInput.localization["fi"] = {
+    var localization = $.asColorPicker.localization["fi"] = {
         cancelText: "Kumoa",
         applyText: "Valitse"
     };
-    $.extend($.asColorInput.defaults.buttons, localization);
+    $.extend($.asColorPicker.defaults.buttons, localization);
 })(jQuery);
