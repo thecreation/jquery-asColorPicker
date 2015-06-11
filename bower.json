@@ -10,7 +10,7 @@
     "tests"
   ],
   "dependencies": {
-    "jquery": ">=1.8.3",
+    "jquery": ">=1.11.0",
     "jquery-asColor": "git@github.com:amazingSurge/jquery-asColor.git#master",
     "jquery-asGradient": "git@github.com:amazingSurge/jquery-asGradient.git#master"
   }
