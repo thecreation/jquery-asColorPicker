@@ -1,35 +1,127 @@
 {
-    "name": "jquery-asColorPicker",
-    "title": "asColorPicker",
-    "description": "a jquery asColorPicker",
-    "version": "0.3.1",
-    "homepage": "https://github.com/amazingSurge/jquery-asColorPicker",
-    "author": {
-        "name": "amazingSurge",
-        "email": "amazingSurge@yahoo.com",
-        "url": "amazingSurge.com"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/amazingSurge/jquery-asColorPicker.git"
-    },
-    "bugs": "https://github.com/amazingSurge/jquery-asColorPicker/issues",
-    "licenses": [{
-        "type": "GPL",
-        "url": "https://github.com/amazingSurge/jquery-asColorPicker/blob/master/LICENSE-GPL"
-    }],
-    "devDependencies": {
-        "grunt-contrib-jshint": "*",
-        "grunt-contrib-concat": "*",
-        "grunt-contrib-uglify": "*",
-        "grunt-contrib-watch": "*",
-        "grunt-contrib-clean": "*",
-        "grunt": "*",
-        "grunt-jsbeautifier": "*",
-        "load-grunt-tasks": "*",
-        "grunt-text-replace": "*",
-        "grunt-contrib-copy": "*",
-        "grunt-contrib-less": "*",
-        "grunt-autoprefixer": "*"
+  "name": "jquery-asColorPicker",
+  "title": "asColorPicker",
+  "description": "A jquery plugin that convent input into color picker.",
+  "version": "0.4.0",
+  "homepage": "https://github.com/amazingSurge/jquery-asColorPicker",
+  "author": {
+    "name": "amazingSurge",
+    "email": "amazingSurge@gmail.com",
+    "url": "amazingSurge.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:amazingSurge/jquery-asColorPicker.git"
+  },
+  "keywords": [
+    "jquery",
+    "jquery-plugin",
+    "ecosystem:jquery",
+    "ui",
+    "es6",
+    "Scrollbar"
+  ],
+  "bugs": "https://github.com/amazingSurge/jquery-asColorPicker/issues",
+  "licenses": [
+    {
+      "type": "LGPL-3.0",
+      "url": "https://github.com/amazingSurge/jquery-asColorPicker/blob/master/LICENSE"
     }
+  ],
+  "license": "LGPL-3.0",
+  "main": "dist/jquery-asColorPicker.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "prestart": "npm install",
+    "start": "gulp serve",
+    "build": "npm run prestart && gulp build",
+    "deploy": "gulp deploy",
+    "deploy:prepare": "gulp deploy:prepare",
+    "release": "gulp release",
+    "test": "gulp test"
+  },
+  "devDependencies": {
+    "argv": "*",
+    "assets-manager": "*",
+    "babel-core": "*",
+    "babel-eslint": "*",
+    "babel-istanbul": "*",
+    "babel-plugin-transform-es2015-modules-umd": "*",
+    "babel-preset-es2015": "*",
+    "babel-preset-es2015-rollup": "*",
+    "babelrc-rollup": "*",
+    "browser-sync": "*",
+    "chai": "*",
+    "del": "*",
+    "esformatter": "*",
+    "graceful-fs": "*",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-autoprefixer": "*",
+    "gulp-babel": "*",
+    "gulp-changed": "*",
+    "gulp-csscomb": "*",
+    "gulp-csslint": "*",
+    "gulp-cssnano": "*",
+    "gulp-eslint": "*",
+    "gulp-extname": "*",
+    "gulp-filter": "*",
+    "gulp-header": "*",
+    "gulp-iconfont-css": "*",
+    "gulp-if": "*",
+    "gulp-jshint": "*",
+    "gulp-notify": "*",
+    "gulp-plumber": "*",
+    "gulp-rename": "*",
+    "gulp-replace": "*",
+    "gulp-rollup": "*",
+    "gulp-sass": "*",
+    "gulp-sass-unicode": "*",
+    "gulp-scss-lint": "*",
+    "gulp-size": "*",
+    "gulp-sourcemaps": "*",
+    "gulp-stylelint": "*",
+    "gulp-uglify": "*",
+    "gulp-util": "*",
+    "gulp-zip": "*",
+    "inquirer": "*",
+    "jshint": "*",
+    "karma": "*",
+    "karma-babel-preprocessor": "*",
+    "karma-chrome-launcher": "*",
+    "karma-commonjs": "*",
+    "karma-coverage": "*",
+    "karma-firefox-launcher": "*",
+    "karma-mocha": "*",
+    "karma-mocha-reporter": "*",
+    "karma-phantomjs-launcher": "*",
+    "karma-rollup-plugin": "*",
+    "karma-sinon-chai": "*",
+    "merge-stream": "*",
+    "mkdirp": "*",
+    "mocha": "*",
+    "node-notifier": "*",
+    "normalize.css": "^4.2.0",
+    "path-exists": "*",
+    "phantomjs-prebuilt": "*",
+    "release-it": "*",
+    "rollup-plugin-babel": "*",
+    "rollup-plugin-istanbul": "*",
+    "sinon": "*",
+    "sinon-chai": "*",
+    "stylelint-config-bootstrap": "*",
+    "stylelint-scss": "*",
+    "through2": "*"
+  },
+  "engines": {
+    "node": ">= 6.2.2",
+    "npm": ">= 3"
+  },
+  "dependencies": {
+    "jquery": ">=2.2.0",
+    "jquery-asColor": "^0.3.4",
+    "jquery-asGradient": "^0.3.1"
+  }
 }

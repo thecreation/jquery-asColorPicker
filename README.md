@@ -1,144 +1,302 @@
-# jQuery asColorPicker
+# [jQuery asColorPicker](https://github.com/amazingSurge/jquery-asColorPicker) ![bower][bower-image] [![NPM version][npm-image]][npm-url] [![Dependency Status][daviddm-image]][daviddm-url] [![prs-welcome]](#contributing)
 
-The powerful jQuery plugin that for color picker. 
-Download: <a href="https://github.com/amazingSurge/jquery-asColorPicker/archive/master.zip">jquery-asColorPicker-master.zip</a>
+> A jquery plugin that convent input into color picker.
 
-***
+## Table of contents
+- [Main files](#main-files)
+- [Quick start](#quick-start)
+- [Requirements](#requirements)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Options](#options)
+- [Methods](#methods)
+- [Events](#events)
+- [No conflict](#no-conflict)
+- [Browser support](#browser-support)
+- [Contributing](#contributing)
+- [Development](#development)
+- [Changelog](#changelog)
+- [Copyright and license](#copyright-and-license)
 
-## Features
+## Main files
+```
+dist/
+├── jquery-asColorPicker.js
+├── jquery-asColorPicker.es.js
+├── jquery-asColorPicker.min.js
+└── css/
+    ├── asColorPicker.css
+    └── asColorPicker.min.css
+```
 
-* **beautiful skin** — we provide some beautiful skins, it also support custom skin.
-* **support all color format** — hex rgb raba hsl hsla. 
-* **UX optimize** — we do a lot work to improve UX.
-* **keyboard support** — we have carefully designed for keyboard support.
+## Quick start
+Several quick start options are available:
+#### Download the latest build
 
-## Dependencies
-* <a href="http://jquery.com/" target="_blank">jQuery 1.83+</a>
-* <a href="https://github.com/amazingSurge/jquery-asColor" target="_blank">jquery-asColor.js</a>
-* <a href="https://github.com/amazingSurge/jquery-asGradient" target="_blank">jquery-asGradient.js</a>
+ * [Development](https://raw.githubusercontent.com/amazingSurge/jquery-asColorPicker/master/dist/jquery-asColorPicker.js) - unminified
+ * [Production](https://raw.githubusercontent.com/amazingSurge/jquery-asColorPicker/master/dist/jquery-asColorPicker.min.js) - minified
+
+#### Install From Bower
+```sh
+bower install jquery-asColorPicker --save
+```
+
+#### Install From Npm
+```sh
+npm install jquery-asColorPicker --save
+```
+
+#### Build From Source
+If you want build from source:
+
+```sh
+git clone git@github.com:amazingSurge/jquery-asColorPicker.git
+cd jquery-asColorPicker
+npm install
+npm install -g gulp-cli babel-cli
+gulp build
+```
+
+Done!
+
+## Requirements
+`jquery-asColorPicker` requires the latest version of [`jQuery`](https://jquery.com/download/), [`jquery-asColor`](https://github.com/amazingSurge/jquery-asColor), and [`jquery-asGradient`](https://github.com/amazingSurge/jquery-asGradient).
 
 ## Usage
+#### Including files:
 
-Import this libraries:
-* jQuery
-* jquery-asColor.js
-* jquery-asGradient.js
-* jquery-asColorPicker.min.js
-
-And CSS:
-* asColorPicker.css 
-
-Create base html element:
 ```html
-    <div class="example">
-        <input type="text" class="color" /> 
-    </div>
+<link rel="stylesheet" href="/path/to/asColorPicker.css">
+<script src="/path/to/jquery.js"></script>
+<script src="/path/to/jquery-asColor.js"></script>
+<script src="/path/to/jquery-asGradient.js"></script>
+<script src="/path/to/jquery-asColorPicker.js"></script>
 ```
 
-Initialize tabs:
-```javascript
-$(".color").asColorPicker();
+#### Required HTML structure
+
+```html
+<input type='text' class="example" value="#000" />
 ```
 
-Or initialize tabs with custom settings:
+#### Initialization
+All you need to do is call the plugin on the element:
+
 ```javascript
-$(".color").asColorPicker({
-	hideInput: false,
+jQuery(function($) {
+  $('.example').asColorPicker(); 
 });
 ```
 
-## Settings
+## Examples
+There are some example usages that you can look at to get started. They can be found in the
+[examples folder](https://github.com/amazingSurge/jquery-asColorPicker/tree/master/examples).
 
-```javascript
-{   
+## Options
+`jquery-asColorPicker` can accept an options object to alter the way it behaves. You can see the default options by call `$.asColorPicker.setDefaults()`. The structure of an options object is as follows:
 
-    // Optional property, Set a namespace for css class
-    namespace: 'asColorPicker',
-    
-    //Optional property, choose the loaded skin
-    skin: null,
-
-    //Optional property, if 'none',we can close at once needn't to give time to render css3 transition
-    readonly: false,
-
-    //Optional property, if true , it will remove trigger components, and show color panel on the page when page loaded.
-    flat: true,
-
-    //Optional property, if true, open keyboard function, note you need load jquery-asColorPicker-keyboard.js file first 
-    keyboard: false,
-
-    //Optional property, trigger when color change 
-    onChange: function() {},
-
-    //Optional property, trigger when open asColorPicker pancel, flat type will never trigger this event
-    onShow: function() {},
-
-    //Optional property, trigger when close asColorPicker pancel, flat type will never trigger this event
-    onClose: function() {},
-
-    //Optional property, trigger when init
-    onInit: function() {},
-
-    //Optional property, trigger when init, it will trigger after init event
-    onReady: function() {},
-
-    //Optional property, trigger when a color is applied
-    onApply: function() {},
+```
+{
+  namespace: 'asColorPicker',
+  readonly: false,
+  skin: null,
+  hideInput: false,
+  hideFireChange: true,
+  keyboard: false,
+  color: {
+    format: false,
+    alphaConvert: { // or false will disable convert
+      'RGB': 'RGBA',
+      'HSL': 'HSLA',
+      'HEX': 'RGBA',
+      'NAMESPACE': 'RGBA',
+    },
+    shortenHex: false,
+    hexUseName: false,
+    reduceAlpha: true,
+    nameDegradation: 'HEX',
+    invalidValue: '',
+    zeroAlphaAsTransparent: true
+  },
+  mode: 'simple',
+  onInit: null,
+  onReady: null,
+  onChange: null,
+  onClose: null,
+  onOpen: null,
+  onApply: null
 }
 ```
 
-## Public methods
+## Methods
+Methods are called on asColorPicker instances through the asColorPicker method itself.
+You can also save the instances to variable for further use.
 
-jquery asColorPicker has different methods , we can use it as below :
 ```javascript
-// show asColorPicker panel
-$(".asColorPicker").asColorPicker("show");
+// call directly
+$().asColorPicker('destory');
 
-// close asColorPicker panel
-$(".asColorPicker").asColorPicker("close");
-
-// apply selected color
-$(".asColorPicker").asColorPicker("apply");
-
-// cancel selceted color
-$(".asColorPicker").asColorPicker("cancel");
-
-// set asColorPicker to specified color
-$(".asColorPicker").asColorPicker("set", '#fff');
-
-// get selected color
-$("asColorPicker").asColorPicker("get");
-
-// enable asColorPicker
-$("asColorPicker").asColorPicker("enable");
-
-// disable asColorPicker
-$("asColorPicker").asColorPicker("disable");
-
-// destroy asColorPicker
-$("asColorPicker").asColorPicker("destroy");
-
+// or
+var api = $().data('asColorPicker');
+api.destory();
 ```
 
-## Event
-
-* <code>asColorPicker::show</code>: trigger when show asColorPicker pancel, flat type will never trigger this event
-* <code>asColorPicker::close</code>: trigger when close asColorPicker pancel, flat type will never trigger this event
-* <code>asColorPicker::apply</code>: trigger when a color is applied
-* <code>asColorPicker::init</code>: trigger when init
-* <code>asColorPicker::ready</code>: trigger after init event
-* <code>asColorPicker::change</code>: trigger when color change
-
-how to use event:
+#### opacity()
+Get or set opacity.
 ```javascript
-$(document).on('asColorPicker::init', function(event,instance) {
-    // instance means current asColorPicker instance 
-    // some stuff
+// get opacity
+$().asColorPicker('opacity');
+
+// set opacity
+$().asColorPicker('opacity', 0.1);
+```
+
+#### open()
+Show the colorpicker dropdown.
+```javascript
+$().asColorPicker('open');
+```
+
+#### close()
+Close the colorpicker dropdown.
+```javascript
+$().asColorPicker('close');
+```
+
+#### clear()
+Clear the colorpicker.
+```javascript
+$().asColorPicker('clear');
+```
+
+#### val(value)
+Get or set the colorpicker val.
+```javascript
+// get the color
+$().asColorPicker('val');
+
+// set the color
+$().asColorPicker('val', 'rgb(100, 100, 100)');
+```
+
+#### set(value)
+Set the color.
+```javascript
+$().asColorPicker('set', 'rgb(100, 100, 100)');
+```
+
+#### get()
+Get the color.
+```javascript
+$().asColorPicker('get');
+```
+
+#### enable()
+Enable the colorpicker functions.
+```javascript
+$().asColorPicker('enable');
+```
+
+#### enable()
+Enable the colorpicker functions.
+```javascript
+$().asColorPicker('enable');
+```
+
+#### disable()
+Disable the colorpicker functions.
+```javascript
+$().asColorPicker('disable');
+```
+
+#### destroy()
+Destroy the colorpicker instance.
+```javascript
+$().asColorPicker('destroy');
+```
+
+## Events
+`jquery-asColorPicker` provides custom events for the plugin’s unique actions. 
+
+```javascript
+$('.the-element').on('asColorPicker::change', function (e) {
+  // on value change 
 });
+
 ```
 
-## Author
-[amazingSurge](http://amazingSurge.com)
+Event   | Description
+------- | -----------
+init    | Fires when the instance is setup for the first time.
+ready   | Fires when the instance is ready for API use.
+change  | Fires when the value changed. 
+enable  | Fires when the `enable` instance method has been called.
+disable | Fires when the `disable` instance method has been called.
+destroy | Fires when an instance is destroyed. 
 
-## License
-jQuery-asColorPicker plugin is released under the <a href="https://github.com/amazingSurge/jquery-asColorPicker/blob/master/LICENCE.GPL" target="_blank">GPL licence</a>.
+## No conflict
+If you have to use other plugin with the same namespace, just call the `$.asColorPicker.noConflict` method to revert to it.
+
+```html
+<script src="other-plugin.js"></script>
+<script src="jquery-asColorPicker.js"></script>
+<script>
+  $.asColorPicker.noConflict();
+  // Code that uses other plugin's "$().asColorPicker" can follow here.
+</script>
+```
+
+## Browser support
+
+Tested on all major browsers.
+
+| <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_32x32.png" alt="Safari"> | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_32x32.png" alt="Chrome"> | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_32x32.png" alt="Firefox"> | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_32x32.png" alt="Edge"> | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_32x32.png" alt="IE"> | <img src="https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_32x32.png" alt="Opera"> |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| Latest ✓ | Latest ✓ | Latest ✓ | Latest ✓ | 9-11 ✓ | Latest ✓ |
+
+As a jQuery plugin, you also need to see the [jQuery Browser Support](http://jquery.com/browser-support/).
+
+## Contributing
+Anyone and everyone is welcome to contribute. Please take a moment to
+review the [guidelines for contributing](CONTRIBUTING.md). Make sure you're using the latest version of `jquery-asColorPicker` before submitting an issue. There are several ways to help out:
+
+* [Bug reports](CONTRIBUTING.md#bug-reports)
+* [Feature requests](CONTRIBUTING.md#feature-requests)
+* [Pull requests](CONTRIBUTING.md#pull-requests)
+* Write test cases for open bug issues
+* Contribute to the documentation
+
+## Development
+`jquery-asColorPicker` is built modularly and uses Gulp as a build system to build its distributable files. To install the necessary dependencies for the build system, please run:
+
+```sh
+npm install -g gulp
+npm install -g babel-cli
+npm install
+```
+
+Then you can generate new distributable files from the sources, using:
+```
+gulp build
+```
+
+More gulp tasks can be found [here](CONTRIBUTING.md#available-tasks).
+
+## Changelog
+To see the list of recent changes, see [Releases section](https://github.com/amazingSurge/jquery-asColorPicker/releases).
+
+## Copyright and license
+Copyright (C) 2016 amazingSurge.
+
+Licensed under [the LGPL license](LICENSE).
+
+[⬆ back to top](#table-of-contents)
+
+[bower-image]: https://img.shields.io/bower/v/jquery-asColorPicker.svg?style=flat
+[bower-link]: https://david-dm.org/amazingSurge/jquery-asColorPicker/dev-status.svg
+[npm-image]: https://badge.fury.io/js/jquery-asColorPicker.svg?style=flat
+[npm-url]: https://npmjs.org/package/jquery-asColorPicker
+[license]: https://img.shields.io/npm/l/jquery-asColorPicker.svg?style=flat
+[prs-welcome]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
+[daviddm-image]: https://david-dm.org/amazingSurge/jquery-asColorPicker.svg?style=flat
+[daviddm-url]: https://david-dm.org/amazingSurge/jquery-asColorPicker
