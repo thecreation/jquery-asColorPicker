@@ -1,5 +1,5 @@
 /**
-* asColorPicker v0.4.0
+* asColorPicker v0.4.1
 * https://github.com/amazingSurge/jquery-asColorPicker
 *
 * Copyright (c) amazingSurge
@@ -13,6 +13,7 @@ var DEFAULTS = {
   namespace: 'asColorPicker',
   readonly: false,
   skin: null,
+  lang: 'en',
   hideInput: false,
   hideFireChange: true,
   keyboard: false,
@@ -698,8 +699,8 @@ var buttons = {
   defaults: {
     apply: false,
     cancel: true,
-    applyText: 'apply',
-    cancelText: 'cancel',
+    applyText: null,
+    cancelText: null,
     template(namespace) {
       return `<div class="${namespace}-buttons"></div>`;
     },
@@ -714,7 +715,10 @@ var buttons = {
   init: function(api, options) {
     const that = this;
 
-    this.options = $.extend(this.defaults, options);
+    this.options = $.extend(this.defaults, {
+      applyText: api.getString('applyText', 'apply'),
+      cancelText: api.getString('cancelText', 'cancel')
+    }, options);
     this.$buttons = $(this.options.template.call(this, api.namespace)).appendTo(api.$dropdown);
 
     api.$element.on('asColorPicker::firstOpen', () => {
@@ -1635,6 +1639,12 @@ var gradient = {
 
 const NAMESPACE$1 = 'asColorPicker';
 const COMPONENTS = {};
+const LOCALIZATIONS = {
+  en: {
+    cancelText: 'cancel',
+    applyText: 'apply'
+  }
+};
 
 let id = 0;
 
@@ -1991,6 +2001,17 @@ class AsColorPicker {
     return this;
   }
 
+  getString(name, def) {
+    if(this.options.lang in LOCALIZATIONS && typeof LOCALIZATIONS[this.options.lang][name] !== 'undefined') {
+      return LOCALIZATIONS[this.options.lang][name];
+    }
+    return def;
+  }
+
+  static setLocalization(lang, strings) {
+    LOCALIZATIONS[lang] = strings;
+  }
+
   static registerComponent(name, method) {
     COMPONENTS[name] = method;
   }
@@ -2012,8 +2033,74 @@ AsColorPicker.registerComponent('palettes', palettes);
 AsColorPicker.registerComponent('preview', preview);
 AsColorPicker.registerComponent('gradient', gradient);
 
+// Chinese (cn) localization
+AsColorPicker.setLocalization('cn', {
+  cancelText: "取消",
+  applyText: "应用"
+});
+
+// German (de) localization
+AsColorPicker.setLocalization('de', {
+  cancelText: "Abbrechen",
+  applyText: "Wählen"
+});
+
+// Danish (dk) localization
+AsColorPicker.setLocalization('dk', {
+  cancelText: "annuller",
+  applyText: "Vælg"
+});
+
+// Spanish (es) localization
+AsColorPicker.setLocalization('es', {
+  cancelText: "Cancelar",
+  applyText: "Elegir"
+});
+
+// Finnish (fi) localization
+AsColorPicker.setLocalization('fi', {
+  cancelText: "Kumoa",
+  applyText: "Valitse"
+});
+
+// French (fr) localization
+AsColorPicker.setLocalization('fr', {
+  cancelText: "Annuler",
+  applyText: "Valider"
+});
+
+// Italian (it) localization
+AsColorPicker.setLocalization('it', {
+  cancelText: "annulla",
+  applyText: "scegli"
+});
+
+// Japanese (ja) localization
+AsColorPicker.setLocalization('ja', {
+  cancelText: "中止",
+  applyText: "選択"
+});
+
+// Russian (ru) localization
+AsColorPicker.setLocalization('ru', {
+  cancelText: "отмена",
+  applyText: "выбрать"
+});
+
+// Swedish (sv) localization
+AsColorPicker.setLocalization('sv', {
+  cancelText: "Avbryt",
+  applyText: "Välj"
+});
+
+// Turkish (tr) localization
+AsColorPicker.setLocalization('tr', {
+  cancelText: "Avbryt",
+  applyText: "Välj"
+});
+
 var info$1 = {
-  version:'0.4.0'
+  version:'0.4.1'
 };
 
 const NAMESPACE = 'asColorPicker';
@@ -2052,6 +2139,7 @@ $$1.fn.asColorPicker = jQueryAsColorPicker;
 $$1.asColorPicker = $$1.extend({
   setDefaults: AsColorPicker.setDefaults,
   registerComponent: AsColorPicker.registerComponent,
+  setLocalization: AsColorPicker.setLocalization,
   noConflict: function() {
     $$1.fn.asColorPicker = OtherAsColorPicker;
     return jQueryAsColorPicker;

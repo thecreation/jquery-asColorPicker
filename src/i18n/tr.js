@@ -1,8 +1,7 @@
-// asColorPicker
-// Turkish (tr) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["tr"] = {
+// Turkish (tr) localization
+AsColorPicker.setLocalization('tr', {
   cancelText: "Avbryt",
   applyText: "Välj"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});

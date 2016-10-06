@@ -100,6 +100,7 @@ There are some example usages that you can look at to get started. They can be f
   namespace: 'asColorPicker',
   readonly: false,
   skin: null,
+  lang: 'en',
   hideInput: false,
   hideFireChange: true,
   keyboard: false,

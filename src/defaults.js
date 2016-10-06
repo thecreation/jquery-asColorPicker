@@ -2,6 +2,7 @@ export default {
   namespace: 'asColorPicker',
   readonly: false,
   skin: null,
+  lang: 'en',
   hideInput: false,
   hideFireChange: true,
   keyboard: false,

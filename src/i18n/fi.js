@@ -1,8 +1,7 @@
-// asColorPicker
-// Finnish (fi) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["fi"] = {
+// Finnish (fi) localization
+AsColorPicker.setLocalization('fi', {
   cancelText: "Kumoa",
   applyText: "Valitse"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});

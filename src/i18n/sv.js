@@ -1,8 +1,7 @@
-// asColorPicker
-// Swedish (sv) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["sv"] = {
+// Swedish (sv) localization
+AsColorPicker.setLocalization('sv', {
   cancelText: "Avbryt",
   applyText: "Välj"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});

@@ -1,8 +1,7 @@
-// asColorPicker
-// Russian (ru) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["ru"] = {
+// Russian (ru) localization
+AsColorPicker.setLocalization('ru', {
   cancelText: "отмена",
   applyText: "выбрать"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});

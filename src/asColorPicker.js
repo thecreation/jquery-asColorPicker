@@ -18,6 +18,12 @@ import gradient from './components/gradient';
 
 const NAMESPACE = 'asColorPicker';
 const COMPONENTS = {};
+const LOCALIZATIONS = {
+  en: {
+    cancelText: 'cancel',
+    applyText: 'apply'
+  }
+};
 
 let id = 0;
 
@@ -372,6 +378,17 @@ class AsColorPicker {
 
     this._trigger('destroy');
     return this;
+  }
+
+  getString(name, def) {
+    if(this.options.lang in LOCALIZATIONS && typeof LOCALIZATIONS[this.options.lang][name] !== 'undefined') {
+      return LOCALIZATIONS[this.options.lang][name];
+    }
+    return def;
+  }
+
+  static setLocalization(lang, strings) {
+    LOCALIZATIONS[lang] = strings;
   }
 
   static registerComponent(name, method) {

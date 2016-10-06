@@ -1,8 +1,7 @@
-// asColorPicker
-// Danish (dk) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["dk"] = {
+// Danish (dk) localization
+AsColorPicker.setLocalization('dk', {
   cancelText: "annuller",
   applyText: "Vælg"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});

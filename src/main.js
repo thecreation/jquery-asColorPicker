@@ -1,5 +1,17 @@
 import $ from 'jquery';
 import AsColorPicker from './asColorPicker';
+import "./i18n/cn";
+import "./i18n/de";
+import "./i18n/dk";
+import "./i18n/es";
+import "./i18n/fi";
+import "./i18n/fr";
+import "./i18n/it";
+import "./i18n/ja";
+import "./i18n/ru";
+import "./i18n/sv";
+import "./i18n/tr";
+
 import info from './info';
 
 const NAMESPACE = 'asColorPicker';
@@ -38,8 +50,11 @@ $.fn.asColorPicker = jQueryAsColorPicker;
 $.asColorPicker = $.extend({
   setDefaults: AsColorPicker.setDefaults,
   registerComponent: AsColorPicker.registerComponent,
+  setLocalization: AsColorPicker.setLocalization,
   noConflict: function() {
     $.fn.asColorPicker = OtherAsColorPicker;
     return jQueryAsColorPicker;
   }
 }, info);
+
+

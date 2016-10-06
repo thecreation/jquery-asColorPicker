@@ -1,8 +1,7 @@
-// asColorPicker
-// Japanese (ja) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["ja"] = {
+// Japanese (ja) localization
+AsColorPicker.setLocalization('ja', {
   cancelText: "中止",
   applyText: "選択"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});

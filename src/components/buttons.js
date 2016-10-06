@@ -3,8 +3,8 @@ export default {
   defaults: {
     apply: false,
     cancel: true,
-    applyText: 'apply',
-    cancelText: 'cancel',
+    applyText: null,
+    cancelText: null,
     template(namespace) {
       return `<div class="${namespace}-buttons"></div>`;
     },
@@ -19,7 +19,10 @@ export default {
   init: function(api, options) {
     const that = this;
 
-    this.options = $.extend(this.defaults, options);
+    this.options = $.extend(this.defaults, {
+      applyText: api.getString('applyText', 'apply'),
+      cancelText: api.getString('cancelText', 'cancel')
+    }, options);
     this.$buttons = $(this.options.template.call(this, api.namespace)).appendTo(api.$dropdown);
 
     api.$element.on('asColorPicker::firstOpen', () => {

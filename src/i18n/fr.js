@@ -1,8 +1,7 @@
-// asColorPicker
-// French (fr) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["fr"] = {
+// French (fr) localization
+AsColorPicker.setLocalization('fr', {
   cancelText: "Annuler",
   applyText: "Valider"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});

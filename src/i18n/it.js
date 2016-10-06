@@ -1,8 +1,7 @@
-// asColorPicker
-// Italian (it) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["it"] = {
+// Italian (it) localization
+AsColorPicker.setLocalization('it', {
   cancelText: "annulla",
   applyText: "scegli"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});

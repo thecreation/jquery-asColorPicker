@@ -1,8 +1,7 @@
-// asColorPicker
-// Spanish (es) localization
+import AsColorPicker from '../asColorPicker';
 
-const localization = $.asColorPicker.localization["es"] = {
+// Spanish (es) localization
+AsColorPicker.setLocalization('es', {
   cancelText: "Cancelar",
   applyText: "Elegir"
-};
-$.extend($.asColorPicker.defaults.buttons, localization);
+});
