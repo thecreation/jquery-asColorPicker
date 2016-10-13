@@ -61,6 +61,8 @@ class AsColorPicker {
       disabled: `${this.namespace}_disabled`,
       mode: `${this.namespace}-mode_${this.options.mode}`
     };
+    
+    this.$mask = $(`.${this.classes.mask}`);
 
     if (this.options.hideInput) {
       this.$element.addClass(this.classes.hideInput);
