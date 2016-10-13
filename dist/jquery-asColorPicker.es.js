@@ -1123,7 +1123,7 @@ var Gradient = function(api, options) {
           const current = that.value.getById(that.current);
 
           if (current) {
-            current.color.val(value)
+            current.color.val(value);
             api._trigger('update', [current.color, that.value]);
           }
 
@@ -1682,6 +1682,8 @@ class AsColorPicker {
       disabled: `${this.namespace}_disabled`,
       mode: `${this.namespace}-mode_${this.options.mode}`
     };
+    
+    this.$mask = $$1(`.${this.classes.mask}`);
 
     if (this.options.hideInput) {
       this.$element.addClass(this.classes.hideInput);
