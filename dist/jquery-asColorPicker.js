@@ -2023,6 +2023,8 @@
           mode: this.namespace + '-mode_' + this.options.mode
         };
 
+        this.$mask = (0, _jquery2.default)('.' + this.classes.mask);
+
         if (this.options.hideInput) {
           this.$element.addClass(this.classes.hideInput);
         }
