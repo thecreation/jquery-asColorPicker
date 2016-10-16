@@ -1,5 +1,5 @@
 /**
-* asColorPicker v0.4.1
+* asColorPicker v0.4.2
 * https://github.com/amazingSurge/jquery-asColorPicker
 *
 * Copyright (c) amazingSurge
@@ -2522,7 +2522,7 @@
     });
 
     var info$1 = {
-      version: '0.4.1'
+      version: '0.4.2'
     };
 
     var NAMESPACE = 'asColorPicker';
@@ -2544,7 +2544,7 @@
             return {
               v: false
             };
-          } else if (/^(get)/.test(method)) {
+          } else if (/^(get)$/.test(method) || method === 'val' && method_arguments.length === 0) {
             var instance = _this7.first().data(NAMESPACE);
 
             if (instance && typeof instance[method] === 'function') {

@@ -1,6 +1,6 @@
 {
   "name": "jquery-asColorPicker",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A jquery plugin that convent input into color picker.",
   "main": "dist/jquery-asColorPicker.js",
   "copyright": "amazingSurge",
