@@ -1,5 +1,5 @@
 /**
-* asColorPicker v0.4.2
+* asColorPicker v0.4.3
 * https://github.com/amazingSurge/jquery-asColorPicker
 *
 * Copyright (c) amazingSurge
@@ -1282,7 +1282,7 @@
               var current = that.value.getById(that.current);
 
               if (current) {
-                api._trigger('update', [current.color, that.value]);
+                api._trigger('update', current.color, that.value);
               }
 
               if (api.element.value !== that.value.toString()) {
@@ -1294,7 +1294,7 @@
           // that.$gradient.on('add', function(e, data) {
           //   if (data.stop) {
           //     that.active(data.stop.id);
-          //     api._trigger('update', [data.stop.color, that.value]);
+          //     api._trigger('update', data.stop.color, that.value);
           //     api._updateInput();
           //   }
           // });
@@ -1355,7 +1355,7 @@
 
               if (current) {
                 current.color.val(value);
-                api._trigger('update', [current.color, that.value]);
+                api._trigger('update', current.color, that.value);
               }
 
               that.$gradient.trigger('update', {
@@ -1369,14 +1369,14 @@
           api._setup = function() {
             var current = that.value.getById(that.current);
 
-            api._trigger('setup', [current.color]);
+            api._trigger('setup', current.color);
           }
           ;
         },
         revertCore: function revertCore() {
           api.set = $.proxy(api._set, api);
           api._setup = function() {
-            api._trigger('setup', [api.color]);
+            api._trigger('setup', api.color);
           }
           ;
         },
@@ -2037,13 +2037,11 @@
       _createClass(AsColorPicker, [{
         key: '_trigger',
         value: function _trigger(eventType) {
-          var _ref;
-
           for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
             params[_key - 1] = arguments[_key];
           }
 
-          var data = (_ref = [this]).concat.apply(_ref, params);
+          var data = [this].concat(params);
 
           // event
           this.$element.trigger(NAMESPACE$1 + '::' + eventType, data);
@@ -2058,9 +2056,7 @@
           var onFunction = 'on' + eventType;
 
           if (typeof this.options[onFunction] === 'function') {
-            var _options$onFunction;
-
-            (_options$onFunction = this.options[onFunction]).apply.apply(_options$onFunction, [this].concat(params));
+            this.options[onFunction].apply(this, params);
           }
         }
       }, {
@@ -2318,7 +2314,7 @@
       }, {
         key: 'apply',
         value: function apply() {
-          this._trigger('apply', [this.color]);
+          this._trigger('apply', this.color);
           this.close();
         }
       }, {
@@ -2334,7 +2330,7 @@
       }, {
         key: '_update',
         value: function _update() {
-          this._trigger('update', [this.color]);
+          this._trigger('update', this.color);
           this._updateInput();
         }
       }, {
@@ -2345,7 +2341,7 @@
           if (this.isEmpty) {
             value = '';
           }
-          this._trigger('change', [value]);
+          this._trigger('change', value);
           this.$element.val(value);
         }
       }, {
@@ -2373,7 +2369,7 @@
       }, {
         key: '_setup',
         value: function _setup() {
-          this._trigger('setup', [this.color]);
+          this._trigger('setup', this.color);
         }
       }, {
         key: 'get',
@@ -2522,7 +2518,7 @@
     });
 
     var info$1 = {
-      version: '0.4.2'
+      version: '0.4.3'
     };
 
     var NAMESPACE = 'asColorPicker';
@@ -2544,7 +2540,7 @@
             return {
               v: false
             };
-          } else if (/^(get)$/.test(method) || method === 'val' && method_arguments.length === 0) {
+          } else if (/^(get)$/.test(method) || method === 'val' && args.length === 0) {
             var instance = _this7.first().data(NAMESPACE);
 
             if (instance && typeof instance[method] === 'function') {

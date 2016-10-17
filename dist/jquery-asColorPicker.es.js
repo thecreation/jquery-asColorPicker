@@ -1,5 +1,5 @@
 /**
-* asColorPicker v0.4.2
+* asColorPicker v0.4.3
 * https://github.com/amazingSurge/jquery-asColorPicker
 *
 * Copyright (c) amazingSurge
@@ -1061,7 +1061,7 @@ var Gradient = function(api, options) {
         const current = that.value.getById(that.current);
 
         if (current) {
-          api._trigger('update', [current.color, that.value]);
+          api._trigger('update', current.color, that.value);
         }
 
         if (api.element.value !== that.value.toString()) {
@@ -1072,7 +1072,7 @@ var Gradient = function(api, options) {
       // that.$gradient.on('add', function(e, data) {
       //   if (data.stop) {
       //     that.active(data.stop.id);
-      //     api._trigger('update', [data.stop.color, that.value]);
+      //     api._trigger('update', data.stop.color, that.value);
       //     api._updateInput();
       //   }
       // });
@@ -1124,7 +1124,7 @@ var Gradient = function(api, options) {
 
           if (current) {
             current.color.val(value)
-            api._trigger('update', [current.color, that.value]);
+            api._trigger('update', current.color, that.value);
           }
 
           that.$gradient.trigger('update', {
@@ -1137,13 +1137,13 @@ var Gradient = function(api, options) {
       api._setup = () => {
         const current = that.value.getById(that.current);
 
-        api._trigger('setup', [current.color]);
+        api._trigger('setup', current.color);
       };
     },
     revertCore() {
       api.set = $.proxy(api._set, api);
       api._setup = () => {
-        api._trigger('setup', [api.color]);
+        api._trigger('setup', api.color);
       };
     },
     preview: {
@@ -1695,7 +1695,7 @@ class AsColorPicker {
   }
 
   _trigger(eventType, ...params) {
-    let data = [this].concat(...params);
+    let data = [this].concat(params);
 
     // event
     this.$element.trigger(`${NAMESPACE$1}::${eventType}`, data);
@@ -1707,7 +1707,7 @@ class AsColorPicker {
     let onFunction = `on${eventType}`;
 
     if (typeof this.options[onFunction] === 'function') {
-      this.options[onFunction].apply(this, ...params);
+      this.options[onFunction].apply(this, params);
     }
   }
 
@@ -1921,7 +1921,7 @@ class AsColorPicker {
   }
 
   apply() {
-    this._trigger('apply', [this.color]);
+    this._trigger('apply', this.color);
     this.close();
   }
 
@@ -1934,7 +1934,7 @@ class AsColorPicker {
   }
 
   _update() {
-    this._trigger('update', [this.color]);
+    this._trigger('update', this.color);
     this._updateInput();
   }
 
@@ -1943,7 +1943,7 @@ class AsColorPicker {
     if (this.isEmpty) {
       value = '';
     }
-    this._trigger('change', [value]);
+    this._trigger('change', value);
     this.$element.val(value);
   }
 
@@ -1967,7 +1967,7 @@ class AsColorPicker {
   }
 
   _setup() {
-    this._trigger('setup', [this.color]);
+    this._trigger('setup', this.color);
   }
 
   get() {
@@ -2100,7 +2100,7 @@ AsColorPicker.setLocalization('tr', {
 });
 
 var info$1 = {
-  version:'0.4.2'
+  version:'0.4.3'
 };
 
 const NAMESPACE = 'asColorPicker';
@@ -2112,7 +2112,7 @@ const jQueryAsColorPicker = function(options, ...args) {
 
     if (/^_/.test(method)) {
       return false;
-    } else if ((/^(get)$/.test(method)) || (method === 'val' && method_arguments.length === 0)) {
+    } else if ((/^(get)$/.test(method)) || (method === 'val' && args.length === 0)) {
       const instance = this.first().data(NAMESPACE);
       if (instance && typeof instance[method] === 'function') {
         return instance[method](...args);

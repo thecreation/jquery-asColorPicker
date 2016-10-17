@@ -46,6 +46,11 @@ bower install jquery-asColorPicker --save
 npm install jquery-asColorPicker --save
 ```
 
+#### Install From Yarn
+```sh
+yarn add jquery-asColorPicker
+```
+
 #### Build From Source
 If you want build from source:
 
@@ -135,11 +140,11 @@ You can also save the instances to variable for further use.
 
 ```javascript
 // call directly
-$().asColorPicker('destory');
+$().asColorPicker('destroy');
 
 // or
 var api = $().data('asColorPicker');
-api.destory();
+api.destroy();
 ```
 
 #### opacity()

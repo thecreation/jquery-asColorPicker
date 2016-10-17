@@ -74,7 +74,7 @@ class AsColorPicker {
   }
 
   _trigger(eventType, ...params) {
-    let data = [this].concat(...params);
+    let data = [this].concat(params);
 
     // event
     this.$element.trigger(`${NAMESPACE}::${eventType}`, data);
@@ -86,7 +86,7 @@ class AsColorPicker {
     let onFunction = `on${eventType}`;
 
     if (typeof this.options[onFunction] === 'function') {
-      this.options[onFunction].apply(this, ...params);
+      this.options[onFunction].apply(this, params);
     }
   }
 
@@ -300,7 +300,7 @@ class AsColorPicker {
   }
 
   apply() {
-    this._trigger('apply', [this.color]);
+    this._trigger('apply', this.color);
     this.close();
   }
 
@@ -313,7 +313,7 @@ class AsColorPicker {
   }
 
   _update() {
-    this._trigger('update', [this.color]);
+    this._trigger('update', this.color);
     this._updateInput();
   }
 
@@ -322,7 +322,7 @@ class AsColorPicker {
     if (this.isEmpty) {
       value = '';
     }
-    this._trigger('change', [value]);
+    this._trigger('change', value);
     this.$element.val(value);
   }
 
@@ -346,7 +346,7 @@ class AsColorPicker {
   }
 
   _setup() {
-    this._trigger('setup', [this.color]);
+    this._trigger('setup', this.color);
   }
 
   get() {

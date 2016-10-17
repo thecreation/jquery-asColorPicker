@@ -52,7 +52,7 @@ var Gradient = function(api, options) {
         const current = that.value.getById(that.current);
 
         if (current) {
-          api._trigger('update', [current.color, that.value]);
+          api._trigger('update', current.color, that.value);
         }
 
         if (api.element.value !== that.value.toString()) {
@@ -63,7 +63,7 @@ var Gradient = function(api, options) {
       // that.$gradient.on('add', function(e, data) {
       //   if (data.stop) {
       //     that.active(data.stop.id);
-      //     api._trigger('update', [data.stop.color, that.value]);
+      //     api._trigger('update', data.stop.color, that.value);
       //     api._updateInput();
       //   }
       // });
@@ -115,7 +115,7 @@ var Gradient = function(api, options) {
 
           if (current) {
             current.color.val(value)
-            api._trigger('update', [current.color, that.value]);
+            api._trigger('update', current.color, that.value);
           }
 
           that.$gradient.trigger('update', {
@@ -128,13 +128,13 @@ var Gradient = function(api, options) {
       api._setup = () => {
         const current = that.value.getById(that.current);
 
-        api._trigger('setup', [current.color]);
+        api._trigger('setup', current.color);
       };
     },
     revertCore() {
       api.set = $.proxy(api._set, api);
       api._setup = () => {
-        api._trigger('setup', [api.color]);
+        api._trigger('setup', api.color);
       };
     },
     preview: {
