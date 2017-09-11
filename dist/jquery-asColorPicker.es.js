@@ -1,5 +1,5 @@
 /**
-* asColorPicker v0.4.3
+* asColorPicker v0.4.4
 * https://github.com/amazingSurge/jquery-asColorPicker
 *
 * Copyright (c) amazingSurge
@@ -1123,7 +1123,7 @@ var Gradient = function(api, options) {
           const current = that.value.getById(that.current);
 
           if (current) {
-            current.color.val(value)
+            current.color.val(value);
             api._trigger('update', current.color, that.value);
           }
 
@@ -2100,7 +2100,7 @@ AsColorPicker.setLocalization('tr', {
 });
 
 var info$1 = {
-  version:'0.4.3'
+  version:'0.4.4'
 };
 
 const NAMESPACE = 'asColorPicker';

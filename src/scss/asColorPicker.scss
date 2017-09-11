@@ -1,15 +1,15 @@
-$trigger-width: 18px;
-$trigger-height: 20px;
-$saturation-size: 175px;
-$hue-alpha-width: 20px;
-$hue-alpha-height: 175px;
-$line-color: #bbb;
+$trigger-width: 18px !default;
+$trigger-height: 20px !default;
+$saturation-size: 175px !default;
+$hue-alpha-width: 20px !default;
+$hue-alpha-height: 175px !default;
+$line-color: #bbb !default;
 
-$active-color: #41a9e5;
+$active-color: #41a9e5 !default;
 
-$wheel-size : 20px;
-$wheel-pointer-size: 3px;
-$inner-border-color: rgba(0, 0, 0, 0.05);
+$wheel-size : 20px !default;
+$wheel-pointer-size: 3px !default;
+$inner-border-color: rgba(0, 0, 0, 0.05) !default;
 
 
 // core
